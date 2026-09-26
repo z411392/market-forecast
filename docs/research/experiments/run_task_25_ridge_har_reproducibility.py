@@ -5,12 +5,11 @@ import csv
 import hashlib
 import math
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Literal
 
 import numpy as np
-import polars as pl
 from sklearn.linear_model import Ridge
 from sklearn.preprocessing import StandardScaler
 
@@ -25,12 +24,40 @@ BOOTSTRAP_BLOCK_LENGTH = 20
 BOOTSTRAP_REPLICATES = 5000
 BOOTSTRAP_SEED = 20260926
 
+EXPECTED_SHA256 = {
+    "GOOGL": "2c09055672391ba0724d0918ddc86f621254154be20ef457c28b7a62f6ff34ba",
+    "NVDA": "99323dc9644f2a5955f1b6119b2d75c7c6dcce8c7b2938be81c610871c5dc54c",
+    "QQQ": "18fd0c5050c348516f616da8abcc764707f4aa669b7ba022a12ce1362954243e",
+    "TSM": "f66835e9328fbe261472a8a693efb898ee144b1d90cfb38c0732037cc58abec4",
+    "2330": "e26c29335402363c4a1b8aae35bb26e63bb1577bed74173f5b914f7258ca3d47",
+    "2317": "98a0b83bb2ced641603a6b248853a0fc288a80d06cae4f8212ab813d54866c5c",
+    "2454": "791626c2890e5aad95d19abc4e4c84586686394b9f81b4fa2d53363465792847",
+}
+
 
 @dataclass(frozen=True)
 class _InputSpec:
     symbol: str
     market: Market
     path: Path
+
+
+@dataclass(frozen=True)
+class _PanelData:
+    dates: np.ndarray
+    rv22: np.ndarray
+    y5: np.ndarray
+    x_d: np.ndarray
+    x_w: np.ndarray
+    z: np.ndarray
+
+
+@dataclass(frozen=True)
+class _Evaluation:
+    dates: np.ndarray
+    global_qlike: np.ndarray
+    market_qlike: np.ndarray
+    market_minus_global: np.ndarray
 
 
 def _parse_args() -> argparse.Namespace:
@@ -47,132 +74,177 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _float_or_nan(row: dict[str, str], key: str) -> float:
+    value = row[key].strip()
+    return float(value) if value else math.nan
+
+
+def _rolling_mean(values: np.ndarray, window: int) -> np.ndarray:
+    result = np.full(values.size, np.nan)
+    for index in range(window - 1, values.size):
+        sample = values[index - window + 1 : index + 1]
+        if np.all(np.isfinite(sample)):
+            result[index] = float(sample.mean())
+    return result
+
+
+def _load(spec: _InputSpec) -> _PanelData:
+    dates: list[date] = []
+    counts: list[float] = []
+    realized_variances: list[float] = []
+
+    with spec.path.open(newline="", encoding="utf-8-sig") as handle:
+        reader = csv.DictReader(handle)
+        required = {
+            "time",
+            "P4_INTRABAR_COUNT_5M",
+            "P4_RV_WHOLE_DAY_5M",
+        }
+        missing = required.difference(reader.fieldnames or [])
+        if missing:
+            raise ValueError(f"{spec.symbol}: missing columns {sorted(missing)}")
+
+        for row in reader:
+            session_date = datetime.fromtimestamp(
+                int(float(row["time"])),
+                tz=timezone.utc,
+            ).date()
+            if session_date < START_DATE:
+                continue
+            dates.append(session_date)
+            counts.append(_float_or_nan(row, "P4_INTRABAR_COUNT_5M"))
+            realized_variances.append(_float_or_nan(row, "P4_RV_WHOLE_DAY_5M"))
+
+    date_array = np.array(dates, dtype=object)
+    count_array = np.array(counts, dtype=float)
+    rv = np.array(realized_variances, dtype=float)
+
+    if spec.market == "us":
+        valid_count = np.isin(count_array, np.array([78.0, 42.0]))
+    else:
+        valid_count = count_array == 53.0
+
+    rv = np.where(valid_count & np.isfinite(rv) & (rv > 0.0), rv, np.nan)
+    rv5 = _rolling_mean(rv, 5)
+    rv22 = _rolling_mean(rv, 22)
+
+    y5 = np.full(rv.size, np.nan)
+    for index in range(rv.size - 5):
+        future = rv[index + 1 : index + 6]
+        if np.all(np.isfinite(future)):
+            y5[index] = float(future.mean())
+
+    with np.errstate(divide="ignore", invalid="ignore"):
+        x_d = np.log(rv / rv22)
+        x_w = np.log(rv5 / rv22)
+        z = np.log(y5 / rv22)
+
+    return _PanelData(
+        dates=date_array,
+        rv22=rv22,
+        y5=y5,
+        x_d=x_d,
+        x_w=x_w,
+        z=z,
+    )
+
+
+def _eligible_mask(data: _PanelData) -> np.ndarray:
+    return (
+        np.isfinite(data.rv22)
+        & np.isfinite(data.y5)
+        & np.isfinite(data.x_d)
+        & np.isfinite(data.x_w)
+        & np.isfinite(data.z)
+    )
+
+
+def _training_rows(
+    data: dict[str, _PanelData],
+    specs: dict[str, _InputSpec],
+    held_out: str,
+    market_only: bool,
+) -> tuple[np.ndarray, np.ndarray]:
+    held_market = specs[held_out].market
+    x_parts: list[np.ndarray] = []
+    y_parts: list[np.ndarray] = []
+
+    for symbol, panel in data.items():
+        if symbol == held_out:
+            continue
+        if market_only and specs[symbol].market != held_market:
+            continue
+
+        before_cutoff = np.array(
+            [session_date <= TRAIN_END_DATE for session_date in panel.dates],
+            dtype=bool,
+        )
+        mask = _eligible_mask(panel) & before_cutoff
+        x_parts.append(np.column_stack((panel.x_d[mask], panel.x_w[mask])))
+        y_parts.append(panel.z[mask])
+
+    if not x_parts:
+        raise ValueError(f"{held_out}: no training symbols remain")
+
+    return np.vstack(x_parts), np.concatenate(y_parts)
+
+
+def _predict(
+    train_x: np.ndarray,
+    train_y: np.ndarray,
+    test_x: np.ndarray,
+    rv22: np.ndarray,
+) -> np.ndarray:
+    scaler = StandardScaler().fit(train_x)
+    model = Ridge(alpha=RIDGE_ALPHA).fit(scaler.transform(train_x), train_y)
+    normalized = model.predict(scaler.transform(test_x))
+    return rv22 * np.exp(normalized)
+
+
 def _qlike(actual: np.ndarray, predicted: np.ndarray) -> np.ndarray:
     ratio = actual / predicted
     return ratio - np.log(ratio) - 1.0
 
 
-def _load(spec: _InputSpec) -> pl.DataFrame:
-    frame = pl.read_csv(spec.path)
-    required = {
-        "time",
-        "P4_INTRABAR_COUNT_5M",
-        "P4_RV_WHOLE_DAY_5M",
-    }
-    missing = required.difference(frame.columns)
-    if missing:
-        raise ValueError(f"{spec.symbol}: missing columns {sorted(missing)}")
-
-    frame = frame.with_columns(
-        pl.from_epoch("time", time_unit="s").dt.date().alias("date"),
-        pl.lit(spec.symbol).alias("symbol"),
-        pl.lit(spec.market).alias("market"),
-    ).filter(pl.col("date") >= pl.lit(START_DATE))
-
-    if spec.market == "us":
-        count_valid = pl.col("P4_INTRABAR_COUNT_5M").is_in([78, 42])
-    else:
-        count_valid = pl.col("P4_INTRABAR_COUNT_5M") == 53
-
-    rv_valid = (
-        count_valid
-        & pl.col("P4_RV_WHOLE_DAY_5M").is_finite()
-        & (pl.col("P4_RV_WHOLE_DAY_5M") > 0.0)
-    )
-    frame = frame.with_columns(
-        pl.when(rv_valid)
-        .then(pl.col("P4_RV_WHOLE_DAY_5M"))
-        .otherwise(None)
-        .alias("rv")
-    )
-
-    rv = pl.col("rv")
-    rv5 = rv.rolling_mean(window_size=5, min_samples=5)
-    rv22 = rv.rolling_mean(window_size=22, min_samples=22)
-    y5 = (
-        rv.shift(-1)
-        + rv.shift(-2)
-        + rv.shift(-3)
-        + rv.shift(-4)
-        + rv.shift(-5)
-    ) / 5.0
-
-    return frame.with_columns(
-        rv5.alias("rv5"),
-        rv22.alias("rv22"),
-        y5.alias("y5"),
-    ).with_columns(
-        (pl.col("rv") / pl.col("rv22")).log().alias("xD"),
-        (pl.col("rv5") / pl.col("rv22")).log().alias("xW"),
-        (pl.col("y5") / pl.col("rv22")).log().alias("z"),
-    )
-
-
-def _eligible(frame: pl.DataFrame) -> pl.DataFrame:
-    return frame.drop_nulls(["rv22", "y5", "xD", "xW", "z"])
-
-
-def _fit(train: pl.DataFrame) -> tuple[StandardScaler, Ridge]:
-    x = train.select(["xD", "xW"]).to_numpy()
-    y = train["z"].to_numpy()
-    scaler = StandardScaler().fit(x)
-    model = Ridge(alpha=RIDGE_ALPHA).fit(scaler.transform(x), y)
-    return scaler, model
-
-
-def _training_rows(
-    frames: dict[str, pl.DataFrame],
-    specs: dict[str, _InputSpec],
-    held_out: str,
-    market_only: bool,
-) -> pl.DataFrame:
-    held_market = specs[held_out].market
-    candidates = []
-    for symbol, frame in frames.items():
-        if symbol == held_out:
-            continue
-        if market_only and specs[symbol].market != held_market:
-            continue
-        candidates.append(
-            _eligible(frame).filter(pl.col("date") <= pl.lit(TRAIN_END_DATE))
-        )
-    if not candidates:
-        raise ValueError(f"{held_out}: no training symbols remain")
-    return pl.concat(candidates, how="vertical")
-
-
-def _predict(
-    train: pl.DataFrame,
-    test: pl.DataFrame,
-) -> np.ndarray:
-    scaler, model = _fit(train)
-    x = test.select(["xD", "xW"]).to_numpy()
-    normalized = model.predict(scaler.transform(x))
-    return test["rv22"].to_numpy() * np.exp(normalized)
-
-
 def _evaluate_symbol(
-    frames: dict[str, pl.DataFrame],
+    data: dict[str, _PanelData],
     specs: dict[str, _InputSpec],
     held_out: str,
-) -> pl.DataFrame:
-    test = _eligible(frames[held_out]).filter(
-        pl.col("date") >= pl.lit(EVALUATION_START_DATE)
+) -> _Evaluation:
+    panel = data[held_out]
+    after_start = np.array(
+        [session_date >= EVALUATION_START_DATE for session_date in panel.dates],
+        dtype=bool,
     )
-    global_train = _training_rows(frames, specs, held_out, market_only=False)
-    market_train = _training_rows(frames, specs, held_out, market_only=True)
+    mask = _eligible_mask(panel) & after_start
 
-    actual = test["y5"].to_numpy()
-    global_pred = _predict(global_train, test)
-    market_pred = _predict(market_train, test)
+    test_x = np.column_stack((panel.x_d[mask], panel.x_w[mask]))
+    actual = panel.y5[mask]
+    rv22 = panel.rv22[mask]
 
+    global_x, global_y = _training_rows(
+        data,
+        specs,
+        held_out,
+        market_only=False,
+    )
+    market_x, market_y = _training_rows(
+        data,
+        specs,
+        held_out,
+        market_only=True,
+    )
+
+    global_pred = _predict(global_x, global_y, test_x, rv22)
+    market_pred = _predict(market_x, market_y, test_x, rv22)
     global_loss = _qlike(actual, global_pred)
     market_loss = _qlike(actual, market_pred)
 
-    return test.select(["date", "symbol", "market"]).with_columns(
-        pl.Series("global_qlike", global_loss),
-        pl.Series("market_qlike", market_loss),
-        pl.Series("market_minus_global", market_loss - global_loss),
+    return _Evaluation(
+        dates=panel.dates[mask],
+        global_qlike=global_loss,
+        market_qlike=market_loss,
+        market_minus_global=market_loss - global_loss,
     )
 
 
@@ -200,31 +272,47 @@ def _moving_block_ci(values: np.ndarray) -> tuple[float, float, float]:
     return float(values.mean()), float(lower), float(upper)
 
 
-def _summarize_scope(
-    rows: pl.DataFrame,
+def _scope_row(
+    evaluations: dict[str, _Evaluation],
+    specs: dict[str, _InputSpec],
     name: str,
     market: Market | None,
 ) -> dict[str, object]:
-    filtered = rows if market is None else rows.filter(pl.col("market") == market)
-    by_date = (
-        filtered.group_by("date")
-        .agg(
-            pl.col("global_qlike").mean(),
-            pl.col("market_qlike").mean(),
-            pl.col("market_minus_global").mean(),
-        )
-        .sort("date")
-    )
-    mean_delta, lower, upper = _moving_block_ci(
-        by_date["market_minus_global"].to_numpy()
-    )
+    per_date: dict[date, list[tuple[float, float, float]]] = {}
+
+    for symbol, evaluated in evaluations.items():
+        if market is not None and specs[symbol].market != market:
+            continue
+        for session_date, global_loss, market_loss, delta in zip(
+            evaluated.dates,
+            evaluated.global_qlike,
+            evaluated.market_qlike,
+            evaluated.market_minus_global,
+            strict=True,
+        ):
+            per_date.setdefault(session_date, []).append(
+                (float(global_loss), float(market_loss), float(delta))
+            )
+
+    global_by_date: list[float] = []
+    market_by_date: list[float] = []
+    delta_by_date: list[float] = []
+
+    for session_date in sorted(per_date):
+        values = per_date[session_date]
+        global_by_date.append(float(np.mean([value[0] for value in values])))
+        market_by_date.append(float(np.mean([value[1] for value in values])))
+        delta_by_date.append(float(np.mean([value[2] for value in values])))
+
+    delta_array = np.array(delta_by_date, dtype=float)
+    mean_delta, lower, upper = _moving_block_ci(delta_array)
     return {
         "kind": "scope",
         "name": name,
         "market": market or "all",
-        "n": by_date.height,
-        "global_qlike": float(by_date["global_qlike"].mean()),
-        "market_qlike": float(by_date["market_qlike"].mean()),
+        "n": len(delta_by_date),
+        "global_qlike": float(np.mean(global_by_date)),
+        "market_qlike": float(np.mean(market_by_date)),
         "market_minus_global": mean_delta,
         "ci_025": lower,
         "ci_975": upper,
@@ -250,27 +338,36 @@ def main() -> None:
         _InputSpec("2317", "taiwan", getattr(args, "2317")),
         _InputSpec("2454", "taiwan", getattr(args, "2454")),
     )
+
+    for spec in input_specs:
+        actual_hash = _sha256(spec.path)
+        expected_hash = EXPECTED_SHA256[spec.symbol]
+        if actual_hash != expected_hash:
+            raise ValueError(
+                f"{spec.symbol}: input SHA-256 {actual_hash} "
+                f"!= expected {expected_hash}"
+            )
+
     specs = {spec.symbol: spec for spec in input_specs}
-    frames = {spec.symbol: _load(spec) for spec in input_specs}
+    data = {spec.symbol: _load(spec) for spec in input_specs}
     evaluations = {
-        symbol: _evaluate_symbol(frames, specs, symbol)
-        for symbol in frames
+        symbol: _evaluate_symbol(data, specs, symbol)
+        for symbol in data
     }
-    all_rows = pl.concat(list(evaluations.values()), how="vertical")
 
     summaries: list[dict[str, object]] = []
     for symbol, evaluated in evaluations.items():
         mean_delta, lower, upper = _moving_block_ci(
-            evaluated["market_minus_global"].to_numpy()
+            evaluated.market_minus_global
         )
         summaries.append(
             {
                 "kind": "symbol",
                 "name": symbol,
                 "market": specs[symbol].market,
-                "n": evaluated.height,
-                "global_qlike": float(evaluated["global_qlike"].mean()),
-                "market_qlike": float(evaluated["market_qlike"].mean()),
+                "n": evaluated.dates.size,
+                "global_qlike": float(evaluated.global_qlike.mean()),
+                "market_qlike": float(evaluated.market_qlike.mean()),
                 "market_minus_global": mean_delta,
                 "ci_025": lower,
                 "ci_975": upper,
@@ -279,9 +376,9 @@ def main() -> None:
 
     summaries.extend(
         [
-            _summarize_scope(all_rows, "overall", None),
-            _summarize_scope(all_rows, "us", "us"),
-            _summarize_scope(all_rows, "taiwan", "taiwan"),
+            _scope_row(evaluations, specs, "overall", None),
+            _scope_row(evaluations, specs, "us", "us"),
+            _scope_row(evaluations, specs, "taiwan", "taiwan"),
         ]
     )
 
