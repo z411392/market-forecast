@@ -91,7 +91,7 @@ Implementer 發現測試失敗時，只准修改 Writable 範圍內的實作或 
 
 ## 測試行為規範
 
-- Unit test 使用 fake ports 與合成資料，不開真 session、不連真實網路、不讀取外部私有內容。
+- Unit test 使用 fake ports 與合成資料，不呼叫真 provider API、不連真實網路、不讀取 licensed／raw market data。
 - E2E 使用正式 composition root 或標準 test bindings，驗證真實 CLI/HTTP 契約。
 - 測試必須自行固定行為標記與環境設定，開發者的本機 `.env` 不得改變測試結果。
 - 測試資料使用明顯虛構內容，不得包含真實機構、個人姓名、私有帳號或真實 URL。
