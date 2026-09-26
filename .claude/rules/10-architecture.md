@@ -98,10 +98,15 @@ CLI、HTTP、排程或批次只是不同 driving surfaces。它們呼叫 inbound
 
 Production feature graph 必須是 DAG。
 
-## 瀏覽器
+## 外部 market-data provider
 
-Camoufox process 是外部資源。開啟、關閉、租用與 profile 由 session／collector adapter 擁有。
-Application 不接收 Playwright page、context 或 browser object。
+Market-data API／檔案來源是外部資源，連線、重試、rate limit、下載與 provider-specific schema 由 `market_data` 的 driven adapter 擁有。
+
+- Application／domain 不接收 provider SDK object、HTTP response、DataFrame 或 raw JSON；外部資料先經 parser 成 owner DTO。
+- Provider identity、symbol identity、timezone、session、adjustment/corporate-action 語義必須顯式保留，不得在 adapter 外靠猜測補齊。
+- 不得靜默從一個 provider fallback 到另一個 provider。替代來源必須由 Task/spec 明示，且輸出保留來源身份，避免混合資料冒充同一 measurement。
+- `apps/<app>/module.py` 可以選擇／組裝 adapter；feature 之間只依賴 supplier ports／DTO，不依賴另一 feature 的 driven adapter。
+- TradingView manual export 只可作具日期的 parity/spot-check evidence；不得冒充 Python 歷史資料 API。
 
 ## 正確
 
