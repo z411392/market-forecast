@@ -508,7 +508,7 @@ GARCH 研究版：
 
 - trailing 504 daily returns
 - every 20 bars refit
-- fixed (alpha 	imes persistence) grid
+- fixed (alpha × persistence) grid
 - Gaussian QMLE
 - H=5 average variance forecast
 
