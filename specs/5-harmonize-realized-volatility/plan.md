@@ -161,6 +161,15 @@ A missing minute is represented only by absence from `bars`; no DTO field author
 Optional action-specific keys use `NotRequired`: `ratio: float`, `previous_symbol: str`, `new_symbol: str`,
 `cash_amount: float`, `currency: str`.
 
+Corporate-action field semantics:
+
+- `effective_date` is the instrument-local market date on which the action becomes effective.
+- for `action_type == "split"`, `ratio` means post-action shares divided by pre-action shares; a 10-for-1 split is `10.0`.
+- `cash_amount` is source-reported cash per share in `currency`; it does not authorize dividend/total-return price adjustment.
+- `previous_symbol` and `new_symbol` carry symbol-change semantics only.
+- `other` preserves a dated/provenanced fact but does not overload split/symbol/dividend-specific fields; a future
+  action type requiring new mandatory semantics must extend the contract explicitly.
+
 ### Port and failure contract
 
 `ReadMinuteBarsPort.__call__(query: MinuteBarsQuery) -> MinuteBarsBatch`.
