@@ -1,0 +1,73 @@
+--- Risk Forecast v1.5-TV Phase 4A
++++ Risk Forecast v1.5-TV GARCH-HAR Risk Pilot
+@@ -2,9 +2,9 @@
+ 
+ indicator(
+ 
+-    "Risk Forecast v1.5-TV Phase 4A - HARQ vs HAR vs GARCH",
+-
+-    shorttitle = "RiskHARQ",
++    "Risk Forecast v1.5-TV - GARCH/HAR Risk Pilot",
++
++    shorttitle = "Risk5D",
+ 
+     overlay = false,
+ 
+@@ -18,6 +18,10 @@
+ 
+ // Frozen specification
+ 
++// Research comparator recovered from the original TradingView study.
++// HARQ is research-only and is not a promoted/default production model.
++// HAR and GARCH remain the primary pilot comparators; no ticker-specific selector.
++
+ // =============================================================================
+ 
+ string LOWER_TF = "5"
+@@ -56,7 +60,7 @@
+ 
+ bool showHarq = input.bool(
+ 
+-    true,
++    false,
+ 
+-    "Show HARQ",
++    "Show HARQ (research only)",
+ 
+     group = GRP_DISPLAY
+ 
+@@ -1806,7 +1810,7 @@
+ 
+         0,
+ 
+-        "HARQ Phase 4A",
++        "GARCH / HAR Pilot",
+ 
+         text_color = color.white
+ 
+@@ -1848,7 +1852,7 @@
+ 
+         2,
+ 
+-        "HARQ Vol",
++        "HARQ Vol (R)",
+ 
+         text_color = color.white
+ 
+@@ -1932,7 +1936,7 @@
+ 
+         5,
+ 
+-        "HARQ βQ",
++        "HARQ βQ (R)",
+ 
+         text_color = color.white
+ 
+@@ -1960,7 +1964,7 @@
+ 
+         6,
+ 
+-        "QLIKE HARQ",
++        "QLIKE HARQ (R)",
+ 
+         text_color = color.white
