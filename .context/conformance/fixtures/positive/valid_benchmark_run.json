@@ -1,0 +1,51 @@
+{
+  "schema_version": "market-forecast-context-benchmark-v1",
+  "evaluated_at": "2026-09-23T10:00:00Z",
+  "commit_sha": "63e74789876786245beec5b7be06a309eb874391",
+  "total_cases": 1,
+  "passed_cases": 1,
+  "gate_evaluation": {
+    "authority_recall_pass": true,
+    "required_contract_recall_pass": true,
+    "zero_false_current_pass": true,
+    "zero_security_denied_pass": true,
+    "zero_sensitive_leak_pass": true,
+    "unauthorized_changes_pass": true,
+    "all_cases_pass": true,
+    "verdict": "ACCEPT"
+  },
+  "rollout_decision": {
+    "ctx_v1_shadow_evaluation": "ACCEPT",
+    "rollout_recommendation": "ASSISTED_CANDIDATE",
+    "default_rollout_authorized": "NO",
+    "enforced_rollout_authorized": "NO"
+  },
+  "case_results": [
+    {
+      "case_id": "CASE-1",
+      "name": "Internal helper bug (build_finding_tree)",
+      "category": "regression",
+      "passed": true,
+      "failure_reasons": [],
+      "authority_recall": 1.0,
+      "required_contract_recall": 1.0,
+      "false_current_authority_count": 0,
+      "security_denied_hits": 0,
+      "sensitive_leak_hits": 0,
+      "precision": 85.0,
+      "consumer_recall": 100.0,
+      "test_recall": 100.0,
+      "unresolved_detected": false,
+      "files_opened": 4,
+      "lines_read": 350,
+      "estimated_tool_calls": 1,
+      "line_reduction_pct": 52.4,
+      "tool_reduction_pct": 80.0
+    }
+  ],
+  "shadow_comparison": {
+    "task_id": "142",
+    "capsule_coverage_pct": 100.0,
+    "prohibited_accessed": 0
+  }
+}
