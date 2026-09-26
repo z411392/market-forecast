@@ -53,6 +53,8 @@ def calculate_intraday_realized_measures(
             _require_positive_finite(opening)
             interval_return = log(closing / opening)
         else:
+            if previous_close is None:
+                raise InvalidRealizedVarianceInputError("missing_previous_close")
             _require_positive_finite(previous_close)
             interval_return = log(closing / previous_close)
 
