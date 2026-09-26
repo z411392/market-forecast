@@ -45,57 +45,55 @@ Forecast
 
 B50 使用三個當前狀態來源：
 
-[
-D=(DI^+-DI^-)cdot rac{ADX}{100}
-]
+```text
+D = (DI+ - DI-) × (ADX / 100)
+```
 
 DMI / ADX 參數為 14 / 14。
 
-[
-B=rac{(High-EMA_{13})+(Low-EMA_{13})}{ATR_{14}}
-]
+```text
+B = ((High - EMA13) + (Low - EMA13)) / ATR14
+```
 
 MACD-V：
 
-[
-MACDV=rac{EMA_{12}-EMA_{26}}{ATR_{26}}cdot100
-]
+```text
+MACDV = ((EMA12 - EMA26) / ATR26) × 100
+```
 
-[
-M=MACDV-EMA_9(MACDV)
-]
+```text
+M = MACDV - EMA9(MACDV)
+```
 
 三個來源都使用只縮放、不移動 native zero 的 causal EWMA-RMS normalization：
 
-[
-q_t=(1-alpha)q_{t-1}+alpha x_t^2
-]
+```text
+q_t = (1 - alpha) q_(t-1) + alpha × x_t²
+```
 
 其中：
 
-[
-alpha=1-2^{-1/20}
-]
+```text
+alpha = 1 - 2^(-1/20)
+```
 
 當期值除以前一根 bar 的 RMS：
 
-[
-z_t=rac{x_t}{sqrt{q_{t-1}}}
-]
+```text
+z_t = x_t / sqrt(q_(t-1))
+```
 
 再壓縮：
 
-[
-u_t=	anh(z_t)
-]
+```text
+u_t = tanh(z_t)
+```
 
 最終：
 
-[
-oxed{
-B50=100(0.25u_D+0.50u_B+0.25u_M)
-}
-]
+```text
+B50 = 100 × (0.25 × uD + 0.50 × uB + 0.25 × uM)
+```
 
 語意：
 
@@ -176,15 +174,15 @@ Horizons：
 
 Binary target：
 
-[
-1[log(C_{t+H}/C_t)>0]
-]
+```text
+1[log(C_(t+H) / C_t) > 0]
+```
 
 Continuous target：
 
-[
-log(C_{t+H}/C_t)
-]
+```text
+log(C_(t+H) / C_t)
+```
 
 模型只使用低複雜度、可解釋 baseline：
 
@@ -286,23 +284,15 @@ Phase 5A 之後的 Deep Research 把 Forecast 問題重新排列：
 
 Primary：
 
-[
-Y_{t,5}
-=
-rac{1}{5}
-sum_{h=1}^{5}
-r_{t+h}^2
-]
+```text
+Y_(t,5) = (1/5) × Σ[h=1..5] r_(t+h)²
+```
 
 Confirmatory：
 
-[
-Y_{t,20}
-=
-rac{1}{20}
-sum_{h=1}^{20}
-r_{t+h}^2
-]
+```text
+Y_(t,20) = (1/20) × Σ[h=1..20] r_(t+h)²
+```
 
 這裡的 `r^2` 是 close-to-close squared log return；研究後來認為它足以證明 volatility persistence，但太粗，不應作為最終 canonical RV target。
 
@@ -390,30 +380,25 @@ Historical evidence artifact：
 
 GARCH recursion：
 
-[
-h_{t+1}=omega+alpha r_t^2+eta h_t
-]
+```text
+h_(t+1) = omega + alpha × r_t² + beta × h_t
+```
 
 多日平均 variance：
 
-[
-ar h_H
-=
-h_infty
-+
-(h_1-h_infty)
-rac{1-p^H}{H(1-p)}
-]
+```text
+avg_h_H = h_long_run + (h_1 - h_long_run) × (1 - p^H) / (H × (1 - p))
+```
 
 其中：
 
-[
-p=alpha+eta
-]
+```text
+p = alpha + beta
+```
 
-[
-h_infty=rac{omega}{1-p}
-]
+```text
+h_long_run = omega / (1 - p)
+```
 
 當時 frozen coefficients 只用來做 prospective production candidate；後續歷史比較若要回看過去，必須重新做 causal / pseudo-prospective fit，不能拿 2026 freeze coefficients 回灌歷史。
 
@@ -475,55 +460,43 @@ Own-stock IV / skew 被保留成另一個真正不同的 hypothesis，但暫時�
 
 ### 8.1 Whole-day RV
 
-[
-RV_t^{WD}
-=
-r_{ON,t}^2
-+
-sum_j (r_{t,j}^{5m})^2
-]
+```text
+RV_WD(t) = r_ON(t)² + Σ_j r_5m(t,j)²
+```
 
 其中：
 
-[
-r_{ON,t}
-=
-log(Open_t/Close_{t-1})
-]
+```text
+r_ON(t) = log(Open_t / Close_(t-1))
+```
 
 Primary future target：
 
-[
-Y_{t,5}
-=
-rac{1}{5}
-sum_{h=1}^{5}
-RV_{t+h}^{WD}
-]
+```text
+Y_(t,5) = (1/5) × Σ[h=1..5] RV_WD(t+h)
+```
 
 ### 8.2 Causal HAR
 
 Features：
 
-[
-D_t=log RV_t
-]
+```text
+D_t = log(RV_t)
+```
 
-[
-W_t=log left(rac{1}{5}sum_{k=0}^{4}RV_{t-k}ight)
-]
+```text
+W_t = log((1/5) × Σ[k=0..4] RV_(t-k))
+```
 
-[
-M_t=log left(rac{1}{22}sum_{k=0}^{21}RV_{t-k}ight)
-]
+```text
+M_t = log((1/22) × Σ[k=0..21] RV_(t-k))
+```
 
 Direct H=5 regression：
 
-[
-log Y_{t,5}
-=
-eta_0+eta_DD_t+eta_WW_t+eta_MM_t
-]
+```text
+log(Y_(t,5)) = beta0 + betaD × D_t + betaW × W_t + betaM × M_t
+```
 
 在 bar `t` 只新增 origin `t-5` 的成熟 training label，因此不偷看未來。
 
@@ -628,9 +601,9 @@ GOOGL / QQQ / NVDA / TSM 的 5m / 10m / 15m 5D aggregate 高度一致，level bi
 
 2330 顯示完全不同的 volatility signature：
 
-[
-RV_{5m}>RV_{10m}>RV_{15m}
-]
+```text
+RV_5m > RV_10m > RV_15m
+```
 
 最近 252 個 5D windows 的觀測約為：
 
@@ -665,9 +638,9 @@ level bias 約：
 
 核心概念：
 
-[
-RQ_t=rac{M}{3}sum_i r_{t,i}^4
-]
+```text
+RQ_t = (M / 3) × Σ_i r_(t,i)^4
+```
 
 HARQ 讓 daily RV coefficient 隨 quarticity / measurement noise 改變。
 
@@ -731,13 +704,9 @@ Cross-market gate: Path E first
 
 一個乾淨的 partial-pooling formulation：
 
-[
-eta_i
-=
-eta_{global}
-+
-delta_{market(i)}
-]
+```text
+beta_i = beta_global + delta_market(i)
+```
 
 市場 deviation 要 shrink toward global，而不是直接替每個 ticker fit 一套完全獨立模型。
 
@@ -879,13 +848,9 @@ Canonical 1m bar：
 
 Headline variance：
 
-[
-V_t^{WD}
-=
-V_t^{RS}
-+
-r_{ON,t}^2
-]
+```text
+V_WD(t) = V_RS(t) + r_ON(t)²
+```
 
 regular session 與 overnight component 在 research table 保持可分解。
 
@@ -921,9 +886,9 @@ regular session 與 overnight component 在 research table 保持可分解。
 
 Risk Forecast primary：
 
-[
+```text
 QLIKE
-]
+```
 
 secondary 才報：
 
@@ -1053,9 +1018,9 @@ Pine deployment Story：
 
 ### 20.1 Market identity
 
-[
-Does market identity
-]
+```text
+Does market identity add stable incremental forecast information?
+```
 
 在 measurement / scale 控制後，是否真的提供 stable incremental volatility dynamics？
 
