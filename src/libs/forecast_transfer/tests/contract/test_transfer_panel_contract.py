@@ -3,12 +3,12 @@ from typing import get_args, get_origin, get_type_hints
 
 from pytest import mark
 
-from libs.market_data.dtos.security_identity import SecurityIdentity
-from libs.realized_variance.dtos.daily_realized_measures import DailyRealizedMeasures
 from libs.forecast_transfer.dtos.transfer_panel_observation import (
     TransferPanelObservation,
 )
 from libs.forecast_transfer.dtos.unseen_symbol_fold import UnseenSymbolFold
+from libs.market_data.dtos.security_identity import SecurityIdentity
+from libs.realized_variance.dtos.daily_realized_measures import DailyRealizedMeasures
 
 
 @mark.contract
