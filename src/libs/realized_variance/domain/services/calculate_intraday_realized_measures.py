@@ -79,6 +79,7 @@ def calculate_intraday_realized_measures(
         "security": security,
         "session_date": session_date,
         "sampling_minutes": sampling_minutes,
+        "price_basis": price_basis,
         "observation_count": len(returns),
         "realized_variance": realized_variance,
         "realized_quarticity": realized_quarticity,
