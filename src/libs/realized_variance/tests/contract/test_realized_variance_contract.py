@@ -46,6 +46,7 @@ def test_realized_variance_contract() -> None:
             "security",
             "session_date",
             "sampling_minutes",
+            "price_basis",
             "observation_count",
             "realized_variance",
             "realized_quarticity",
@@ -57,6 +58,7 @@ def test_realized_variance_contract() -> None:
     assert intraday_hints["security"] is SecurityIdentity
     assert intraday_hints["session_date"] is date
     assert get_args(intraday_hints["sampling_minutes"]) == (5, 10, 15)
+    assert get_args(intraday_hints["price_basis"]) == ("as_printed", "split_adjusted")
     assert intraday_hints["observation_count"] is int
     assert intraday_hints["realized_variance"] is float
     assert intraday_hints["realized_quarticity"] is float
@@ -68,6 +70,7 @@ def test_realized_variance_contract() -> None:
             "security",
             "session_date",
             "sampling_minutes",
+            "price_basis",
             "regular_session_variance",
             "overnight_log_return",
             "overnight_variance",
@@ -84,6 +87,7 @@ def test_realized_variance_contract() -> None:
     assert daily_hints["security"] is SecurityIdentity
     assert daily_hints["session_date"] is date
     assert get_args(daily_hints["sampling_minutes"]) == (5, 10, 15)
+    assert get_args(daily_hints["price_basis"]) == ("as_printed", "split_adjusted")
     for field in (
         "regular_session_variance",
         "overnight_log_return",

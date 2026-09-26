@@ -202,3 +202,16 @@ Key findings:
 
 Next:
 - S2 commits positive/negative tests before any Task #12 production implementation.
+
+
+### Task #11 downstream correction reconciled into Task #12
+
+Reconciled upstream candidate:
+- `d1a458b639ec952eac1d716d1e3b452f63a8a3d4`
+
+Reason:
+- Task #12 discovered that #11 originally dropped `price_basis` after aggregation.
+- #11 refroze the invariant and propagated it through intraday and daily realized-measure DTOs/calculators.
+- Task #12 now consumes that exact corrected source/test contract before S2 audit tests begin.
+
+This reconciliation does not add measurement-audit behavior, select a sampling frequency, or change RV/RQ/semivariance formulas.

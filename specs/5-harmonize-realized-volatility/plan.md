@@ -242,6 +242,7 @@ Required keys:
 - `security: SecurityIdentity`
 - `session_date: date`
 - `sampling_minutes: Literal[5, 10, 15]`
+- `price_basis: Literal["as_printed", "split_adjusted"]`
 - `observation_count: int`
 - `realized_variance: float`
 - `realized_quarticity: float`
@@ -255,6 +256,7 @@ Required keys:
 - `security: SecurityIdentity`
 - `session_date: date`
 - `sampling_minutes: Literal[5, 10, 15]`
+- `price_basis: Literal["as_printed", "split_adjusted"]`
 - `regular_session_variance: float`
 - `overnight_log_return: float`
 - `overnight_variance: float`
@@ -265,6 +267,19 @@ Required keys:
 - `whole_day_negative_semivariance: float`
 - `realized_quarticity: float`
 - `observation_count: int`
+
+### Price-basis propagation invariant
+
+The adjustment basis is part of measurement identity and must survive every downstream transform:
+
+```text
+CanonicalMinuteBar.price_basis
+→ AggregatedIntradayBar.price_basis
+→ IntradayRealizedMeasures.price_basis
+→ DailyRealizedMeasures.price_basis
+```
+
+No downstream measurement/audit/target code may compare or combine values while silently dropping this field.
 
 ### Strict aggregation invariants
 

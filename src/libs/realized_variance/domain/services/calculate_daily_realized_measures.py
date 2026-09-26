@@ -47,6 +47,7 @@ def calculate_daily_realized_measures(
         "security": intraday["security"],
         "session_date": intraday["session_date"],
         "sampling_minutes": intraday["sampling_minutes"],
+        "price_basis": intraday["price_basis"],
         "regular_session_variance": intraday["realized_variance"],
         "overnight_log_return": overnight_log_return,
         "overnight_variance": overnight_variance,
