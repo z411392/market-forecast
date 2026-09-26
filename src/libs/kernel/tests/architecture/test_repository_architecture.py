@@ -1,4 +1,4 @@
-from ast import Import, ImportFrom, parse
+from ast import Import, ImportFrom, parse, walk
 from pathlib import Path
 
 SRC = Path(__file__).resolve().parents[4]
@@ -118,8 +118,6 @@ def _module_imports(path: Path) -> tuple[str, list[str]]:
 
 
 def _walk_imports(tree: object) -> list[object]:
-    from ast import walk
-
     return [node for node in walk(tree) if isinstance(node, (Import, ImportFrom))]
 
 
