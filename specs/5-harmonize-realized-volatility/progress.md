@@ -113,7 +113,7 @@ Explicitly not implemented:
 - CLI/composition;
 - live data access.
 
-The frozen S2 test files were not rewritten by S3.
+The S2 assertions/oracles were not changed by S3. The test files did receive import-order/formatting changes after the RED commit, so byte identity is not claimed.
 
 ### Task #10 S4 — semantic correction and structural readback
 
