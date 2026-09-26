@@ -1,0 +1,174 @@
+{
+  "deployment": {
+    "display": [
+      "5D expected annualized volatility %",
+      "5D one-sigma move %",
+      "trailing 20D realized volatility %"
+    ],
+    "historical_backfill_with_frozen_coefficients": false,
+    "pine_behavior": "deterministic inference only",
+    "prospective_tracking_metric": "QLIKE",
+    "unsupported_symbol_behavior": "fail_closed"
+  },
+  "manifest_version": "risk_forecast_har_frozen_v1",
+  "measurement": {
+    "chart_timeframe": "1D",
+    "fit_method": "OLS via covariance matrix pseudo-inverse",
+    "har_features": {
+      "D": "RV_t",
+      "M": "mean(RV_t..RV_t-21)",
+      "W": "mean(RV_t..RV_t-4)"
+    },
+    "lower_timeframe": "5m",
+    "target": "mean(RV_t+1..RV_t+5)",
+    "training_window_matured_rows": 504,
+    "whole_day_variance": "regular-session 5m realized variance + overnight squared log return"
+  },
+  "selected_model": "Level-HAR",
+  "selection_evidence": {
+    "panel": {
+      "taiwan": [
+        "2330",
+        "2317",
+        "2454"
+      ],
+      "us": [
+        "GOOGL",
+        "NVDA",
+        "QQQ",
+        "TSM"
+      ]
+    },
+    "primary_horizon_sessions": 5,
+    "primary_metric": "QLIKE",
+    "ruling": [
+      "market-specific Ridge-HAR not promoted",
+      "global Ridge-HAR not promoted over causal per-symbol HAR",
+      "HAR preferred to GARCH overall in supplied pilot",
+      "HARQ not promoted over HAR"
+    ],
+    "task": 13
+  },
+  "status": "PROSPECTIVE_FROZEN_PILOT",
+  "symbols": {
+    "BATS:GOOGL": {
+      "absolute_difference": 2.992397996059992e-17,
+      "coefficients": {
+        "beta_d": 0.048002057980074994,
+        "beta_m": 0.04327993488251401,
+        "beta_w": 0.033641770850260655,
+        "intercept_variance": 0.00038571636420582086
+      },
+      "fit_bar_date": "2026-09-25",
+      "freeze_bar_export_forecast_variance": 0.0004170373015049,
+      "python_reconstructed_forecast_variance": 0.00041703730150492995,
+      "source_sha256": "69128266274b3ae8e0bb5374575b02b16fed60cab2e293dbb5b7552c69f2e368",
+      "symbol": "GOOGL",
+      "training_origin_end": "2026-09-18",
+      "training_origin_start": "2024-09-16",
+      "training_rows": 504
+    },
+    "BATS:NVDA": {
+      "absolute_difference": 1.452830911130576e-17,
+      "coefficients": {
+        "beta_d": 0.1248914307803534,
+        "beta_m": 0.3432736920532302,
+        "beta_w": 0.12321716335174432,
+        "intercept_variance": 0.0003113956504987292
+      },
+      "fit_bar_date": "2026-09-25",
+      "freeze_bar_export_forecast_variance": 0.0005553547343328,
+      "python_reconstructed_forecast_variance": 0.0005553547343328145,
+      "source_sha256": "99323dc9644f2a5955f1b6119b2d75c7c6dcce8c7b2938be81c610871c5dc54c",
+      "symbol": "NVDA",
+      "training_origin_end": "2026-09-18",
+      "training_origin_start": "2024-09-16",
+      "training_rows": 504
+    },
+    "BATS:QQQ": {
+      "absolute_difference": 2.303929616531697e-17,
+      "coefficients": {
+        "beta_d": 0.3554726051333471,
+        "beta_m": 0.23152426471936713,
+        "beta_w": -0.029774723654848928,
+        "intercept_variance": 8.023331625960692e-05
+      },
+      "fit_bar_date": "2026-09-25",
+      "freeze_bar_export_forecast_variance": 0.00012232032823,
+      "python_reconstructed_forecast_variance": 0.00012232032822997695,
+      "source_sha256": "18fd0c5050c348516f616da8abcc764707f4aa669b7ba022a12ce1362954243e",
+      "symbol": "QQQ",
+      "training_origin_end": "2026-09-18",
+      "training_origin_start": "2024-09-16",
+      "training_rows": 504
+    },
+    "BATS:TSM": {
+      "absolute_difference": 4.087442190270352e-17,
+      "coefficients": {
+        "beta_d": 0.06169558464961368,
+        "beta_m": 0.10529569491075311,
+        "beta_w": 0.13736920195833344,
+        "intercept_variance": 0.0005094966215658159
+      },
+      "fit_bar_date": "2026-09-25",
+      "freeze_bar_export_forecast_variance": 0.0005877345474578,
+      "python_reconstructed_forecast_variance": 0.0005877345474577592,
+      "source_sha256": "f66835e9328fbe261472a8a693efb898ee144b1d90cfb38c0732037cc58abec4",
+      "symbol": "TSM",
+      "training_origin_end": "2026-09-18",
+      "training_origin_start": "2024-09-16",
+      "training_rows": 504
+    },
+    "TWSE:2317": {
+      "absolute_difference": 1.1384122811097797e-17,
+      "coefficients": {
+        "beta_d": 0.18231984881915508,
+        "beta_m": -0.015920594866739395,
+        "beta_w": 0.2000194815248944,
+        "intercept_variance": 0.0004408414087813874
+      },
+      "fit_bar_date": "2026-09-24",
+      "freeze_bar_export_forecast_variance": 0.0005313610195261,
+      "python_reconstructed_forecast_variance": 0.0005313610195261114,
+      "source_sha256": "98a0b83bb2ced641603a6b248853a0fc288a80d06cae4f8212ab813d54866c5c",
+      "symbol": "2317",
+      "training_origin_end": "2026-09-17",
+      "training_origin_start": "2024-08-21",
+      "training_rows": 504
+    },
+    "TWSE:2330": {
+      "absolute_difference": 3.69712940817557e-17,
+      "coefficients": {
+        "beta_d": 0.12469766742590664,
+        "beta_m": -0.055393964997532186,
+        "beta_w": 0.026066015068912315,
+        "intercept_variance": 0.0005924760756065551
+      },
+      "fit_bar_date": "2026-09-24",
+      "freeze_bar_export_forecast_variance": 0.0006088767862502,
+      "python_reconstructed_forecast_variance": 0.000608876786250163,
+      "source_sha256": "e26c29335402363c4a1b8aae35bb26e63bb1577bed74173f5b914f7258ca3d47",
+      "symbol": "2330",
+      "training_origin_end": "2026-09-17",
+      "training_origin_start": "2024-08-22",
+      "training_rows": 504
+    },
+    "TWSE:2454": {
+      "absolute_difference": 2.7972416050126014e-17,
+      "coefficients": {
+        "beta_d": 0.14067129140913373,
+        "beta_m": 0.4877291380316383,
+        "beta_w": 0.1401941339804982,
+        "intercept_variance": 0.0002987256434904451
+      },
+      "fit_bar_date": "2026-09-24",
+      "freeze_bar_export_forecast_variance": 0.0017450424433165,
+      "python_reconstructed_forecast_variance": 0.001745042443316472,
+      "source_sha256": "791626c2890e5aad95d19abc4e4c84586686394b9f81b4fa2d53363465792847",
+      "symbol": "2454",
+      "training_origin_end": "2026-09-17",
+      "training_origin_start": "2024-08-22",
+      "training_rows": 504
+    }
+  }
+}

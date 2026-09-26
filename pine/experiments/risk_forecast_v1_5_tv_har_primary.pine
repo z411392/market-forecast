@@ -1,0 +1,310 @@
+//@version=6
+indicator(
+    "Risk Forecast v1.5-TV — HAR Primary",
+    shorttitle = "RiskHAR5D",
+    overlay = false,
+    precision = 2,
+    max_bars_back = 3000
+)
+
+// Task #13 pilot promotion:
+// - causal rolling Level-HAR is the primary H=5 risk forecast
+// - no market/ticker-specific selector
+// - no direction probability / Buy-Sell semantics
+// - GARCH/HARQ remain research comparators in the Phase 4A script
+
+string LOWER_TF = "5"
+int HORIZON = 5
+int HAR_WEEK = 5
+int HAR_MONTH = 22
+int TRAIN_WINDOW = 504
+float TRADING_DAYS = 252.0
+float EPS = 0.000000000001
+float VAR_SCALE = 10000.0
+
+string GRP_DISPLAY = "Display"
+bool showExpectedVol = input.bool(true, "Show 5D expected volatility", group = GRP_DISPLAY)
+bool showTable = input.bool(true, "Show status table", group = GRP_DISPLAY)
+
+f_qlike(float actualVariance, float predictedVariance) =>
+    float result = na
+    bool valid = (
+        not na(actualVariance)
+        and not na(predictedVariance)
+        and actualVariance > 0.0
+        and predictedVariance > 0.0
+    )
+    if valid
+        float ratio = actualVariance / predictedVariance
+        result := ratio - math.log(ratio) - 1.0
+    result
+
+f_intraday_rv(array<float> opens, array<float> closes) =>
+    float result = na
+    int openCount = array.size(opens)
+    int closeCount = array.size(closes)
+    bool validArrays = openCount > 0 and closeCount > 0 and openCount == closeCount
+    if validArrays
+        result := 0.0
+        float firstOpen = array.get(opens, 0)
+        float firstClose = array.get(closes, 0)
+        if firstOpen > 0.0 and firstClose > 0.0
+            float r0 = math.log(firstClose / firstOpen)
+            result += r0 * r0
+        if closeCount > 1
+            for i = 1 to closeCount - 1
+                float previousClose = array.get(closes, i - 1)
+                float currentClose = array.get(closes, i)
+                if previousClose > 0.0 and currentClose > 0.0
+                    float r = math.log(currentClose / previousClose)
+                    result += r * r
+    result
+
+bool exactDaily = timeframe.isdaily and timeframe.multiplier == 1
+if not exactDaily
+    runtime.error("Risk Forecast v1.5-TV HAR Primary must run on a 1D chart.")
+
+string regularTicker = ticker.new(
+    syminfo.prefix,
+    syminfo.ticker,
+    session.regular
+)
+
+array<float> intrabarOpen = request.security_lower_tf(
+    regularTicker,
+    LOWER_TF,
+    open,
+    ignore_invalid_timeframe = true
+)
+
+array<float> intrabarClose = request.security_lower_tf(
+    regularTicker,
+    LOWER_TF,
+    close,
+    ignore_invalid_timeframe = true
+)
+
+int intrabarCount = array.size(intrabarClose)
+float regularRv = f_intraday_rv(intrabarOpen, intrabarClose)
+
+float overnightVariance = na
+bool overnightReady = not na(close[1]) and close[1] > 0.0 and open > 0.0
+if overnightReady
+    float overnightReturn = math.log(open / close[1])
+    overnightVariance := overnightReturn * overnightReturn
+
+float wholeDayRv = na
+bool rvReady = barstate.isconfirmed and not na(regularRv) and not na(overnightVariance)
+if rvReady
+    wholeDayRv := regularRv + overnightVariance
+
+float rv5 = ta.sma(wholeDayRv, HAR_WEEK)
+float rv22 = ta.sma(wholeDayRv, HAR_MONTH)
+float trailing20Rv = ta.sma(wholeDayRv, 20)
+
+float currentD = na
+float currentW = na
+float currentM = na
+if not na(wholeDayRv)
+    currentD := wholeDayRv * VAR_SCALE
+if not na(rv5)
+    currentW := rv5 * VAR_SCALE
+if not na(rv22)
+    currentM := rv22 * VAR_SCALE
+
+float maturedTargetVariance = ta.sma(wholeDayRv, HORIZON)
+
+float trainD = na
+float trainW = na
+float trainM = na
+float trainY = na
+
+bool trainingRowReady = (
+    not na(maturedTargetVariance)
+    and not na(currentD[HORIZON])
+    and not na(currentW[HORIZON])
+    and not na(currentM[HORIZON])
+)
+
+if trainingRowReady
+    trainD := currentD[HORIZON]
+    trainW := currentW[HORIZON]
+    trainM := currentM[HORIZON]
+    trainY := maturedTargetVariance * VAR_SCALE
+
+float meanD = ta.sma(trainD, TRAIN_WINDOW)
+float meanW = ta.sma(trainW, TRAIN_WINDOW)
+float meanM = ta.sma(trainM, TRAIN_WINDOW)
+float meanY = ta.sma(trainY, TRAIN_WINDOW)
+
+float covDD = na
+float covDW = na
+float covDM = na
+float covWW = na
+float covWM = na
+float covMM = na
+float covDY = na
+float covWY = na
+float covMY = na
+
+bool momentsReady = (
+    not na(meanD)
+    and not na(meanW)
+    and not na(meanM)
+    and not na(meanY)
+)
+
+if momentsReady
+    covDD := ta.sma(trainD * trainD, TRAIN_WINDOW) - meanD * meanD
+    covDW := ta.sma(trainD * trainW, TRAIN_WINDOW) - meanD * meanW
+    covDM := ta.sma(trainD * trainM, TRAIN_WINDOW) - meanD * meanM
+    covWW := ta.sma(trainW * trainW, TRAIN_WINDOW) - meanW * meanW
+    covWM := ta.sma(trainW * trainM, TRAIN_WINDOW) - meanW * meanM
+    covMM := ta.sma(trainM * trainM, TRAIN_WINDOW) - meanM * meanM
+    covDY := ta.sma(trainD * trainY, TRAIN_WINDOW) - meanD * meanY
+    covWY := ta.sma(trainW * trainY, TRAIN_WINDOW) - meanW * meanY
+    covMY := ta.sma(trainM * trainY, TRAIN_WINDOW) - meanM * meanY
+
+float harB0 = na
+float harBD = na
+float harBW = na
+float harBM = na
+
+bool harFitReady = (
+    not na(covDD)
+    and not na(covDW)
+    and not na(covDM)
+    and not na(covWW)
+    and not na(covWM)
+    and not na(covMM)
+    and not na(covDY)
+    and not na(covWY)
+    and not na(covMY)
+)
+
+if harFitReady
+    matrix<float> harCov = matrix.new<float>(3, 3, 0.0)
+    matrix.set(harCov, 0, 0, covDD)
+    matrix.set(harCov, 0, 1, covDW)
+    matrix.set(harCov, 0, 2, covDM)
+    matrix.set(harCov, 1, 0, covDW)
+    matrix.set(harCov, 1, 1, covWW)
+    matrix.set(harCov, 1, 2, covWM)
+    matrix.set(harCov, 2, 0, covDM)
+    matrix.set(harCov, 2, 1, covWM)
+    matrix.set(harCov, 2, 2, covMM)
+
+    matrix<float> harInv = matrix.pinv(harCov)
+    harBD := (
+        matrix.get(harInv, 0, 0) * covDY
+        + matrix.get(harInv, 0, 1) * covWY
+        + matrix.get(harInv, 0, 2) * covMY
+    )
+    harBW := (
+        matrix.get(harInv, 1, 0) * covDY
+        + matrix.get(harInv, 1, 1) * covWY
+        + matrix.get(harInv, 1, 2) * covMY
+    )
+    harBM := (
+        matrix.get(harInv, 2, 0) * covDY
+        + matrix.get(harInv, 2, 1) * covWY
+        + matrix.get(harInv, 2, 2) * covMY
+    )
+    harB0 := meanY - harBD * meanD - harBW * meanW - harBM * meanM
+
+float harVarianceForecast = na
+bool harPredictionReady = (
+    not na(harB0)
+    and not na(currentD)
+    and not na(currentW)
+    and not na(currentM)
+)
+
+if harPredictionReady
+    float scaledForecast = harB0 + harBD * currentD + harBW * currentW + harBM * currentM
+    harVarianceForecast := math.max(scaledForecast / VAR_SCALE, EPS)
+
+float harAnnualizedVol = na
+float harFiveDayMove = na
+float trailing20AnnualizedVol = na
+
+if not na(harVarianceForecast)
+    harAnnualizedVol := math.sqrt(harVarianceForecast * TRADING_DAYS) * 100.0
+    harFiveDayMove := math.sqrt(harVarianceForecast * float(HORIZON)) * 100.0
+
+if not na(trailing20Rv)
+    trailing20AnnualizedVol := math.sqrt(math.max(trailing20Rv, EPS) * TRADING_DAYS) * 100.0
+
+float harQlike = f_qlike(
+    maturedTargetVariance,
+    harVarianceForecast[HORIZON]
+)
+float harQlike252 = ta.sma(harQlike, 252)
+
+float expectedVolDisplay = showExpectedVol ? harAnnualizedVol : na
+plot(
+    expectedVolDisplay,
+    title = "HAR 5D Expected Volatility %",
+    linewidth = 3
+)
+
+string expectedVolText = na(harAnnualizedVol) ? "—" : str.tostring(harAnnualizedVol, "#.00") + "%"
+string moveText = na(harFiveDayMove) ? "—" : str.tostring(harFiveDayMove, "#.00") + "%"
+string realizedText = (
+    na(trailing20AnnualizedVol)
+    ? "—"
+    : str.tostring(trailing20AnnualizedVol, "#.00") + "%"
+)
+string qlikeText = na(harQlike252) ? "—" : str.tostring(harQlike252, "#.0000")
+
+var table statusTable = table.new(position.top_right, 2, 6, border_width = 1)
+
+if barstate.islast and showTable
+    table.cell(statusTable, 0, 0, "Risk Forecast")
+    table.cell(statusTable, 1, 0, "HAR Primary")
+    table.cell(statusTable, 0, 1, "5D expected vol")
+    table.cell(statusTable, 1, 1, expectedVolText)
+    table.cell(statusTable, 0, 2, "5D 1σ move")
+    table.cell(statusTable, 1, 2, moveText)
+    table.cell(statusTable, 0, 3, "20D realized vol")
+    table.cell(statusTable, 1, 3, realizedText)
+    table.cell(statusTable, 0, 4, "5m bars")
+    table.cell(statusTable, 1, 4, str.tostring(intrabarCount))
+    table.cell(statusTable, 0, 5, "QLIKE 252")
+    table.cell(statusTable, 1, 5, qlikeText)
+
+plot(
+    float(intrabarCount),
+    title = "RF_INTRABAR_COUNT_5M",
+    display = display.data_window
+)
+plot(
+    wholeDayRv,
+    title = "RF_RV_WHOLE_DAY_5M",
+    display = display.data_window
+)
+plot(
+    harVarianceForecast,
+    title = "RF_FORECAST_HAR_VAR5",
+    display = display.data_window
+)
+plot(
+    harAnnualizedVol,
+    title = "RF_HAR_VOL5_ANNUALIZED_PCT",
+    display = display.data_window
+)
+plot(
+    harFiveDayMove,
+    title = "RF_HAR_MOVE5_1SIGMA_PCT",
+    display = display.data_window
+)
+plot(
+    harQlike,
+    title = "RF_QLIKE_HAR",
+    display = display.data_window
+)
+plot(
+    harQlike252,
+    title = "RF_QLIKE_252_HAR",
+    display = display.data_window
+)
