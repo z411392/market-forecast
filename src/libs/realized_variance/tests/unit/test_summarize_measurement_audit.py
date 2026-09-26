@@ -67,7 +67,7 @@ def test_summarize_measurement_audit() -> None:
     assert summary["spearman_rv_5m_15m"] == approx(1.0)
     assert summary["geometric_bias_5m_vs_10m_pct"] == approx(0.0, abs=1e-12)
     assert summary["geometric_bias_5m_vs_15m_pct"] == approx(100.0)
-    assert summary["mean_abs_log_gap_5m_10m"] == approx(log(2.0) / 2.0)
+    assert summary["mean_abs_log_gap_5m_10m"] == approx(log(2.0))
     assert summary["mean_abs_log_gap_5m_15m"] == approx(log(2.0))
     assert summary["first_session_date"] == date(2026, 9, 22)
     assert summary["last_session_date"] == date(2026, 9, 25)
