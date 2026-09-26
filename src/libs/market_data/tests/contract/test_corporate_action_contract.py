@@ -1,11 +1,12 @@
 from datetime import date
 from typing import get_args, get_type_hints
 
+from pytest import mark
+
 from libs.market_data.dtos.corporate_action_fact import CorporateActionFact
 from libs.market_data.dtos.corporate_actions_query import CorporateActionsQuery
 from libs.market_data.dtos.security_identity import SecurityIdentity
 from libs.market_data.dtos.source_provenance import SourceProvenance
-from pytest import mark
 
 
 @mark.contract

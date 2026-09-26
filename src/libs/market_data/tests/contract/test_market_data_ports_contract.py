@@ -1,6 +1,8 @@
 from inspect import isabstract
 from typing import get_args, get_origin, get_type_hints
 
+from pytest import mark
+
 from libs.market_data.dtos.corporate_action_fact import CorporateActionFact
 from libs.market_data.dtos.corporate_actions_query import CorporateActionsQuery
 from libs.market_data.dtos.minute_bars_batch import MinuteBarsBatch
@@ -10,7 +12,6 @@ from libs.market_data.exceptions.invalid_market_data_contract_error import (
 )
 from libs.market_data.ports.read_corporate_actions_port import ReadCorporateActionsPort
 from libs.market_data.ports.read_minute_bars_port import ReadMinuteBarsPort
-from pytest import mark
 
 
 @mark.contract

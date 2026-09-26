@@ -1,12 +1,13 @@
 from datetime import date, datetime
 from typing import get_args, get_origin, get_type_hints
 
+from pytest import mark
+
 from libs.market_data.dtos.canonical_minute_bar import CanonicalMinuteBar
 from libs.market_data.dtos.minute_bars_batch import MinuteBarsBatch
 from libs.market_data.dtos.minute_bars_query import MinuteBarsQuery
 from libs.market_data.dtos.security_identity import SecurityIdentity
 from libs.market_data.dtos.source_provenance import SourceProvenance
-from pytest import mark
 
 
 @mark.contract
