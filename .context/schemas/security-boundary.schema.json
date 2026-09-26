@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://market-forecast.io/schemas/context/security-boundary.schema.json",
+  "title": "Context Security Boundary Policy Schema",
+  "type": "object",
+  "required": [
+    "policy_version",
+    "invariant",
+    "canonical_path_resolution",
+    "prohibited_patterns",
+    "prohibited_path_components",
+    "prohibited_extensions"
+  ],
+  "properties": {
+    "policy_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "invariant": {
+      "type": "string",
+      "const": "DENY_BEFORE_READ_FOR_INDEXING"
+    },
+    "canonical_path_resolution": {
+      "type": "object",
+      "required": ["resolve_symlinks_before_check", "reject_traversal_escaping_repo_root"],
+      "properties": {
+        "resolve_symlinks_before_check": {
+          "type": "boolean",
+          "const": true
+        },
+        "reject_traversal_escaping_repo_root": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "prohibited_patterns": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" }
+    },
+    "prohibited_path_components": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" }
+    },
+    "prohibited_extensions": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" }
+    },
+    "allowed_binary_extensions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "descriptions": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}
