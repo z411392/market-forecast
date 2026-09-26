@@ -58,7 +58,6 @@ def test_realized_variance_contract() -> None:
             "realized_quarticity",
             "positive_semivariance",
             "negative_semivariance",
-            "algorithm_version",
         }
     )
     intraday_hints = get_type_hints(IntradayRealizedMeasures)
