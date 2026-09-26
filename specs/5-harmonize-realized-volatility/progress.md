@@ -136,3 +136,50 @@ Remaining gate:
 - independent Reviewer runtime is still `UNBOUND`.
 
 Therefore Task #10 remains `REVIEW_PENDING`; downstream work may stack on the exact candidate contract, but final integration must not treat it as accepted until the missing gates are satisfied.
+
+
+### Task #11 — deterministic RV measurement core
+
+Status: CANDIDATE / REVIEW_PENDING.
+
+S1 design:
+- strict provider-neutral measurement kernel was frozen before production code;
+- accepted live provider is not required for pure deterministic algorithms, but remains required for provider/session completeness integration;
+- aggregation is anchored by explicit UTC session start and fails closed on gaps, duplicates, mixed session/security/basis, or partial final buckets.
+
+S2 frozen behavior tests:
+- revision `97295bfd073135d3e3bcb2c74efa45117975c5cd`;
+- exact DTO/error contract;
+- positive/negative 1m→5/10/15m aggregation;
+- hand-computed RV/RQ/RS+/RS-;
+- overnight return and whole-day composition;
+- invalid timestamp/gap/basis/session/price cases.
+
+S3 implementation:
+- `54de510261e410a9e1f5d87ea1124c118048ecf6` — aggregated intraday bar DTO;
+- `a36511ab41b8cbf31fba1baf3bd403c4a80a2c5a` — remaining DTOs + stable input error;
+- `c2c1cd5ff43c6333de22cc4bd60a3edae392f9c9` — strict minute aggregation;
+- `cf9edfd9b846bfa5577a64f90be731236cc7e05d` — intraday RV/RQ/semivariance.
+
+S4 implementation:
+- `eff075e8e3828bedff5619ce411b3f707a67d627` — overnight log return;
+- `661169d3a2a214ca5718f762293887a7f4874473` — daily whole-day composition.
+
+S5 static type-safety corrections:
+- `7fe4525b05efa252b8df746e1d5e64b8f8c3cf0a` — explicit Optional previous-close narrowing;
+- `33dac2111e5a6bcbbc1f2f5200504c5b7fa9936c` — literal TypedDict field access during validation.
+
+Frozen S2 test files remain byte-identical through S5.
+
+What this candidate proves:
+- deterministic measurement semantics are now encoded in provider-neutral source and frozen tests;
+- no provider/network/credential logic is present;
+- no forward-fill/synthetic-bar path exists.
+
+What remains unproven:
+- repository-executed `make test-fast` / `make test-contract` / `make ci-fast` in a real checkout;
+- legitimate provider-specific missing-bar / auction / early-close behavior;
+- live Massive/FinMind parity;
+- independent Reviewer acceptance.
+
+Therefore Task #11 is not Done and measurement is not frozen by this candidate.
