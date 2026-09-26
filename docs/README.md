@@ -9,7 +9,8 @@
 5. [Event Storming](architecture/event-storming.md)
 6. [Context Map](architecture/context-map.md)
 7. [Authority-Aware Repository Context Methodology](architecture/authority-aware-repository-context-methodology.md)
-8. [Story specs](../specs/README.md)
+8. [Risk Forecast 研究歷程](research/risk-forecast-research-history.md)
+9. [Story specs](../specs/README.md)
 
 ## SSOT 原則
 
