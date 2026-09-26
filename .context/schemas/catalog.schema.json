@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://market-forecast.io/schemas/context/catalog.schema.json",
+  "title": "Root Context Catalog Schema (depth=1 meta-index)",
+  "type": "object",
+  "required": [
+    "version",
+    "catalog_depth",
+    "repository_identity",
+    "meta_index",
+    "domains",
+    "rebuild_descriptors",
+    "runtime_state_policy",
+    "security_policy",
+    "freshness_clocks"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "catalog_depth": {
+      "type": "integer",
+      "const": 1,
+      "description": "Hard invariant: META_INDEX_DEPTH must be strictly 1"
+    },
+    "repository_identity": {
+      "type": "object",
+      "required": ["name", "owner"],
+      "properties": {
+        "name": { "type": "string" },
+        "owner": { "type": "string" },
+        "canonical_url": { "type": "string" },
+        "architecture_style": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "meta_index": {
+      "type": "object",
+      "required": ["description", "authority_ref"],
+      "properties": {
+        "description": { "type": "string" },
+        "authority_ref": { "type": "string" },
+        "prohibit_recursive_catalog": {
+          "type": "boolean",
+          "const": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "domains": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "path", "description", "coverage", "authority_class"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "not": { "enum": ["catalog", "root_catalog", "meta_catalog"] }
+          },
+          "path": {
+            "type": "string",
+            "not": { "pattern": ".*catalog\\.ya?ml$" }
+          },
+          "description": { "type": "string" },
+          "coverage": { "type": "string" },
+          "authority_class": {
+            "type": "string",
+            "enum": ["DURABLE_NAVIGATION", "REBUILDABLE_CACHE", "CANONICAL_GOVERNANCE"]
+          },
+          "provenance": {
+            "$ref": "common.schema.json#/$defs/provenance"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "rebuild_descriptors": {
+      "type": "object",
+      "required": ["builder_version", "index_db_path", "rebuild_command", "freshness_check_command"],
+      "properties": {
+        "builder_version": { "type": "string" },
+        "index_db_path": { "type": "string" },
+        "rebuild_command": { "type": "string" },
+        "freshness_check_command": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "runtime_state_policy": {
+      "type": "string",
+      "const": "QUERY_TIME_FRESH_READ"
+    },
+    "security_policy": {
+      "type": "string",
+      "const": "DENY_BEFORE_READ_FOR_INDEXING"
+    },
+    "freshness_clocks": {
+      "type": "object",
+      "required": ["code_clock", "authority_clock", "builder_clock", "catalog_digest"],
+      "properties": {
+        "code_clock": { "type": "string" },
+        "authority_clock": { "type": "string" },
+        "builder_clock": { "type": "string" },
+        "catalog_digest": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "architecture_references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "path", "class", "role"],
+        "properties": {
+          "id": { "type": "string" },
+          "path": { "type": "string" },
+          "class": { "type": "string" },
+          "role": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "prohibited_contents": {
+      "type": "object",
+      "properties": {
+        "canonical_spec_body": { "type": "boolean", "const": false },
+        "full_source": { "type": "boolean", "const": false },
+        "persistent_llm_summary": { "type": "boolean", "const": false },
+        "call_graph": { "type": "boolean", "const": false },
+        "runtime_workflow_status": { "type": "boolean", "const": false },
+        "embeddings": { "type": "boolean", "const": false },
+        "execution_transcripts": { "type": "boolean", "const": false }
+      },
+      "additionalProperties": false
+    },
+    "status": {
+      "not": {},
+      "description": "Prohibit runtime status (READY, BLOCKED, IN_PROGRESS, DONE) in Catalog"
+    },
+    "spec_body": {
+      "not": {},
+      "description": "Prohibit canonical spec bodies in Catalog"
+    },
+    "ready": { "not": {} },
+    "blocked": { "not": {} },
+    "in_progress": { "not": {} },
+    "assignee": { "not": {} },
+    "reviewer": { "not": {} },
+    "sprint": { "not": {} }
+  },
+  "additionalProperties": false
+}
