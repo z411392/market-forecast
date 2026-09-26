@@ -62,3 +62,26 @@ Required evidence classes:
 - recent date overlapping existing TradingView manual-export evidence.
 
 The live step must not start until credentials/subscription access and quota/spend authorization are explicit. No bulk backfill is part of the acceptance run.
+
+### Spike #4 S3 refinement — exact live-call plan
+
+Status: COMPLETE AS READ-ONLY DESIGN; NO PROVIDER CALL EXECUTED.
+
+新增研究／探索發現：
+
+- Massive 1-minute custom bars 可明示 `adjusted=false` 取得 as-printed basis；預設 `adjusted=true` 是 split-adjusted。
+- Massive 在沒有 qualifying trades 的 interval 不產生 aggregate bar，支持「缺分鐘保持缺失」的既有契約。
+- FinMind `TaiwanStockKBar` 是 sponsor-only、單次一天；REST request 使用
+  `dataset=TaiwanStockKBar` + `data_id=2330` + `start_date`。
+- FinMind KBar 回傳 local `date` + `minute`，因此 timezone/UTC normalization 必須由 adapter 依 canonical security identity 執行。
+- repo 目前沒有 TradingView manual-export artifact/date；recent parity date 不可猜，標記
+  `PENDING_TRADINGVIEW_EXPORT_DATE`。
+
+最小 Massive acceptance requests 已凍結為：
+- AAPL 2024-07-02..2024-07-03, adjusted=false。
+- NVDA 2024-06-07..2024-06-10, adjusted=false。
+- NVDA 同區間 adjusted=true，只作 adjustment convention 對照。
+
+S4 仍 BLOCKED：缺 Massive key、FinMind sponsor token、provider/quota 明示授權，以及實際 TradingView export date/artifact。
+
+
