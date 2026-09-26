@@ -16,15 +16,10 @@ def calculate_daily_realized_measures(
     if intraday["observation_count"] <= 0:
         raise InvalidRealizedVarianceInputError("invalid_observation_count")
 
-    for field in (
-        "realized_variance",
-        "realized_quarticity",
-        "positive_semivariance",
-        "negative_semivariance",
-    ):
-        value = intraday[field]
-        if not isfinite(value) or value < 0.0:
-            raise InvalidRealizedVarianceInputError("invalid_intraday_measure")
+    _require_nonnegative_finite(intraday["realized_variance"])
+    _require_nonnegative_finite(intraday["realized_quarticity"])
+    _require_nonnegative_finite(intraday["positive_semivariance"])
+    _require_nonnegative_finite(intraday["negative_semivariance"])
 
     semivariance_total = (
         intraday["positive_semivariance"] + intraday["negative_semivariance"]
@@ -63,3 +58,8 @@ def calculate_daily_realized_measures(
         "realized_quarticity": intraday["realized_quarticity"],
         "observation_count": intraday["observation_count"],
     }
+
+
+def _require_nonnegative_finite(value: float) -> None:
+    if not isfinite(value) or value < 0.0:
+        raise InvalidRealizedVarianceInputError("invalid_intraday_measure")
