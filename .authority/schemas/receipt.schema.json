@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Market Forecast Authority Receipt Schema",
+  "description": "Schema for immutable historical accepted authority specification snapshots under FAH v2.0.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "authority_id",
+    "scope_kind",
+    "source_repository",
+    "source_issue",
+    "canonical_home",
+    "authority_owner",
+    "approver",
+    "delivery_owner",
+    "accepted_revision",
+    "accepted_sections",
+    "content_digest",
+    "acceptance_reference",
+    "is_current_authority"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "authority_id": {
+      "type": "string",
+      "pattern": "^market-forecast:[a-z0-9_-]+:[a-z0-9_.-]+$"
+    },
+    "scope_kind": {
+      "type": "string",
+      "enum": [
+        "REPOSITORY_GLOBAL",
+        "BC_DURABLE",
+        "STORY",
+        "TASK",
+        "PROVIDER_OWNED_PUBLIC_CONTRACT",
+        "EXPLICIT_SHARED_CONTRACT",
+        "MACHINE_CONTRACT",
+        "DELIVERY_TRACK"
+      ]
+    },
+    "source_repository": {
+      "type": "string"
+    },
+    "source_issue": {
+      "type": "object",
+      "required": ["number", "url"],
+      "properties": {
+        "number": { "type": "integer" },
+        "url": { "type": "string", "format": "uri" }
+      },
+      "additionalProperties": false
+    },
+    "canonical_home": {
+      "type": "string"
+    },
+    "authority_owner": {
+      "type": "string"
+    },
+    "approver": {
+      "type": "string"
+    },
+    "delivery_owner": {
+      "type": "string"
+    },
+    "affected_bcs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "accepted_revision": {
+      "type": ["integer", "string"]
+    },
+    "accepted_sections": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "content_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "acceptance_reference": {
+      "type": "object",
+      "required": [
+        "source_kind",
+        "reference_url",
+        "bound_content_digest",
+        "verifiable_evidence",
+        "accepted_at"
+      ],
+      "properties": {
+        "source_kind": {
+          "type": "string",
+          "enum": [
+            "REVIEWER_VERDICT",
+            "PO_COMMENT",
+            "COMMIT_RECEIPT",
+            "GOVERNANCE_DECISION"
+          ]
+        },
+        "reference_url": { "type": "string", "format": "uri" },
+        "bound_content_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "verifiable_evidence": { "type": "string" },
+        "accepted_at": { "type": "string" },
+        "bound_predecessor_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "predecessor_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "supersedes_receipt_ids": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "version_or_digest", "type"],
+        "properties": {
+          "name": { "type": "string" },
+          "version_or_digest": { "type": "string" },
+          "type": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "is_current_authority": {
+      "type": "boolean",
+      "const": false
+    },
+    "metadata": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": false
+}
