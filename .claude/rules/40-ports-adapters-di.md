@@ -78,7 +78,7 @@ class ListRadarTopics(ListRadarTopicsPort):
         return self._radar_store.list_topics(query)
 
 
-class SqliteRadarAdapter(ReadRadarPort):
+class MassiveAdapter(ReadMinuteBarsPort):
     def __init__(self, db_path: str) -> None:
         self._db_path = db_path
 ```
@@ -106,13 +106,13 @@ class RunPipelineHandler(RunPipelinePort):
 ```python
 class SqliteRadarAdapter(ReadRadarPort):
     def __init__(self) -> None:
-        self._path = environ["KALEDOXA_RADAR_DB"]
+        self._api_key = environ["MASSIVE_API_KEY"]
 ```
 
 ```python
-class ListRadarTopics:
+class BuildRealizedVariance:
     def __init__(self) -> None:
-        self._adapter = SqliteRadarAdapter("radar.db")
+        self._adapter = MassiveAdapter()
 ```
 
 ```python

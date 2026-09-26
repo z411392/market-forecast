@@ -635,8 +635,8 @@ Commander 不得因「正在等待」而發送 final response。必須等待並�
 - 真實觀測若可能沒有答案，先縮小並指定觀測目標、提高命中率，並事先說明無答案的可能性。
 - 視覺驗收盡量轉成自動閘門；人工只檢查尚無法自動判定的少量殘差。
 
-驗證安排不能只由趕時間決定。這個 repo 的完整本機 gate 是 `make ci-fast`。碰到 Camoufox、平台登入判定或
-頁面掃描時，另依 [70-testing.md](70-testing.md) 完成真實手動驗證。
+驗證安排不能只由趕時間決定。這個 repo 的完整本機 gate 是 `make ci-fast`。碰到真 provider API、付費／quota market-data、
+TradingView manual parity observation 或其他 live integration 時，另依 [70-testing.md](70-testing.md) 完成具日期的真實觀測驗證。
 
 ## 成果壽命
 

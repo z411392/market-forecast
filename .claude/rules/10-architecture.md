@@ -111,42 +111,42 @@ Market-data API／檔案來源是外部資源，連線、重試、rate limit、�
 ## 正確
 
 ```python
-from libs.content_store.dtos.stored_entity import StoredEntity
-from libs.content_store.ports.read_content_port import ReadContentPort
+from libs.market_data.dtos.canonical_minute_bar import CanonicalMinuteBar
+from libs.market_data.ports.read_minute_bars_port import ReadMinuteBarsPort
 ```
 
 ```python
-from libs.data_pipeline.ports.run_pipeline_port import RunPipelinePort
+from libs.realized_variance.ports.build_realized_variance_port import BuildRealizedVariancePort
 
-receipt = injector.get(RunPipelinePort)(request)
+result = injector.get(BuildRealizedVariancePort)(request)
 ```
 
 ```python
 from functools import partial
 from fire import Fire
 
-Fire({"new": partial(new_session, injector)})
+Fire({"measure": partial(measure, injector)})
 ```
 
 ## 錯誤
 
 ```python
-from libs.content_store.adapters.driven.sqlite_content_store_adapter import SqliteContentStoreAdapter
+from libs.market_data.adapters.driven.massive_adapter import MassiveAdapter
 # 另一個 lib 直接依賴實作。
 ```
 
 ```python
-from apps.cli.ports.source_fetcher_port import SourceFetcherPort
+from apps.cli.ports.read_minute_bars_port import ReadMinuteBarsPort
 # port 出現在 apps/。
 ```
 
 ```python
-from libs.data_pipeline.application.commands.run_pipeline import RunPipeline
+from libs.realized_variance.application.commands.build_realized_variance import BuildRealizedVariance
 # driving handler 依賴 application 具體 class。
 ```
 
 ```python
-from apps.cli.adapters.driving.run_pipeline import main as run_pipeline
+from apps.cli.adapters.driving.measure import main as measure
 ```
 
 ## 驗證
