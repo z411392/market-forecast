@@ -1,0 +1,15 @@
+policy_version: "1.0.0"
+invariant: "DENY_BEFORE_READ_FOR_INDEXING"
+
+canonical_path_resolution:
+  resolve_symlinks_before_check: false  # ILLEGAL: must resolve symlinks before check
+  reject_traversal_escaping_repo_root: true
+
+prohibited_patterns:
+  - "*.pem"
+
+prohibited_path_components:
+  - "sessions"
+
+prohibited_extensions:
+  - ".pem"
