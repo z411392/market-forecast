@@ -288,17 +288,17 @@ Commander 收件後必須：
 `Codex Reviewer is the authoritative independent acceptance authority for locally-final candidates.`
 `External ChatGPT is an optional external audit only when explicitly requested by Product Owner, not a mandatory candidate integration gate.`
 
-Codex Reviewer（`01a0bf82-79e6-7e70-a2d6-f528485ff252`）是專案正式的本機獨立驗收權威。
+本專案的獨立 Reviewer 角色是 locally-final candidate 的正式獨立驗收權威；目前 runtime binding 若為 `UNBOUND`，就只能停在 `REVIEW_PENDING`，不得假造 task ID 或 verdict。
 本機 development & acceptance loop 必須由 Commander 自行持續推進：
-`Gemini Implementer → deterministic verify → Codex Reviewer → (若 REJECT) → Gemini Implementer 修 → verify → Codex Reviewer → ... → Codex Reviewer FINAL ACCEPT`
+`Implementer → deterministic verify → independent Reviewer → (若 REJECT) → Implementer 修 → verify → Reviewer → ... → FINAL ACCEPT`
 
-當 Codex Reviewer 判定 `VERDICT: ACCEPT`，且 deterministic / integration 前置全部成立後，候選版本即達到 `INTEGRATION_READY`。Commander 必須自行執行 merge、readback、close，並進入 `PORTFOLIO_RECONCILIATION` 繼續推動下一個授權工作，**不得等待外部審查，亦不得停止**。
+當 independent Reviewer 判定 `VERDICT: ACCEPT`，且 deterministic / integration 前置全部成立後，候選版本即達到 `INTEGRATION_READY`。Commander 必須自行執行 merge、readback、close，並進入 `PORTFOLIO_RECONCILIATION` 繼續推動下一個授權工作，**不得等待外部審查，亦不得停止**。
 
 External ChatGPT 不再是每個 candidate 的 mandatory integration gate。若且唯若 Product Owner 明確指示需要外部審計（`OPTIONAL_EXTERNAL_AUDIT`）時，才在 `LOCAL_FINAL_ACCEPTED` 後觸發外部審查旁路；審查結束後回到 `INTEGRATION_READY`。
 
 ### Local Closure Loop
 
-`Implementation revisions must be iterated locally through Gemini Implementer + deterministic verification + Codex Reviewer until local FINAL ACCEPT.`
+`Implementation revisions must be iterated locally through Implementer + deterministic verification + independent Reviewer until local FINAL ACCEPT.`
 
 若在選配的外部審查或其他稽核中收到 `REVISION_REQUIRED` 或 findings：
 Commander 絕不得修完單一局部 finding 就立刻再次尋求外部審查。
