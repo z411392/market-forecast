@@ -183,3 +183,22 @@ What remains unproven:
 - independent Reviewer acceptance.
 
 Therefore Task #11 is not Done and measurement is not frozen by this candidate.
+
+
+### Task #12 S1 — audit/target contract freeze
+
+Status: COMPLETE AS DESIGN; NO PRODUCTION CODE YET.
+
+Key findings:
+- aggregate correlations alone are insufficient for the Story AC because they erase the dates driving disagreement;
+  therefore the contract includes dated `MeasurementAuditRow` records plus an aggregate summary.
+- future target construction cannot infer local-session continuity from adjacent rows; the builder requires explicit
+  `expected_session_dates` and verifies exact alignment before constructing H=5/H=20 windows.
+- measurement audit remains forecast-score blind: no QLIKE/model field exists in the DTO/function contract.
+- no outlier threshold is frozen; dated log gaps are retained so empirical S6 can report outliers without a post-hoc
+  arbitrary cutoff becoming part of the measurement definition.
+- target version is `whole_day_variance_v1`; audit version is `rv_measurement_audit_v1`.
+- S1 does not freeze 5m as canonical across markets and does not make a U.S./Taiwan empirical claim.
+
+Next:
+- S2 commits positive/negative tests before any Task #12 production implementation.

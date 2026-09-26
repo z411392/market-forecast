@@ -347,3 +347,164 @@ Negative:
 - mixed sampling/session input to realized-measures calculation.
 
 Provider-specific missing-bar meaning, early-close/auction classification and live completeness are outside S1–S4.
+
+
+## Task #12 S1 — measurement-audit and future-target contract
+
+Task #12 separates two provider-neutral responsibilities:
+
+1. align and summarize 5m / 10m / 15m whole-day variance measurements without forecast scores;
+2. construct future H=5 / H=20 average whole-day-variance targets from explicitly validated local-session sequences.
+
+Final empirical U.S./Taiwan conclusions and sampling freeze remain blocked on #4 live provider acceptance.
+
+### Exact public files
+
+| Path | Public symbol | Purpose |
+|---|---|---|
+| `src/libs/realized_variance/dtos/measurement_audit_row.py` | `MeasurementAuditRow` | one aligned session of 5m/10m/15m variance disagreement |
+| `src/libs/realized_variance/dtos/measurement_audit_summary.py` | `MeasurementAuditSummary` | aggregate agreement/bias/rank statistics |
+| `src/libs/realized_variance/dtos/future_variance_target.py` | `FutureVarianceTarget` | matured future H-session average whole-day variance |
+| `src/libs/realized_variance/domain/services/build_measurement_audit_rows.py` | `build_measurement_audit_rows` | align daily measurements by security/session/sampling |
+| `src/libs/realized_variance/domain/services/summarize_measurement_audit.py` | `summarize_measurement_audit` | compute log-Pearson/Spearman/bias/gap |
+| `src/libs/realized_variance/domain/services/build_future_variance_targets.py` | `build_future_variance_targets` | construct H=5/H=20 future targets from explicit local sessions |
+
+Task #12 reuses `InvalidRealizedVarianceInputError`; it does not add a second measurement exception family.
+
+### MeasurementAuditRow
+
+Required keys:
+
+- `security: SecurityIdentity`
+- `session_date: date`
+- `whole_day_variance_5m: float`
+- `whole_day_variance_10m: float`
+- `whole_day_variance_15m: float`
+- `log_ratio_5m_10m: float`
+- `log_ratio_5m_15m: float`
+- `abs_log_gap_5m_10m: float`
+- `abs_log_gap_5m_15m: float`
+- `audit_version: Literal["rv_measurement_audit_v1"]`
+
+The row keeps date-level disagreement visible so outlier dates can be reported without hard-coding an outlier threshold.
+
+### MeasurementAuditSummary
+
+Required keys:
+
+- `security: SecurityIdentity`
+- `observation_count: int`
+- `pearson_log_rv_5m_10m: float`
+- `pearson_log_rv_5m_15m: float`
+- `spearman_rv_5m_10m: float`
+- `spearman_rv_5m_15m: float`
+- `geometric_bias_5m_vs_10m_pct: float`
+- `geometric_bias_5m_vs_15m_pct: float`
+- `mean_abs_log_gap_5m_10m: float`
+- `mean_abs_log_gap_5m_15m: float`
+- `first_session_date: date`
+- `last_session_date: date`
+- `audit_version: Literal["rv_measurement_audit_v1"]`
+
+Definitions:
+
+```text
+Pearson     = correlation(log(V5), log(Vx))
+Spearman    = Pearson(average_rank(V5), average_rank(Vx))
+Geo bias %  = (exp(mean(log(V5 / Vx))) - 1) × 100
+Abs log gap = mean(abs(log(V5 / Vx)))
+```
+
+Spearman ties use average ranks. All variances entering log metrics must be finite and strictly positive.
+
+A summary requires at least two rows and rejects undefined correlations caused by zero variance in either compared vector.
+
+### build_measurement_audit_rows
+
+Input:
+
+`tuple[DailyRealizedMeasures, ...]`
+
+Required behavior:
+
+- accepts only one `SecurityIdentity`;
+- accepts only sampling intervals 5 / 10 / 15;
+- requires exactly one observation for every `(session_date, sampling_minutes)` combination represented in the output;
+- rejects duplicate interval observations for a session;
+- rejects any session missing one of 5m / 10m / 15m;
+- rejects non-finite or non-positive `whole_day_variance`;
+- sorts output by `session_date`;
+- never consumes forecast QLIKE, model output, or sampling-selection state.
+
+### FutureVarianceTarget
+
+Required keys:
+
+- `security: SecurityIdentity`
+- `origin_session_date: date`
+- `horizon_sessions: Literal[5, 20]`
+- `first_target_session_date: date`
+- `last_target_session_date: date`
+- `average_whole_day_variance: float`
+- `realized_session_count: int`
+- `target_version: Literal["whole_day_variance_v1"]`
+
+### build_future_variance_targets
+
+Input:
+
+- `measurements: tuple[DailyRealizedMeasures, ...]`
+- `expected_session_dates: tuple[date, ...]`
+- `horizon_sessions: Literal[5, 20]`
+
+Required behavior:
+
+- accepts one security and one sampling interval per call;
+- requires `measurements` and `expected_session_dates` to have identical length;
+- requires measurement session dates to exactly match `expected_session_dates` in order;
+- requires strictly increasing, unique expected session dates;
+- requires finite, non-negative whole-day variances;
+- for origin index `i`, target uses only indices `i+1 ... i+H`;
+- current-origin variance is never included in its target;
+- returns targets only where all H future local sessions are present;
+- `realized_session_count == horizon_sessions`;
+- H=5 is primary; H=20 is confirmatory only.
+
+The function does not infer exchange calendars itself. Calendar/session authority is supplied explicitly through
+`expected_session_dates`, preventing a missing local session from silently shortening the forecast horizon.
+
+### S2 frozen test oracle
+
+Before production implementation, tests must cover:
+
+Measurement audit positive:
+- exact alignment of 5m/10m/15m into dated rows;
+- hand-computed log ratios / absolute log gaps;
+- hand-computed Pearson(log RV);
+- Spearman with ties using average ranks;
+- geometric bias and mean absolute log gap.
+
+Measurement audit negative:
+- mixed security;
+- duplicate interval/date;
+- missing 5m/10m/15m member;
+- unsupported sampling;
+- non-finite / zero / negative variance;
+- fewer than two rows for summary;
+- undefined Pearson/Spearman due to constant vectors.
+
+Future target positive:
+- H=5 origin uses exactly next five measurements;
+- H=20 uses exactly next twenty measurements;
+- first / last target dates and realized count are exact;
+- target is arithmetic mean of future whole-day variance only.
+
+Future target negative:
+- measurement/date length mismatch;
+- date sequence mismatch;
+- duplicate or non-increasing session dates;
+- mixed security / mixed sampling;
+- unsupported horizon;
+- non-finite or negative variance.
+
+No test may select sampling frequency from QLIKE or any forecast-model result.
