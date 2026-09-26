@@ -1,0 +1,56 @@
+name: Epic
+description: epic 工作項；遵守 specs/README.md
+labels: ["type/epic"]
+body:
+  - type: textarea
+    id: outcome
+    attributes:
+      label: "業務成果與路線圖引用"
+    validations:
+      required: true
+  - type: textarea
+    id: success
+    attributes:
+      label: "可觀察的成功條件（不是完成 child 數量）"
+    validations:
+      required: true
+  - type: textarea
+    id: roadmap_phase
+    attributes:
+      label: "Roadmap phase"
+      description: "產品 P1–P6；不填工程 Analysis／Design／Implement 階段。"
+    validations:
+      required: true
+  - type: textarea
+    id: roadmap_exits
+    attributes:
+      label: "Roadmap exit IDs"
+      description: "精確 ID 與 owning Story progress；支援工作填 None（僅支援），跨階段逐 Subtask 映射。"
+    validations:
+      required: true
+  - type: dropdown
+    id: roadmap_effect
+    attributes:
+      label: "Roadmap effect"
+      description: "貢獻分類不代表 Exit 已成立；跨 Subtask 差異在驗收映射逐項列明。"
+      options:
+        - ADVANCES
+        - PROVES
+        - SUPPORT_ONLY
+        - FUTURE_PHASE
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance_mapping
+    attributes:
+      label: "SC／AC → Task／Subtask GWT → Exit／effect → 必要證據"
+      description: "列正例、反例、禁止副作用、oracle／commands／expected results；Epic 連到各 Story 唯一 AC，不重抄產品規則。"
+    validations:
+      required: true
+  - type: textarea
+    id: evidence_verdict
+    attributes:
+      label: "Exit evidence／verdict 與 first blocking exit"
+      description: "引用 owning Story progress：revision、命令／exit／日期、正反結果、獨立 reviewer；NOT_RUN 的 exit 填 N/A。無必要證據不能 PROVEN。Blocker 列 concrete Task／AC／dependency、受阻 Task／Exit、owner、clear condition。"
+    validations:
+      required: true
