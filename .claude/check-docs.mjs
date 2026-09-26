@@ -196,6 +196,11 @@ for (const retired of [
   'browser profiles',
   'private tenant exports',
   'Gemini 3.8 Flash',
+  'semantic_analysis',
+  'ListRadarTopics',
+  'ReadRadarPort',
+  'SourceFetcherPort',
+  'RunPipelinePort',
 ]) {
   check(
     !inheritedCurrentTruthText.includes(retired),

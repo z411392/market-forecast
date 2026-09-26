@@ -151,5 +151,5 @@ from apps.cli.adapters.driving.measure import main as measure
 
 ## 驗證
 
-`src/libs/kernel/tests/unit/test_dependency_direction.py` 掃描 production imports。
+`src/libs/kernel/tests/architecture/test_repository_architecture.py` 掃描 production imports 與 repository path invariants。
 修改規則時依 [70-testing.md](70-testing.md) 做故障注入。
