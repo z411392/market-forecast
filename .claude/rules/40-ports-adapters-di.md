@@ -36,7 +36,7 @@ Outbound port 是 application 向外取得能力的契約。
 - Driven adapter 只放在 `libs/<feature>/adapters/driven/`，實作一個或多個 outbound ports。
 - 不准放在 `apps/`。App 只有 driving adapter 與 composition root。
 - 以 constructor parameter 接收已解析的設定，絕不自己讀環境變數。
-- 可擁有 SQLite connection、FAISS index、LadybugDB connection、HTTP client 或 browser resource。
+- 可擁有 SQLite connection、HTTP client、檔案／cache handle 或 market-data provider SDK/resource。
 - 基礎設施資源不得是 module-level global。
 - 來源 adapter 回傳 feature DTO，不讓外部 SDK response 穿過 port。
 
@@ -51,7 +51,7 @@ Outbound port 是 application 向外取得能力的契約。
 
 ## 資源 identity
 
-多個 outbound ports 必須共用同一 transaction、browser lease 或 store instance 時，providers 必須回傳
+多個 outbound ports 必須共用同一 transaction、provider client 或 store instance 時，providers 必須回傳
 同一個 memoized adapter。兩個獨立 `@singleton` provider 仍可能各建立一個物件。
 
 ## DI smoke test
@@ -62,62 +62,63 @@ Outbound port 是 application 向外取得能力的契約。
 ## 正確
 
 ```python
-class ListRadarTopicsPort(ABC):
-    def __call__(self, query: RadarTopicQuery) -> RadarTopicPage: ...
+class BuildRealizedVariancePort(ABC):
+    def __call__(self, request: BuildRealizedVarianceRequest) -> RealizedVarianceResult: ...
 
 
-class ReadRadarPort(ABC):
-    def list_topics(self, query: RadarTopicQuery) -> RadarTopicPage: ...
+class ReadMinuteBarsPort(ABC):
+    def __call__(self, query: MinuteBarsQuery) -> list[CanonicalMinuteBar]: ...
 
 
-class ListRadarTopics(ListRadarTopicsPort):
-    def __init__(self, radar_store: ReadRadarPort) -> None:
-        self._radar_store = radar_store
+class BuildRealizedVariance(BuildRealizedVariancePort):
+    def __init__(self, read_minute_bars: ReadMinuteBarsPort) -> None:
+        self._read_minute_bars = read_minute_bars
 
-    def __call__(self, query: RadarTopicQuery) -> RadarTopicPage:
-        return self._radar_store.list_topics(query)
+    def __call__(self, request: BuildRealizedVarianceRequest) -> RealizedVarianceResult:
+        bars = self._read_minute_bars(request.bars_query)
+        return calculate_realized_variance(bars)
 
 
-class SqliteRadarAdapter(ReadRadarPort):
+class MassiveAdapter(ReadMinuteBarsPort):
     def __init__(self, db_path: str) -> None:
         self._db_path = db_path
 ```
 
 ```python
-def list_radar_topics(injector: Injector, cursor: str | None = None) -> None:
-    page = injector.get(ListRadarTopicsPort)(RadarTopicQuery(cursor=cursor))
-    print(dumps(page))
+def measure(injector: Injector, symbol: str, trading_date: str) -> None:
+    request = BuildRealizedVarianceRequest(symbol=symbol, trading_date=trading_date)
+    result = injector.get(BuildRealizedVariancePort)(request)
+    print(dumps(result))
 ```
 
 ## 錯誤
 
 ```python
-# apps/cli/ports/source_fetcher_port.py
-class SourceFetcherPort(ABC):
-    def fetch(self, request: SourceFetchRequest) -> TargetFetchResult: ...
+# apps/cli/ports/read_minute_bars_port.py
+class ReadMinuteBarsPort(ABC):
+    def __call__(self, query: MinuteBarsQuery) -> list[CanonicalMinuteBar]: ...
 ```
 
 ```python
-class RunPipelineHandler(RunPipelinePort):
-    def __call__(self, request: PipelineRequest) -> PipelineReceipt:
+class MeasureHandler(BuildRealizedVariancePort):
+    def __call__(self, request: BuildRealizedVarianceRequest) -> RealizedVarianceResult:
         ...
 ```
 
 ```python
-class SqliteRadarAdapter(ReadRadarPort):
+class MassiveAdapter(ReadMinuteBarsPort):
     def __init__(self) -> None:
-        self._path = environ["KALEDOXA_RADAR_DB"]
+        self._api_key = environ["MASSIVE_API_KEY"]
 ```
 
 ```python
-class ListRadarTopics:
+class BuildRealizedVariance:
     def __init__(self) -> None:
-        self._adapter = SqliteRadarAdapter("radar.db")
+        self._adapter = MassiveAdapter()
 ```
 
 ```python
-def get_radar(request: Request) -> ApiResponse:
-    content = request.app.state.injector.get(ReadContentPort)
-    embeddings = request.app.state.injector.get(SearchEmbeddingsPort)
-    radar = request.app.state.injector.get(ReadRadarPort)
+def measure(request: Request) -> ApiResponse:
+    adapter = request.app.state.injector.get(ReadMinuteBarsPort)
+    use_case = BuildRealizedVariance(adapter)
 ```

@@ -32,7 +32,7 @@ dev = [
 package = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/apps", "src/libs"]
+packages = ["src/libs"]
 
 [tool.pytest.ini_options]
 testpaths = ["src"]

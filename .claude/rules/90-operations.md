@@ -5,18 +5,18 @@
 刪除或覆寫之前先解析精確目標。
 
 - `make clean-generated` 只碰明示列出的可重建產物。
-- `assets/` 目錄下的各項 session、SQLite、raw observation、export 與金鑰憑證依 [60-configuration-data.md](60-configuration-data.md) 嚴格隔離，絕不納入版本控制或任意覆寫。
-- live、provider、browser、crawl、export、reset、`make data` 或其他有副作用的操作必須在 Task 明示授權。
+- `data/`、provider raw/cache、Parquet/CSV/SQLite、holdout outcomes、exports 與金鑰憑證依 [60-configuration-data.md](60-configuration-data.md) 嚴格隔離，絕不納入版本控制或任意覆寫。
+- live provider call、付費／quota market-data、bulk backfill、export、reset、universe/model freeze 或其他有副作用的操作必須在 Task 明示授權。
 - 保留使用者未提交工作（dirty work）。不得自行 stage、commit、restore。
 - 失敗 attempt 是診斷證據，不靠刪除它防止誤用；消費者以 completion 與 acceptance gate 拒絕。
 - 移除唯一副本或不可重建檔案前，先保留 SHA256、引用掃描與可還原來源；被現行架構完全取代的程式／文件由 Git history 保存，不另建 archive 副本。
 
 ## 本機執行
 
-- `make ci-fast` 是完整 hermetic gate：lint、typecheck、architecture-check、test。不連外部公開平台來源。
+- `make ci-fast` 是完整 hermetic gate：lint、typecheck、architecture-check、governance-check、test。不連外部 provider 或公開平台來源。
 - 生產入口、CLI、lint 與本機 tests 依規則使用 `uv run`。
-- Camoufox、平台登入判定或真瀏覽器掃描依 [70-testing.md](70-testing.md) 僅在明示授權且特定 gate 執行。
-- Token、OAuth state 與憑證不寫進 repo、公開契約或 log。
+- 真 provider API／下載與 TradingView manual parity observation 依 [70-testing.md](70-testing.md) 僅在明示授權且特定 gate 執行。
+- Token、API key、provider account／billing identity 與憑證不寫進 repo、公開契約或 log。
 
 ## 完成定義
 

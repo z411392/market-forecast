@@ -47,10 +47,10 @@ Tier 1: Pure Domain Unit       (< 15 秒，純領域模型、純函數公式、P
 Tier 2: Contract & Adapter     (< 30 秒，Ports 契約、Fake I/O 適配器、本機 SQLite 隔離交易)
 Tier 3: Heavy Computation     (< 45 秒，蒙地卡羅、大矩陣運算、重型統計模擬)
 Tier 4: Hermetic E2E           (< 30 秒，已組裝 CLI/HTTP、離線端到端流程)
-Tier 5: Live Integration       (真實外部網路、真瀏覽器、即時平台觀測，非 hermetic)
+Tier 5: Live Integration       (真實外部網路、provider API、即時平台觀測，非 hermetic)
 ```
 
-Tier 0 至 Tier 4 屬於離線 hermetic 測試，必須全數納入 `make ci-fast`。Tier 5 標記 `@pytest.mark.integration`，只在 release gate 或手動觸發。
+Tier 0 至 Tier 4 屬於離線 hermetic 測試，必須全數納入 `make ci-fast`。Tier 5 標記 `@pytest.mark.live_external`，只在 release gate 或手動觸發。`integration` marker 保留給本機、離線的 adapter／storage integration tests。
 
 ## AI Agent 治理與 Done Contract
 
@@ -91,7 +91,7 @@ Implementer 發現測試失敗時，只准修改 Writable 範圍內的實作或 
 
 ## 測試行為規範
 
-- Unit test 使用 fake ports 與合成資料，不開真 session、不連真實網路、不讀取外部私有內容。
+- Unit test 使用 fake ports 與合成資料，不呼叫真 provider API、不連真實網路、不讀取 licensed／raw market data。
 - E2E 使用正式 composition root 或標準 test bindings，驗證真實 CLI/HTTP 契約。
 - 測試必須自行固定行為標記與環境設定，開發者的本機 `.env` 不得改變測試結果。
 - 測試資料使用明顯虛構內容，不得包含真實機構、個人姓名、私有帳號或真實 URL。

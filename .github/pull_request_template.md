@@ -32,7 +32,7 @@ First blocking exit／Remaining conditions preventing phase exit：
 - [ ] 五類文件影響已檢查，必要 spec／plan／progress 已同步
 - [ ] 未修改 frozen oracle，或另有明確設計授權
 - [ ] 無私有來源、session、secret 或未授權副作用
-- [ ] 局部 PASS 未冒稱 Story 驗收；由指定 Steward 驗收
+- [ ] 局部 PASS 未冒稱 Story 驗收；由指定獨立 Reviewer 驗收
 - [ ] SUPPORT_ONLY／FUTURE_PHASE／未執行 ADVANCES 未冒充當前產品 Exit 通過
 - [ ] 如涉及歷史清理，原範圍→canonical survivor／KEEP、完整備份及獨立 review 齊全；空 branch deletion allowlist 即零刪除
 - [ ] 不以 generic global Design gate 阻擋局部 Ready；本 Subtask 後停止，不默認授權下一 phase

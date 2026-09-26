@@ -8,7 +8,8 @@
 4. [共通需求](delivery/requirements-specification.md)
 5. [Event Storming](architecture/event-storming.md)
 6. [Context Map](architecture/context-map.md)
-7. [Story specs](../specs/README.md)
+7. [Authority-Aware Repository Context Methodology](architecture/authority-aware-repository-context-methodology.md)
+8. [Story specs](../specs/README.md)
 
 ## SSOT 原則
 

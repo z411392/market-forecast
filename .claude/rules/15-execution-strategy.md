@@ -74,27 +74,23 @@ Commander 每次收到 Analysis／Plan／Design／Review 回報，立即回答 `
 <a id="execution-topology-and-dispatch"></a>
 ## 執行拓撲與派工入口
 
-本節是執行拓撲與模型分工的唯一權威（2026-09-20 Product Owner 裁決正式切換為角色共享具名任務與動態 Effort 政策）；入口與 rule05 只引用本節，`.claude/roster.json` 僅為非權威（noncanonical）機器投影。本次遷移中，歷史 task receipts 與 identities 完整保留不變、Context 與 product ownership 維持不變，而 current routing 則依本次決策指向新的 shared role identity。其他文件只能引用，不得複製出第二份完整 routing authority。`.claude/roster.json` 因既有治理測試合約鎖定其 execution_policy.model 為 `gpt-6-astra`，僅作為機器投影，不代表現行真實路由；現行真實派工以本節正式模型拓撲為唯一權威。
+本節是 Market Forecast 執行拓撲與角色分工的唯一權威；`.claude/roster.json` 只做非權威（noncanonical）機器投影。不得把另一個產品的 runtime task ID、模型名稱或歷史 session identity 複製成本專案現行事實；沒有真實 runtime binding 時必須明示 `UNBOUND`，嚴禁合成 task ID。
 
 ### Control-plane responsibility boundary
 
-本節同時是 Product Owner、Product / Governance Coordinator、Commander、Architect、Implementer、Reviewer 的責任邊界與控制面順序唯一權威。產品語意仍由對應 Product Authority 保存；本節只規範誰能把既有 authority 轉成治理／執行動作。
+- Product Owner：決定產品方向、scope、authority 與必須由人類裁決的產品決策。
+- Product / Governance Coordinator：在 Product Owner 明示授權下維護 GitHub Epic／Story／Task navigation 與 durable product authority；不是 engineering Reviewer。
+- Commander：repo execution control plane，負責 fresh-read、task-local readiness、routing、continuation、唯一 Git integration、Issue/Project execution synchronization 與結果消費。
+- Architect：跨 BC 共用 analysis／planning／architecture／design／root-cause／contract-oracle role；不驗收自己設計的 candidate。
+- Implementer：在 frozen contract、exact writable scope 與 writer ownership 內有限實作；不取得 product authority。
+- Reviewer：獨立驗收角色；必須 read-only、no-write-authority，對 exact candidate 與 current authority 給出 ACCEPT／REJECT，不自行修 finding。
 
-- Product Owner：負責產品方向、scope、authority 與必須由人類裁決的產品決策。Product Owner 可明示授權 Product / Governance Coordinator 將已做出的產品決策 materialize 到 GitHub 與產品層導航。
-- Product / Governance Coordinator：Issue-level control-plane role，不是 engineering worker。在 Product Owner 明示授權下，可 create/update/close GitHub Issues、更新 Epic／Story navigation、建立 successor hierarchy、加入 supersession／scope-transfer receipt、將已批准 Product Design authority materialize 到 GitHub，並維護 product-level roadmap truth。不得假造 implementation receipt、不得自行給 engineering `ACCEPT`、不得把 planning 當 implementation complete、不得自行配置 Architect／Reviewer model budget，也不得取代 Commander 的 execution ownership。除非未來成為可 dispatch runtime agent，否則不加入 `.claude/roster.json`。
-- Commander：repo 唯一 execution control plane，負責 fresh-read current Product Authority、task-local readiness、routing、dispatch、continuation、integration、repo docs migration、result consumption，以及 GitHub Project execution Status synchronization + readback。若 Product / Governance Coordinator 已合法更新 product-level Issues，Commander 必須 `fresh-read → reconcile`；不得以舊 execution context 覆寫外部合法 product authority，也不得自行發明 Product Owner 決策。
-- Architect：跨 BC 共用 analysis／planning／architecture／design／root cause／contract-oracle role；不做 mechanical implementation，不驗收自己設計的 candidate。
-- Implementer：在 frozen contract 與 writer ownership 內做有限 implementation；不取得 product authority，不 self-review。
-- Reviewer：跨 BC 共用獨立驗收角色；必須 READ_ONLY、NON_INTERACTIVE、NO_WRITE_AUTHORITY，依 exact candidate 與 current authority 驗證，不修自己的 finding。
-
-正式控制面順序：
+正式控制面：
 
 ```text
 Product Owner decision
         ↓
-Product Design authority
-        ↓
-durable GitHub product authority
+durable product authority
         ↓
 Commander fresh-read / reconciliation
         ↓
@@ -108,75 +104,55 @@ independent Reviewer Accept
         ↓
 Commander integration
         ↓
-GitHub Project Status readback
+GitHub execution status readback
 ```
 
-GitHub Project Status 只能投影 execution workflow；不得反向成為 Product Authority、Story acceptance、Roadmap Exit 或 Product GO。
+GitHub Project 只投影 workflow status，不是產品語意或驗收 authority。
 
-### 拓撲決策理由與核心原則
+### 小型專案的 Commander-Implementer 例外
 
-**問題（舊策略）**：
-舊策略採用「一個 Bounded Context × 一個 Astra planning/design task」，會造成每個具名任務反覆在 session 中建立大量共通 context：
-- architecture rules 與分層邊界
-- Ports & Adapters / DDD 慣例
-- Product Authority 與決策鏈
-- Task Pack conventions
-- Git / docs governance
-- cross-BC contracts
-- review standards
-隨著 Bounded Context 數量增加，相同的 context 與 Astra quota 被近似重複支付，造成資源巨大浪費與維護負擔。
+Market Forecast 目前是小型研究專案，Product Owner 已明示要求目前對話中的 Commander 直接使用 GitHub connector 推進 repo、Issue 與 bounded implementation。此授權允許 Commander 在單一 leaf Task 中兼任 Git writer／Implementer，但必須同時滿足：
 
-**不採用另一個極端**：
-我們亦不採用「整個 Market Forecast 只有一個全能 Super Agent」，因為這會造成：
-- Design 與 Review 的角色污染（Role Contamination）
-- 提案草案（proposal）與正式定案（accepted truth）混淆
-- 舊 candidate 與 current main 混淆
-- 獨立驗收的身分與客觀性（independent review identity）消失
-- 長期對話 context 嚴重污染
+1. Task body/comment 明確記錄 dual-role delegation、exact branch/base/writable scope。
+2. 仍遵守 TDD／frozen oracle／Subtask commit 邊界；不得因兼任而跳過 deterministic Verify。
+3. Commander-Implementer 絕不能把自己的 candidate 宣告為 independent ACCEPT。
+4. 最終 Task acceptance 仍需要與 Implementer／Architect 不同的 Reviewer；若獨立 runtime 尚未連接，狀態只能是 `REVIEW_PENDING`，不得偽造 task ID、verdict 或收據。
+5. 此例外不授權付費 provider、bulk download、deploy、model freeze 等額外副作用；那些仍需 Task 明示授權。
 
-**採納模型（Chosen Model）**：
-持久存在的是**角色（Role）**，而不是 **Bounded Context**。因此：
-- 1 個跨 BC 共用的 Architect 具名任務
-- 1 個跨 BC 共用的 Reviewer 具名任務
-- Bounded Context 的隔離改由每次派工的 **fresh Task Pack** 嚴格提供。
-- Persistent task context 只可作為背景參考，永遠不是 current authority。
-- 每一輪派工仍必須 fresh-read：
-  - current main SHA
-  - exact Issue / Story / AC
-  - current Product Authority
-  - relevant BC files
-  - direct dependencies
-  - frozen paths
-  - current candidate
+### 角色共享與 Fresh Task Pack
 
-**關鍵原則**：
-- `Role identity is persistent.`
-- `BC/task scope is ephemeral and supplied by the Task Pack.`
+持久的是角色，不是 Bounded Context。若 runtime 支援 reusable named task/session，優先重用同一 Architect 與 Reviewer；不同 BC 本身不是建立新 agent/session 的理由。每次派工仍必須 fresh-read 並送完整 Task Pack，至少包含：
 
-### 正式模型拓撲與規範角色
+```text
+ROLE:
+EFFORT: DEFAULT | HIGH
+ESCALATION_REASON: (required if HIGH)
+CURRENT_TASK:
+CURRENT_BC:
+current_base_sha:
+candidate_sha:
+AUTHORITIES:
+AC:
+WRITABLE:
+READ_ONLY_DEPENDENCIES:
+FROZEN:
+POSITIVE_ORACLES:
+NEGATIVE_ORACLES:
+REQUIRED_READSET:
+REQUIRED_COMMANDS:
+ROLE_BOUNDARY:
+ROUTE_RETURN_CONDITION:
+```
 
-| 角色／活動 | Runtime 與模型／effort | 責任邊界 |
-|---|---|---|
-| Commander | Antigravity / Agy (Gemini 3.8 Flash) | 唯一長住 control plane，持有產品理解、任務依賴、readiness、routing、continuation、Git integration、current product state、Task 建立與成果消費；不設計、不實作、不做獨立 Accept。 |
-| Implementation、test authoring、mechanical refactor、bugfix | Antigravity / Agy (Gemini 3.8 Flash) | 依固定契約有限實作；context-local 保持 writer ownership 與 worktree 隔離；debug 指已定位問題的修復，不包含根因分析。 |
-| Architect（跨 BC 共用） | Codex (OpenAI Codex gpt-6-astra, Medium 預設 / High 門檻升級) | 有界架構專家，跨所有 BC 共用具名任務（`01a0bf82-2f55-7152-82e0-71a276cb8087`），負責 analysis、planning、architecture、design、root-cause reasoning、technical option evaluation、Task decomposition、oracle design、current-main retriage。只補本 Task 直接必要架構缺口，不成為第二個長住 Commander，不擔任一般 mechanical implementation。 |
-| Reviewer（跨 BC 共用） | Codex (OpenAI Codex gpt-6-astra, Medium 一般驗證預設 / High 獨立驗收門檻) | 獨立審查者，跨所有 BC 共用具名任務（`01a0bf82-79e6-7e70-a2d6-f528485ff252`），依角色隔離與當次授權核對證據；全面核對 production、tests、authority 與 AC，給出明確 `VERDICT: ACCEPT` 或 `VERDICT: REJECT`，以及 ready-for-external-review signoff。 |
+舊對話／session 只能作背景，不能取代 current repo truth。
 
-#### 規範角色定義
+### Runtime binding 與 effort
 
-1. **Architect（架構師）**：
-   - 具名任務：`Market Forecast｜Architect｜分析・規劃・設計`
-   - Runtime：**Codex**（OpenAI Codex `gpt-6-astra`），跨所有 Bounded Context 共用真實 persistent task `01a0bf82-2f55-7152-82e0-71a276cb8087`。
-   - 歷史 Antigravity Architect subagent（`9d69eb51-45db-47a8-aafe-ee865a6f2439`）已標記為 `LEGACY_NO_NEW_DISPATCH`；歷史收據有效，但禁止向 Agy 續派 Architect 任務。
-   - 責任：analysis、planning、architecture、design、root cause、technical option evaluation、external capability analysis、Task-local architecture contract、positive / negative oracle design、current-main retriage。
-   - 禁止：mechanical implementation、candidate implementation、independent acceptance of a candidate it designed、whole-project continuation ownership。
-2. **Reviewer（審查者）**：
-   - 具名任務：`Market Forecast｜Reviewer｜驗證・獨立驗收`
-   - Runtime：**Codex**（OpenAI Codex `gpt-6-astra`），跨所有 Bounded Context 共用真實 persistent task `01a0bf82-79e6-7e70-a2d6-f528485ff252`。
-   - 歷史 Antigravity Reviewer subagents（`ccd0fbdb-3dee-4ba2-9264-4125b487f5b2` / `859fcbe8-5891-40e0-84ed-15dc6e29cdee`）已標記為 `LEGACY_NO_NEW_DISPATCH`；歷史收據有效，但禁止向 Agy 續派 Reviewer 任務。
-   - 責任：verification reasoning、candidate diff、architecture compliance、Product Authority review、integration review、independent acceptance、regression boundary analysis、ready-for-external-review signoff。
-   - 禁止：implementation、fixing candidate under review、acting as Architect for the same candidate、becoming Commander。Reviewer 必須與 Architect / Implementer 保持嚴格 role isolation。
-
+- 真實 runtime/model/session identity 只在可查證時寫入 roster 或 Task receipt；未知就寫 `UNBOUND`。
+- 一般 bounded analysis／planning／validation 使用 runtime 的預設或中等 effort。
+- High effort 只用於 final independent acceptance、不可逆 migration、cross-BC contract、安全／資料洩漏邊界、複雜 concurrency 或 medium 未解衝突。
+- High 不用來做無界全庫探索；先縮小問題再升級。
+- 不同產品的歷史 runtime ID、quota 政策或 provider matrix 不得複製成現行規則。
 
 <a id="independent-reviewer-runtime-isolation"></a>
 ### Independent Reviewer runtime isolation
@@ -223,129 +199,36 @@ Independent Review／Accept／Forensic Audit 的角色隔離必須由 runtime �
 
 此節只規範 Independent Reviewer 的 runtime isolation，不改 Task-local Ready、產品 AC、測試門檻、Git integration authority 或 Commander continuation ownership。
 
-### 動態 Effort 政策與升級規則
+### 派工與 role-isolation 不變式
 
-歷史 Astra 派工模型為 `gpt-6-astra low` 與 `gpt-6-astra high`。從現在起，Codex Astra 僅使用 `Medium` 與 `High`，不再使用 `Low`（亦不得使用 xhigh / max / ultra 等非標準 effort）。一般 mechanical implementation 由 Gemini 3.8 Flash 承接。歷史已完成之 Astra / Grok / Claude receipts 全部完整保留有效，不得竄改歷史收據。嚴禁合成或捏造假 Codex ID，所有 Codex 派工必須透過真實 Codex 工具（`codex exec`）執行並取得真實收據。
+1. Architect / Reviewer 每次都 fresh-read exact Task、current authority、base/candidate SHA、direct dependencies 與 frozen paths。
+2. Implementer 不得 self-review；Architect 不得對自己設計且自己實作的 candidate 作 independent acceptance。
+3. 若 Commander 依本專案小型例外兼任 Implementer，最終 acceptance 仍必須由另一個 read-only Reviewer 完成。
+4. Reviewer finding 若是明確 local engineering defect，Commander 應回原 Task 派修，不建立新產品決策來繞過 finding。
+5. Reviewer REJECT 且 finding 可本地修復時，標準轉移是：
+   `REVIEW_REJECT -> LOCAL_REVISION_REQUIRED -> IMPLEMENTER_DISPATCH`。
+6. Reviewer ACCEPT 且無已知 local blocker 時，標準轉移是：
+   `REVIEW_ACCEPT -> INTEGRATION_READY -> COMMANDER_INTEGRATION`。
+7. `INTEGRATION_COMPLETE -> PORTFOLIO_RECONCILIATION`；candidate commit、review dispatch 或 ACCEPT 本身都不等於 Commander terminal。
+8. `LOCAL_ROUTE_STOP != COMMANDER_STOP`；worker 回報只結束該 route，由 Commander 消費後依 continuation 規則續推。
+9. `Reviewer 已啟動 != 驗收完成`；沒有 exact-SHA verdict 不得冒稱通過。
+10. `REVIEWER_ACCEPT != COMMANDER_TERMINAL`；仍須 integration、status readback 與剩餘 dependency reconciliation。
 
-1. **Medium = DEFAULT（預設）**：
-   以下分析與驗收工作一律預設為 Medium：
-   - fresh-read / bounded analysis
-   - ordinary planning
-   - ordinary architecture analysis
-   - API / schema review
-   - BC-local design
-   - root-cause exploration
-   - Task decomposition
-   - test / oracle planning
-   - ordinary candidate diff
-   - ordinary validation
-   - regression review
-   概念上應占大多數 Astra 工作，避免無謂消耗 high-effort quota。
-2. **High = GATE / ESCALATION（門檻與升級）**：
-   High 不拿來從零做大範圍全庫探索。推薦工作流為：
-   `Medium exploration` → `bounded candidate` → `High gate`。
-   High 嚴格限定於以下關鍵門檻與複雜度升級：
-   - `CROSS_BC_CONTRACT_GATE`：跨 BC 契約與邊界決策
-   - `CONCURRENCY_CORRECTNESS_GATE`：高難度並行、分散式鎖或交易語義正確性
-   - `SECURITY_TENANCY_GATE`：租戶隔離、隱私法規或安全性邊界
-   - `MIGRATION_GATE`：具不可逆後果的資料庫或架構遷移
-   - `FINAL_ARCHITECTURE_FREEZE`：架構凍結或最終架構審查門檻
-   - `FINAL_INDEPENDENT_ACCEPT`：最終獨立 ACCEPT / REJECT 驗收門檻（假陽性接受成本高時）
-   - `MEDIUM_UNRESOLVED_CONFLICT`：Medium 分析結論衝突需進行權威仲裁
-   - 或具實質後果的 Product Authority 歧義解析。
-3. **升級規則（Escalation Rule）**：
-   Commander 每次派工 Architect / Reviewer 時，Task Pack 必須包含：
-   `ASTRA_EFFORT: MEDIUM | HIGH`
-   並附帶明確的升級理由（Escalation Reason，如上述代碼之一）。Default 為 `MEDIUM`。禁止以「因為這是架構／驗收，所以一律 High」為由濫用 High。High gate 必須收到縮小聚焦的 narrowed Task Pack，不得重新進行無界全庫探索。Commander 可以在同一具名任務中依本次 dispatch 動態切換 Medium / High。
+### Architect 使用規則
 
-### 具名任務重用與 Fresh Task Pack 不變式
+已有明確 defect、required behavior、oracle 與 writable scope 時，通常不再追加 Architect。只有 architecture ambiguity、root cause 未知、多個合理 contract、cross-BC boundary、transaction/concurrency semantics 或 measurement/model governance 未定時才派 Architect。
 
-所有派工都優先選擇既有適任具名任務。worker 不自行 spawn 或派工，不要每次工作都建立新的 agent / subagent / session。
+### Reviewer 使用規則
 
-1. **具名任務重用原則**：
-   - 舊有「每 BC 一個 planning/design Astra task」的推薦拓撲已廢除。**Bounded Context 不再是建立新 Astra named task 的理由。**
-   - 不得因 collection-watch、entity-knowledge、semantic-grouping、runtime-ops、product-ui 等領域各建一個 Astra Architect。同一 Architect 具名任務依序服務不同 BC；同一 Reviewer 具名任務審查不同 BC candidate。
-   - 建立新 Astra named task 的唯一允許條件：
-     - role conflict（角色衝突，無法兼任）
-     - independent validation isolation（獨立驗收需要完全隔離的對話 context）
-     - existing task context 已實質污染或漂移
-     - tool / session 失效無法安全運作
-     - security / permission isolation
-     - genuine separate product（真正獨立的不同專案產品）
-     「different BC」本身絕不成立為新建 Astra 具名任務之理由。
-   - 舊有 BC-specific Astra 任務不要刪除或 kill（保留歷史可追溯性），改標為 `IDLE / LEGACY_NO_NEW_DISPATCH`，之後新工作不得再路由給它們。
-2. **Fresh Task Pack 是 BC 隔離的唯一邊界**：
-   - 重用具名任務不等於沿用舊 context。每次派工 Architect / Reviewer 必須發送完整的 fresh Task Pack，不得省略。
-   - Task Pack 至少必須包含：
-     ```
-     ROLE:
-     ASTRA_EFFORT: MEDIUM | HIGH
-     ESCALATION_REASON: (required if HIGH)
-     CURRENT_TASK:
-     CURRENT_BC:
-     current_main_sha:
-     candidate_sha:
-     AUTHORITIES:
-     AC:
-     WRITABLE:
-     READ_ONLY_DEPENDENCIES:
-     FROZEN:
-     POSITIVE_ORACLES:
-     NEGATIVE_ORACLES:
-     REQUIRED_READSET:
-     REQUIRED_COMMANDS:
-     ROLE_BOUNDARY:
-     ROUTE_RETURN_CONDITION:
-     ```
-   - 舊 context 只能作為背景參考，絕對不能作為 current authority。如果舊 context 與新 Task Pack 衝突，一律以 Task Pack 及 current repo truth 為準。
-3. **實作者拓撲維持（Implementer Topology）**：
-   - 現有 Gemini Flash Implementer 依 writer ownership、worktree 及 repo 路徑繼續保持 context-local（例如搜尋、上下文分析、概念分群、前端介面、執行治理等），不強制合併為單一實作者。
-   - Implementer 的隔離主要服務於唯一的 writer ownership、worktree 隔離以及並行實作的安全性，這與 Astra 分析 quota 問題截然不同。未有直接理由前，不更動 Implementer 拓撲。
+Final Reviewer 必須：
+- fresh-read exact reviewed SHA；
+- fresh-read applicable Product Authority / Story AC；
+- 檢查 production/document diff 與 tests/oracles；
+- 保持 read-only runtime isolation；
+- 最後輸出明確 `VERDICT: ACCEPT` 或 `VERDICT: REJECT`；
+- receipt 記錄 reviewed SHA、runtime mode、commands/results 與未驗證範圍。
 
-### 角色隔離與獨立驗收不變式
-
-- **角色隔離**：
-  - Gemini Implementer（Antigravity）不得驗收自己的 candidate。
-  - Codex Architect 不得直接接著實作。
-  - Codex Reviewer 不得是該 candidate 的 Implementer 或 Architect。同一具名任務不得在同一 candidate 上 Design → Implement → Independent Accept 全部包辦。
-- **標準流程**：
-  `Gemini Commander (Antigravity)` → `Codex Medium/High Architect（僅必要時）` → `Gemini Flash Implementation (Antigravity)` → `deterministic verification` → `Codex High Reviewer（Independent Validation）` → `Gemini Commander integration`。
-- **Codex Architect 使用規則**：
-  若 External review finding 或 Task 已明確指定 defect、violated invariant、required behavior 及 oracle，通常**不需要** Architect，直接由 Gemini 3.8 Flash Implementer 進行實作或修復。
-  只有當 Implementer 或 Commander 遇到以下情況時，才派工 `Market Forecast｜Architect｜分析・規劃・設計`（Codex `01a0bf82-2f55-7152-82e0-71a276cb8087`）：
-  - architecture ambiguity（架構歧義）
-  - root cause 不明
-  - contract 存在兩種以上合理實作取捨
-  - cross-BC 邊界決策
-  - concurrency / transactional semantics 未定
-  預設 effort 為 `ASTRA_EFFORT: MEDIUM`。Architect 回覆後，Commander 必須立即 consume 並 dispatch Implementer，**不得停在 `ARCHITECT_HANDOFF`**。
-- **Codex Reviewer 使用規則**：
-  - 普通 implementation iteration：可使用 Reviewer Medium 進行 bounded candidate validation。
-  - 真正 local final candidate：使用 `Market Forecast｜Reviewer｜驗證・獨立驗收`（Codex `01a0bf82-79e6-7e70-a2d6-f528485ff252`），設定 `ASTRA_EFFORT: HIGH` 與 `ESCALATION_REASON: FINAL_INDEPENDENT_ACCEPT`。
-  Reviewer 必須 fresh-read exact SHA。若 Reviewer REJECT，且 findings 屬於 local engineering defects，Commander **必須立即派工 Gemini Implementer 修復**，不得停下來向使用者回報 status summary，更**不得在 local reject 下尋求外部審查**。
-  此狀態轉移現為標準強制不變式：
-  `CODEX_REVIEW_REJECT -> LOCAL_REVISION_REQUIRED -> IMPLEMENTER_DISPATCH`
-  兩者之間不存在中間終止狀態（`REVIEW_REJECT_WITH_ACTIONABLE_FINDINGS` implies `FINAL_RESPONSE_FORBIDDEN`）。若 workflow state 處於：
-  `review_verdict = REJECT` 且 `findings_actionability = LOCAL_ENGINEERING`，
-  則允許的後續狀態僅有：
-  - `LOCAL_REVISION_IN_PROGRESS`
-  - `IMPLEMENTER_RUNNING`
-  嚴禁轉為 `WAITING`、`COMPLETE`、`USER_HANDOFF` 或 `INTEGRATION_READY`。
-  當 Reviewer 判定 `VERDICT: ACCEPT` 且無已知 local blocker，直接進入 `INTEGRATION_READY`。此狀態轉移現為標準強制不變式：
-  `CODEX_REVIEW_ACCEPT -> INTEGRATION_READY -> COMMANDER_INTEGRATION`
-  `INTEGRATION_COMPLETE -> PORTFOLIO_RECONCILIATION`
-- **獨立驗收標準**：
-  `tests green != ACCEPT`。Codex High 獨立驗收仍必須：
-  - fresh-read exact SHA
-  - fresh-read Product Authority
-  - fresh-read AC
-  - 檢查 production diff
-  - 檢查 tests
-  - 最後只能輸出明確的 `VERDICT: ACCEPT` 或 `VERDICT: REJECT`。
-
-#57 的 grandfathered checkpoint 僅指原 Claude Sonnet 4.6 Thinking reviewer `task-16666`、trajectory `22a16b0c-9f61-4844-a15f-fac1d9dd501f` 與 exact SHA `dc0b815fd641263e3c199523f2b051426c2b990e`。依 2026-09-13 最新使用者裁決，實際仍 RUNNING 時不 kill、不改原候選；無有效 reviewed SHA／verdict／findings 收據時記 `LEGACY_REVIEW_EVIDENCE_UNAVAILABLE`，不得冒作 ACCEPT，也不要求使用者恢復舊對話或將其作為永久依賴。保存舊候選後，在 latest main 重播並由獨立 Codex High fresh-read 新 exact SHA 重新驗收，仍須遵守角色隔離與既有整合 gate。舊收據日後返回僅作歷史補充，其中具體 correctness finding 按 defect 處理；此有限例外不改一般新 validation 的 provider 政策，不包含憑證。
-
-#55、#56、#57、#58 既有 delivery / acceptance 全部保留。不要因 routing 改變重新驗收 immutable historical SHA。只有未來 candidate bytes 改變，才需要 Codex High 驗收新 exact SHA。
+若沒有可提供獨立 read-only runtime 的 Reviewer，記 `REVIEW_RUNTIME_ISOLATION_UNAVAILABLE` 或 `REVIEW_PENDING`；不得由 Commander／Implementer補一個自評 verdict。
 
 <a id="收到執行結果後接續"></a>
 ## 收到執行結果後接續
@@ -405,17 +288,17 @@ Commander 收件後必須：
 `Codex Reviewer is the authoritative independent acceptance authority for locally-final candidates.`
 `External ChatGPT is an optional external audit only when explicitly requested by Product Owner, not a mandatory candidate integration gate.`
 
-Codex Reviewer（`01a0bf82-79e6-7e70-a2d6-f528485ff252`）是專案正式的本機獨立驗收權威。
+本專案的獨立 Reviewer 角色是 locally-final candidate 的正式獨立驗收權威；目前 runtime binding 若為 `UNBOUND`，就只能停在 `REVIEW_PENDING`，不得假造 task ID 或 verdict。
 本機 development & acceptance loop 必須由 Commander 自行持續推進：
-`Gemini Implementer → deterministic verify → Codex Reviewer → (若 REJECT) → Gemini Implementer 修 → verify → Codex Reviewer → ... → Codex Reviewer FINAL ACCEPT`
+`Implementer → deterministic verify → independent Reviewer → (若 REJECT) → Implementer 修 → verify → Reviewer → ... → FINAL ACCEPT`
 
-當 Codex Reviewer 判定 `VERDICT: ACCEPT`，且 deterministic / integration 前置全部成立後，候選版本即達到 `INTEGRATION_READY`。Commander 必須自行執行 merge、readback、close，並進入 `PORTFOLIO_RECONCILIATION` 繼續推動下一個授權工作，**不得等待外部審查，亦不得停止**。
+當 independent Reviewer 判定 `VERDICT: ACCEPT`，且 deterministic / integration 前置全部成立後，候選版本即達到 `INTEGRATION_READY`。Commander 必須自行執行 merge、readback、close，並進入 `PORTFOLIO_RECONCILIATION` 繼續推動下一個授權工作，**不得等待外部審查，亦不得停止**。
 
 External ChatGPT 不再是每個 candidate 的 mandatory integration gate。若且唯若 Product Owner 明確指示需要外部審計（`OPTIONAL_EXTERNAL_AUDIT`）時，才在 `LOCAL_FINAL_ACCEPTED` 後觸發外部審查旁路；審查結束後回到 `INTEGRATION_READY`。
 
 ### Local Closure Loop
 
-`Implementation revisions must be iterated locally through Gemini Implementer + deterministic verification + Codex Reviewer until local FINAL ACCEPT.`
+`Implementation revisions must be iterated locally through Implementer + deterministic verification + independent Reviewer until local FINAL ACCEPT.`
 
 若在選配的外部審查或其他稽核中收到 `REVISION_REQUIRED` 或 findings：
 Commander 絕不得修完單一局部 finding 就立刻再次尋求外部審查。
@@ -752,8 +635,8 @@ Commander 不得因「正在等待」而發送 final response。必須等待並�
 - 真實觀測若可能沒有答案，先縮小並指定觀測目標、提高命中率，並事先說明無答案的可能性。
 - 視覺驗收盡量轉成自動閘門；人工只檢查尚無法自動判定的少量殘差。
 
-驗證安排不能只由趕時間決定。這個 repo 的完整本機 gate 是 `make ci-fast`。碰到 Camoufox、平台登入判定或
-頁面掃描時，另依 [70-testing.md](70-testing.md) 完成真實手動驗證。
+驗證安排不能只由趕時間決定。這個 repo 的完整本機 gate 是 `make ci-fast`。碰到真 provider API、付費／quota market-data、
+TradingView manual parity observation 或其他 live integration 時，另依 [70-testing.md](70-testing.md) 完成具日期的真實觀測驗證。
 
 ## 成果壽命
 

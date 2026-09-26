@@ -1,6 +1,6 @@
 # 規則索引
 
-此目錄是三種 coding agent 共用的工程規則真相。`.agents` 是未追蹤的本機相容 alias（`.agents -> .claude`），不是遠端閱讀依賴；正式 tracked 來源是本目錄。
+此目錄是三種 coding agent 共用的工程規則真相。`.agents` 是 tracked 相容軟連結（`.agents -> .claude`），不是另一份規則來源；正式內容仍只在本目錄。
 規則不放產品範圍、業務 AC、工作進度或模型清單；這些各自的入口見 [docs/README.md](../../docs/README.md)。
 
 ## 必讀清單
@@ -20,5 +20,5 @@
 11. [80-documentation.md](80-documentation.md)：MECE／SSOT、文件格式與維護。
 12. [90-operations.md](90-operations.md)：操作、破壞性限制與 Git 交付規則。
 
-跨 repo 寫 frontend 時另讀 frontend `.claude/rules/00-index.md` 全部指定檔案。
+跨 repository 工作時，另讀目標 repository 自己的 `.claude/rules/00-index.md` 與其指定檔案；不得把本 repo 規則假設成對方現行 authority。
 規則與程式衝突時先指出哪一條過期或越界，不自開例外。既有 source tests 是 oracle，不能為了改文件而偷偷放寬。

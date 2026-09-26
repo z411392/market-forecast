@@ -1,58 +1,51 @@
 {
-  "version": 1,
+  "version": 2,
   "product": "market-forecast",
   "authority": ".claude/rules/15-execution-strategy.md#execution-topology-and-dispatch",
   "canonical": false,
+  "binding_policy": "truthful-runtime-only",
   "commander": {
     "name": "Market Forecast｜Commander",
     "runtime_tool": "chatgpt",
-    "model": "GPT-5.6 Sol"
+    "model": "GPT-5.6 Sol",
+    "implementation_delegation": "PRODUCT_OWNER_EXPLICIT_SMALL_PROJECT_DELEGATION"
   },
   "shared_roles": {
     "architect": {
       "name": "Market Forecast｜Architect｜分析・規劃・設計",
-      "runtime_tool": "codex"
+      "runtime_tool": "codex",
+      "status": "UNBOUND"
     },
     "reviewer": {
       "name": "Market Forecast｜Reviewer｜驗證・獨立驗收",
-      "runtime_tool": "codex"
+      "runtime_tool": "codex",
+      "status": "UNBOUND",
+      "required_runtime_mode": "read-only"
     }
   },
   "contexts": {
     "market-data": {
       "architect": "shared:architect",
       "reviewer": "shared:reviewer",
-      "implementer": {
-        "name": "Market Forecast｜Market Data｜實作",
-        "runtime_tool": "commander"
-      },
+      "implementer": "commander-delegated",
       "verifier": "deterministic-tools"
     },
     "realized-variance": {
       "architect": "shared:architect",
       "reviewer": "shared:reviewer",
-      "implementer": {
-        "name": "Market Forecast｜Realized Variance｜實作",
-        "runtime_tool": "commander"
-      },
+      "implementer": "commander-delegated",
       "verifier": "deterministic-tools"
     },
     "risk-forecast": {
       "architect": "shared:architect",
       "reviewer": "shared:reviewer",
-      "implementer": {
-        "name": "Market Forecast｜Risk Forecast｜實作",
-        "runtime_tool": "commander"
-      },
+      "implementer": "commander-delegated",
       "verifier": "deterministic-tools"
     },
     "forecast-validation": {
       "architect": "shared:architect",
       "reviewer": "shared:reviewer",
-      "implementer": {
-        "name": "Market Forecast｜Forecast Validation｜實作",
-        "runtime_tool": "commander"
-      },
+      "implementer": "commander-delegated",
       "verifier": "deterministic-tools"
     }
   },
@@ -60,19 +53,13 @@
     "runtime-ops": {
       "architect": "shared:architect",
       "reviewer": "shared:reviewer",
-      "implementer": {
-        "name": "Market Forecast｜Runtime & Governance｜實作",
-        "runtime_tool": "commander"
-      },
+      "implementer": "commander-delegated",
       "verifier": "deterministic-tools"
     },
     "pine-deployment": {
       "architect": "shared:architect",
       "reviewer": "shared:reviewer",
-      "implementer": {
-        "name": "Market Forecast｜Pine Deployment｜實作",
-        "runtime_tool": "commander"
-      },
+      "implementer": "commander-delegated",
       "verifier": "golden-parity-tests"
     }
   }

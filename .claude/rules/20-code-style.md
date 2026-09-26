@@ -55,7 +55,7 @@ from asyncio import run
 from fire import Fire
 from functools import partial
 from json import dumps
-from libs.semantic_analysis.ports.embed_documents_port import EmbedDocumentsPort
+from libs.market_data.ports.read_minute_bars_port import ReadMinuteBarsPort
 ```
 
 ## 錯誤
@@ -67,10 +67,8 @@ print(message, file=sys.stderr)
 
 ```python
 def load_adapter() -> object:
-    from libs.semantic_analysis.adapters.driven.openrouter_embedding_adapter import (
-        OpenRouterEmbeddingAdapter,
-    )
-    return OpenRouterEmbeddingAdapter()
+    from libs.market_data.adapters.driven.massive_adapter import MassiveAdapter
+    return MassiveAdapter()
 ```
 
 ## 工具
