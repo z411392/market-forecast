@@ -1,0 +1,7 @@
+version: "1.0.0"
+authorities:
+  - id: unprovenanced_authority
+    path: docs/spec.md
+    class: ACTIVE
+    domain: PRODUCT_SEMANTICS
+    # ILLEGAL: missing required 'provenance'
