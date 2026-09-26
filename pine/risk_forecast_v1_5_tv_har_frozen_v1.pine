@@ -1,0 +1,293 @@
+//@version=6
+indicator(
+    "Risk Forecast v1.5-TV — HAR Frozen v1",
+    shorttitle = "RiskHAR-F1",
+    overlay = false,
+    precision = 2,
+    max_bars_back = 3000
+)
+
+// Frozen model manifest: risk_forecast_har_frozen_v1
+// Deterministic inference only. No fitting, refitting, tuning, or model selection.
+// Supported exact ticker IDs:
+// BATS:GOOGL, BATS:NVDA, BATS:QQQ, BATS:TSM, TWSE:2330, TWSE:2317, TWSE:2454
+
+string LOWER_TF = "5"
+int HORIZON = 5
+int HAR_WEEK = 5
+int HAR_MONTH = 22
+float TRADING_DAYS = 252.0
+float EPS = 0.000000000001
+
+f_qlike(float actualVariance, float predictedVariance) =>
+    float result = na
+    bool valid = (
+        not na(actualVariance)
+        and not na(predictedVariance)
+        and actualVariance > 0.0
+        and predictedVariance > 0.0
+    )
+    if valid
+        float ratio = actualVariance / predictedVariance
+        result := ratio - math.log(ratio) - 1.0
+    result
+
+f_intraday_rv(array<float> opens, array<float> closes) =>
+    float result = na
+    int openCount = array.size(opens)
+    int closeCount = array.size(closes)
+    bool validArrays = openCount > 0 and closeCount > 0 and openCount == closeCount
+    if validArrays
+        result := 0.0
+        float firstOpen = array.get(opens, 0)
+        float firstClose = array.get(closes, 0)
+        if firstOpen > 0.0 and firstClose > 0.0
+            float r0 = math.log(firstClose / firstOpen)
+            result += r0 * r0
+        if closeCount > 1
+            for i = 1 to closeCount - 1
+                float previousClose = array.get(closes, i - 1)
+                float currentClose = array.get(closes, i)
+                if previousClose > 0.0 and currentClose > 0.0
+                    float r = math.log(currentClose / previousClose)
+                    result += r * r
+    result
+
+bool exactDaily = timeframe.isdaily and timeframe.multiplier == 1
+if not exactDaily
+    runtime.error("Risk Forecast HAR Frozen v1 must run on a 1D chart.")
+
+string tickerId = syminfo.tickerid
+float beta0 = na
+float betaD = na
+float betaW = na
+float betaM = na
+int freezeYear = na
+int freezeMonth = na
+int freezeDay = na
+
+if tickerId == "BATS:GOOGL"
+    beta0 := 0.00038571636420582086
+    betaD := 0.048002057980074994
+    betaW := 0.033641770850260655
+    betaM := 0.04327993488251401
+    freezeYear := 2026
+    freezeMonth := 9
+    freezeDay := 25
+else if tickerId == "BATS:NVDA"
+    beta0 := 0.0003113956504987292
+    betaD := 0.1248914307803534
+    betaW := 0.12321716335174432
+    betaM := 0.3432736920532302
+    freezeYear := 2026
+    freezeMonth := 9
+    freezeDay := 25
+else if tickerId == "BATS:QQQ"
+    beta0 := 0.00008023331625960692
+    betaD := 0.3554726051333471
+    betaW := -0.029774723654848928
+    betaM := 0.23152426471936713
+    freezeYear := 2026
+    freezeMonth := 9
+    freezeDay := 25
+else if tickerId == "BATS:TSM"
+    beta0 := 0.0005094966215658159
+    betaD := 0.06169558464961368
+    betaW := 0.13736920195833344
+    betaM := 0.10529569491075311
+    freezeYear := 2026
+    freezeMonth := 9
+    freezeDay := 25
+else if tickerId == "TWSE:2330"
+    beta0 := 0.0005924760756065551
+    betaD := 0.12469766742590664
+    betaW := 0.026066015068912315
+    betaM := -0.055393964997532186
+    freezeYear := 2026
+    freezeMonth := 9
+    freezeDay := 24
+else if tickerId == "TWSE:2317"
+    beta0 := 0.0004408414087813874
+    betaD := 0.18231984881915508
+    betaW := 0.2000194815248944
+    betaM := -0.015920594866739395
+    freezeYear := 2026
+    freezeMonth := 9
+    freezeDay := 24
+else if tickerId == "TWSE:2454"
+    beta0 := 0.0002987256434904451
+    betaD := 0.14067129140913373
+    betaW := 0.1401941339804982
+    betaM := 0.4877291380316383
+    freezeYear := 2026
+    freezeMonth := 9
+    freezeDay := 24
+else
+    runtime.error("Unsupported ticker for HAR Frozen v1: " + tickerId)
+
+int freezeTimestamp = timestamp(syminfo.timezone, freezeYear, freezeMonth, freezeDay, 0, 0)
+bool freezeActive = time >= freezeTimestamp
+
+string regularTicker = ticker.new(
+    syminfo.prefix,
+    syminfo.ticker,
+    session.regular
+)
+
+array<float> intrabarOpen = request.security_lower_tf(
+    regularTicker,
+    LOWER_TF,
+    open,
+    ignore_invalid_timeframe = true
+)
+
+array<float> intrabarClose = request.security_lower_tf(
+    regularTicker,
+    LOWER_TF,
+    close,
+    ignore_invalid_timeframe = true
+)
+
+int intrabarCount = array.size(intrabarClose)
+float regularRv = f_intraday_rv(intrabarOpen, intrabarClose)
+
+float overnightVariance = na
+bool overnightReady = not na(close[1]) and close[1] > 0.0 and open > 0.0
+if overnightReady
+    float overnightReturn = math.log(open / close[1])
+    overnightVariance := overnightReturn * overnightReturn
+
+float wholeDayRv = na
+bool rvReady = barstate.isconfirmed and not na(regularRv) and not na(overnightVariance)
+if rvReady
+    wholeDayRv := regularRv + overnightVariance
+
+float rv5 = ta.sma(wholeDayRv, HAR_WEEK)
+float rv22 = ta.sma(wholeDayRv, HAR_MONTH)
+float trailing20Rv = ta.sma(wholeDayRv, 20)
+
+float frozenVarianceForecast = na
+bool featureReady = (
+    freezeActive
+    and not na(wholeDayRv)
+    and not na(rv5)
+    and not na(rv22)
+)
+
+if featureReady
+    frozenVarianceForecast := math.max(
+        beta0
+        + betaD * wholeDayRv
+        + betaW * rv5
+        + betaM * rv22,
+        EPS
+    )
+
+float expectedAnnualizedVol = na
+float expectedFiveDayMove = na
+float trailing20AnnualizedVol = na
+
+if not na(frozenVarianceForecast)
+    expectedAnnualizedVol := math.sqrt(frozenVarianceForecast * TRADING_DAYS) * 100.0
+    expectedFiveDayMove := math.sqrt(frozenVarianceForecast * float(HORIZON)) * 100.0
+
+if not na(trailing20Rv)
+    trailing20AnnualizedVol := math.sqrt(math.max(trailing20Rv, EPS) * TRADING_DAYS) * 100.0
+
+float maturedTargetVariance = ta.sma(wholeDayRv, HORIZON)
+float frozenQlike = f_qlike(
+    maturedTargetVariance,
+    frozenVarianceForecast[HORIZON]
+)
+float frozenQlike252 = ta.sma(frozenQlike, 252)
+
+plot(
+    expectedAnnualizedVol,
+    title = "HAR Frozen 5D Expected Volatility %",
+    linewidth = 3
+)
+
+string expectedVolText = (
+    na(expectedAnnualizedVol)
+    ? "—"
+    : str.tostring(expectedAnnualizedVol, "#.00") + "%"
+)
+string moveText = (
+    na(expectedFiveDayMove)
+    ? "—"
+    : str.tostring(expectedFiveDayMove, "#.00") + "%"
+)
+string realizedText = (
+    na(trailing20AnnualizedVol)
+    ? "—"
+    : str.tostring(trailing20AnnualizedVol, "#.00") + "%"
+)
+string qlikeText = (
+    na(frozenQlike252)
+    ? "Pending"
+    : str.tostring(frozenQlike252, "#.0000")
+)
+
+var table statusTable = table.new(position.top_right, 2, 7, border_width = 1)
+
+if barstate.islast
+    table.cell(statusTable, 0, 0, "Risk Forecast")
+    table.cell(statusTable, 1, 0, "HAR Frozen v1")
+    table.cell(statusTable, 0, 1, "Ticker")
+    table.cell(statusTable, 1, 1, tickerId)
+    table.cell(statusTable, 0, 2, "5D expected vol")
+    table.cell(statusTable, 1, 2, expectedVolText)
+    table.cell(statusTable, 0, 3, "5D 1σ move")
+    table.cell(statusTable, 1, 3, moveText)
+    table.cell(statusTable, 0, 4, "20D realized vol")
+    table.cell(statusTable, 1, 4, realizedText)
+    table.cell(statusTable, 0, 5, "5m bars")
+    table.cell(statusTable, 1, 5, str.tostring(intrabarCount))
+    table.cell(statusTable, 0, 6, "Prospective QLIKE-252")
+    table.cell(statusTable, 1, 6, qlikeText)
+
+plot(
+    float(intrabarCount),
+    title = "RF_FROZEN_INTRABAR_COUNT_5M",
+    display = display.data_window
+)
+plot(
+    wholeDayRv,
+    title = "RF_FROZEN_RV_WHOLE_DAY_5M",
+    display = display.data_window
+)
+plot(
+    rv5,
+    title = "RF_FROZEN_RV5",
+    display = display.data_window
+)
+plot(
+    rv22,
+    title = "RF_FROZEN_RV22",
+    display = display.data_window
+)
+plot(
+    frozenVarianceForecast,
+    title = "RF_FROZEN_HAR_VAR5",
+    display = display.data_window
+)
+plot(
+    expectedAnnualizedVol,
+    title = "RF_FROZEN_HAR_VOL5_ANNUALIZED_PCT",
+    display = display.data_window
+)
+plot(
+    expectedFiveDayMove,
+    title = "RF_FROZEN_HAR_MOVE5_1SIGMA_PCT",
+    display = display.data_window
+)
+plot(
+    frozenQlike,
+    title = "RF_FROZEN_QLIKE_HAR",
+    display = display.data_window
+)
+plot(
+    frozenQlike252,
+    title = "RF_FROZEN_QLIKE_252_HAR",
+    display = display.data_window
+)
