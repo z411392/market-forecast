@@ -1,0 +1,46 @@
+version: "1.0.0"
+capabilities:
+  - id: market_data
+    aliases: ["市場資料", "intraday bars", "security master", "market-data"]
+    owner: market-data
+    module_roots: ["src/libs/market_data"]
+    authority_refs:
+      - docs/architecture/context-map.md
+      - docs/delivery/requirements-specification.md
+    description: "資料來源、raw provenance、canonical 1m bars、交易時段與標的身份"
+
+  - id: realized_variance
+    aliases: ["RV", "realized volatility", "realized variance", "RQ", "semivariance"]
+    owner: realized-variance
+    module_roots: ["src/libs/realized_variance"]
+    authority_refs:
+      - docs/architecture/context-map.md
+      - specs/5-harmonize-realized-volatility/spec.md
+    description: "1m→5/10/15m 聚合、regular-session/overnight/whole-day RV、measurement audit"
+
+  - id: risk_forecast
+    aliases: ["GARCH", "HAR", "HARQ", "Ridge-HAR", "risk forecast"]
+    owner: risk-forecast
+    module_roots: ["src/libs/risk_forecast"]
+    authority_refs:
+      - docs/architecture/context-map.md
+      - docs/delivery/requirements-specification.md
+    description: "風險模型 fitting、frozen specification 與 inference contract"
+
+  - id: forecast_validation
+    aliases: ["QLIKE", "walk-forward", "purge", "bootstrap", "holdout"]
+    owner: forecast-validation
+    module_roots: ["src/libs/forecast_validation"]
+    authority_refs:
+      - docs/architecture/context-map.md
+      - docs/delivery/requirements-specification.md
+    description: "chronological OOS、symbol transfer、QLIKE、uncertainty 與 promotion/stop gates"
+
+  - id: runtime_operations_and_governance
+    aliases: ["runtime-ops", "CLI", "governance"]
+    owner: runtime-ops
+    module_roots: ["src/apps/cli", "src/libs/kernel"]
+    authority_refs:
+      - .claude/rules/00-index.md
+      - docs/architecture/context-map.md
+    description: "CLI、composition、資料作業入口、治理與驗證"
