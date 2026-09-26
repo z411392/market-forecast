@@ -75,3 +75,64 @@ S1 design finding:
 - Story target formula formatting was repaired; product semantics are unchanged.
 
 Next: S2 adds frozen positive/negative contract tests before production contract implementation.
+
+
+### Task #10 S2 — contract tests frozen before implementation
+
+Status: COMPLETE.
+
+Frozen contract-test revision:
+- `e42bc922801d9fbe9c1b29c44549f4f74fdd4099`
+
+The tests lock:
+- exact TypedDict required/optional key sets;
+- `session_scope` / `price_basis` / corporate-action Literals;
+- owner DTO-only ABC port signatures;
+- stable `InvalidMarketDataContractError.type`;
+- absence of ambiguous public `adjusted` fields.
+
+No provider adapter or network call is part of this test slice.
+
+### Task #10 S3 — minimal provider-neutral public contract
+
+Status: COMPLETE AS CANDIDATE.
+
+Candidate revision:
+- `9de353281ddf2c70e54e69f3b156dc399388e94d`
+
+Implemented exactly:
+- seven owner TypedDicts;
+- two outbound ABC ports;
+- one typed provider-neutral contract exception.
+
+Explicitly not implemented:
+- Massive / FinMind / Databento adapters;
+- provider-specific parsers;
+- session normalization logic;
+- forward-fill/synthetic bars;
+- CLI/composition;
+- live data access.
+
+The frozen S2 test files were not rewritten by S3.
+
+### Task #10 S4 — semantic correction and structural readback
+
+Status: READY FOR INDEPENDENT REVIEW, NOT ACCEPTED.
+
+Corporate-action semantics were clarified without changing the public type shape:
+- `effective_date` = instrument-local market date when the action becomes effective;
+- split `ratio` = post-action shares / pre-action shares; 10-for-1 = `10.0`;
+- `cash_amount` = source-reported cash per share in `currency`, not authorization for total-return adjustment;
+- symbol-change fields are not overloaded by `other`.
+
+Structural readback after S3 found:
+- zero `__init__.py`;
+- one public symbol per new Python file;
+- no relative or function-local imports;
+- frozen S2 contract-test blobs unchanged after S3.
+
+Remaining gate:
+- repository-executed contract / architecture gates are not available through the current GitHub-only execution surface;
+- independent Reviewer runtime is still `UNBOUND`.
+
+Therefore Task #10 remains `REVIEW_PENDING`; downstream work may stack on the exact candidate contract, but final integration must not treat it as accepted until the missing gates are satisfied.
