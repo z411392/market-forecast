@@ -21,3 +21,15 @@
 - Primary metric: QLIKE。
 - 先 measurement harmonization，再判斷 global / market-specific / partial-pooling。
 - TradingView/Pine 是 frozen deterministic inference 目標；Python/uv 負責多市場資料與研究 fitting。
+
+
+## 2026-09-26 compatibility-link decision
+
+使用者明示要求工具入口與規則目錄使用實體軟連結：
+
+- `CLAUDE.md` 是 root canonical agent entrypoint。
+- `AGENTS.md -> CLAUDE.md`。
+- `GEMINI.md -> CLAUDE.md`。
+- `.agents -> .claude`。
+
+前三者與 Kaledoxa 現行 Git 形狀一致；`.agents` 則由 Kaledoxa 的「本機未追蹤 alias」改為本 repo 的 tracked symlink。這是使用者明示的治理差異，內容權威仍只在 `.claude/`。
