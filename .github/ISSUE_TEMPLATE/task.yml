@@ -23,14 +23,14 @@ body:
   - type: textarea
     id: done
     attributes:
-      label: "AC 引用、有限步驟、測試命令、預期結果及停止条件"
+      label: "AC 引用、有限步驟、測試命令、預期結果及停止條件"
     validations:
       required: true
   - type: textarea
     id: roadmap_phase
     attributes:
       label: "Roadmap phase"
-      description: "產品 P1–P6；不填工程 Analysis／Design／Implement 階段。"
+      description: "產品 P0–P4；不填工程 Analysis／Design／Implement 階段。"
     validations:
       required: true
   - type: textarea
