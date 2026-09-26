@@ -1,0 +1,61 @@
+//@version=6
+indicator("Market Forecast — Current State + Risk Bridge", shorttitle = "MF Risk Bridge", overlay = true, precision = 2)
+
+string G_SOURCES = "External sources"
+bool sourcesConfigured = input.bool(false, "Sources configured", group = G_SOURCES)
+float b50Source = input.source(close, "B50 current-state source", group = G_SOURCES)
+float vol5Source = input.source(close, "5D expected annualized volatility %", group = G_SOURCES)
+float move5Source = input.source(close, "5D 1σ move %", group = G_SOURCES)
+float vol20Source = input.source(close, "20D expected annualized volatility %", group = G_SOURCES)
+
+string G_DISPLAY = "Display"
+bool show20D = input.bool(true, "Show 20D confirmatory volatility", group = G_DISPLAY)
+
+f_b50_state(float value) =>
+    string state = "Neutral"
+    if value >= 50.0
+        state := "Strong positive"
+    else if value > 0.0
+        state := "Positive"
+    else if value <= -50.0
+        state := "Strong negative"
+    else if value < 0.0
+        state := "Negative"
+    state
+
+f_number(float value, string suffix) =>
+    string text = "—"
+    if not na(value)
+        text := str.tostring(value, "#.##") + suffix
+    text
+
+float b50 = sourcesConfigured ? b50Source : na
+float vol5 = sourcesConfigured ? vol5Source : na
+float move5 = sourcesConfigured ? move5Source : na
+float vol20 = sourcesConfigured and show20D ? vol20Source : na
+
+plot(b50, "Bridge B50", display = display.none)
+plot(vol5, "Bridge 5D Expected Volatility %", display = display.none)
+plot(move5, "Bridge 5D 1σ Move %", display = display.none)
+plot(vol20, "Bridge 20D Expected Volatility %", display = display.none)
+
+var table dashboard = table.new(position.top_right, 2, 6, border_width = 1)
+
+if barstate.islast
+    table.cell(dashboard, 0, 0, "Current state")
+    table.cell(dashboard, 1, 0, sourcesConfigured ? "Configured" : "Configure sources")
+
+    table.cell(dashboard, 0, 1, "B50")
+    table.cell(dashboard, 1, 1, f_number(b50, ""))
+
+    table.cell(dashboard, 0, 2, "Momentum state")
+    table.cell(dashboard, 1, 2, sourcesConfigured and not na(b50) ? f_b50_state(b50) : "—")
+
+    table.cell(dashboard, 0, 3, "5D expected vol")
+    table.cell(dashboard, 1, 3, f_number(vol5, "%"))
+
+    table.cell(dashboard, 0, 4, "5D 1σ move")
+    table.cell(dashboard, 1, 4, f_number(move5, "%"))
+
+    table.cell(dashboard, 0, 5, "20D expected vol")
+    table.cell(dashboard, 1, 5, show20D ? f_number(vol20, "%") : "Hidden")
