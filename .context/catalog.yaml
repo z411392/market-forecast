@@ -1,0 +1,44 @@
+version: "1.0.0"
+catalog_depth: 1
+
+repository_identity:
+  name: "market-forecast"
+  owner: "z411392"
+  canonical_url: "https://github.com/z411392/market-forecast"
+  architecture_style: "Ports-and-Adapters research monorepo"
+
+meta_index:
+  description: "Root Context Catalog depth=1 meta-index"
+  authority_ref: "docs/governance-source.md"
+  prohibit_recursive_catalog: true
+
+domains:
+  - id: capabilities
+    path: ".context/capabilities.yaml"
+    description: "能力、owner、module roots 與權威入口"
+    authority_class: "DURABLE_NAVIGATION"
+    provenance:
+      source_ref: "docs/architecture/context-map.md"
+  - id: authority_routing
+    path: ".context/authority-routing.yaml"
+    description: "正式文件權威與寫入邊界"
+    authority_class: "DURABLE_NAVIGATION"
+    provenance:
+      source_ref: "docs/governance-source.md"
+  - id: security_boundary
+    path: ".context/security-boundary.yaml"
+    description: "market data、secrets、holdout 與大型研究 artifact 的索引安全邊界"
+    authority_class: "DURABLE_NAVIGATION"
+    provenance:
+      source_ref: ".claude/rules/60-configuration-data.md"
+
+runtime_state_policy: "QUERY_TIME_FRESH_READ"
+security_policy: "DENY_BEFORE_READ_FOR_INDEXING"
+
+prohibited_contents:
+  canonical_spec_body: false
+  full_source: false
+  persistent_llm_summary: false
+  runtime_workflow_status: false
+  raw_market_data: true
+  holdout_outcomes: true
