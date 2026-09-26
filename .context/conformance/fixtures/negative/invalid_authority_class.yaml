@@ -1,0 +1,7 @@
+version: "1.0.0"
+authorities:
+  - id: bad_class_authority
+    path: docs/spec.md
+    class: CURRENT  # ILLEGAL: must be ACTIVE, CANDIDATE, LEGACY, SUPERSEDED, HISTORICAL_ONLY, or UNKNOWN
+    domain: PRODUCT_SEMANTICS
+    provenance: "Test spec"
