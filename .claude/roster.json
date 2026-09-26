@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "product": "market-forecast",
+  "authority": ".claude/rules/15-execution-strategy.md#execution-topology-and-dispatch",
+  "canonical": false,
+  "commander": {
+    "name": "Market Forecast｜Commander",
+    "runtime_tool": "chatgpt",
+    "model": "GPT-5.6 Sol"
+  },
+  "shared_roles": {
+    "architect": {
+      "name": "Market Forecast｜Architect｜分析・規劃・設計",
+      "runtime_tool": "codex"
+    },
+    "reviewer": {
+      "name": "Market Forecast｜Reviewer｜驗證・獨立驗收",
+      "runtime_tool": "codex"
+    }
+  },
+  "contexts": {
+    "market-data": {
+      "architect": "shared:architect",
+      "reviewer": "shared:reviewer",
+      "implementer": {
+        "name": "Market Forecast｜Market Data｜實作",
+        "runtime_tool": "commander"
+      },
+      "verifier": "deterministic-tools"
+    },
+    "realized-variance": {
+      "architect": "shared:architect",
+      "reviewer": "shared:reviewer",
+      "implementer": {
+        "name": "Market Forecast｜Realized Variance｜實作",
+        "runtime_tool": "commander"
+      },
+      "verifier": "deterministic-tools"
+    },
+    "risk-forecast": {
+      "architect": "shared:architect",
+      "reviewer": "shared:reviewer",
+      "implementer": {
+        "name": "Market Forecast｜Risk Forecast｜實作",
+        "runtime_tool": "commander"
+      },
+      "verifier": "deterministic-tools"
+    },
+    "forecast-validation": {
+      "architect": "shared:architect",
+      "reviewer": "shared:reviewer",
+      "implementer": {
+        "name": "Market Forecast｜Forecast Validation｜實作",
+        "runtime_tool": "commander"
+      },
+      "verifier": "deterministic-tools"
+    }
+  },
+  "delivery_tracks": {
+    "runtime-ops": {
+      "architect": "shared:architect",
+      "reviewer": "shared:reviewer",
+      "implementer": {
+        "name": "Market Forecast｜Runtime & Governance｜實作",
+        "runtime_tool": "commander"
+      },
+      "verifier": "deterministic-tools"
+    },
+    "pine-deployment": {
+      "architect": "shared:architect",
+      "reviewer": "shared:reviewer",
+      "implementer": {
+        "name": "Market Forecast｜Pine Deployment｜實作",
+        "runtime_tool": "commander"
+      },
+      "verifier": "golden-parity-tests"
+    }
+  }
+}
