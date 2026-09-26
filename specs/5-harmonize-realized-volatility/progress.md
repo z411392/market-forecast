@@ -183,3 +183,20 @@ What remains unproven:
 - independent Reviewer acceptance.
 
 Therefore Task #11 is not Done and measurement is not frozen by this candidate.
+
+
+### Task #11 S5c — downstream price-basis contract correction
+
+Status: RED ORACLE REFROZEN; PRODUCTION NOT YET UPDATED.
+
+Downstream Task #12 found that `IntradayRealizedMeasures` and `DailyRealizedMeasures` dropped the explicit
+`price_basis` already present in canonical/aggregated bars. That would make later 5m/10m/15m comparisons unable to prove
+that all measurements use the same adjustment basis.
+
+Correction frozen in tests/design before production changes:
+- both realized-measure DTOs require `price_basis: Literal["as_printed", "split_adjusted"]`;
+- intraday calculation must propagate the homogeneous aggregated-bar basis;
+- daily composition must propagate that basis unchanged;
+- no formula, sampling, RV/RQ/semivariance or overnight behavior changes.
+
+This refreeze intentionally makes the current production candidate incomplete until the follow-up GREEN commit lands.

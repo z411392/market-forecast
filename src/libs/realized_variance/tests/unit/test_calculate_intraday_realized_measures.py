@@ -59,6 +59,7 @@ def test_calculate_intraday_realized_measures() -> None:
     assert result["security"] == _security()
     assert result["session_date"] == date(2026, 9, 25)
     assert result["sampling_minutes"] == 5
+    assert result["price_basis"] == "as_printed"
     assert result["observation_count"] == 3
     assert result["realized_variance"] == approx(expected_rv)
     assert result["realized_quarticity"] == approx(expected_rq)

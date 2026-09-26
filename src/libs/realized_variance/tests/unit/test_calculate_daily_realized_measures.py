@@ -26,6 +26,7 @@ def _intraday() -> IntradayRealizedMeasures:
         "security": _security(),
         "session_date": date(2026, 9, 25),
         "sampling_minutes": 5,
+        "price_basis": "as_printed",
         "observation_count": 10,
         "realized_variance": 0.04,
         "realized_quarticity": 0.003,
@@ -40,6 +41,7 @@ def test_calculate_daily_realized_measures() -> None:
     assert positive["security"] == _security()
     assert positive["session_date"] == date(2026, 9, 25)
     assert positive["sampling_minutes"] == 5
+    assert positive["price_basis"] == "as_printed"
     assert positive["regular_session_variance"] == approx(0.04)
     assert positive["overnight_log_return"] == approx(0.1)
     assert positive["overnight_variance"] == approx(0.01)
