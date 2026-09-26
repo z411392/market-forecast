@@ -13,7 +13,7 @@
 
 ## 本機執行
 
-- `make ci-fast` 是完整 hermetic gate：lint、typecheck、architecture-check、test。不連外部公開平台來源。
+- `make ci-fast` 是完整 hermetic gate：lint、typecheck、architecture-check、governance-check、test。不連外部 provider 或公開平台來源。
 - 生產入口、CLI、lint 與本機 tests 依規則使用 `uv run`。
 - 真 provider API／下載與 TradingView manual parity observation 依 [70-testing.md](70-testing.md) 僅在明示授權且特定 gate 執行。
 - Token、API key、provider account／billing identity 與憑證不寫進 repo、公開契約或 log。
