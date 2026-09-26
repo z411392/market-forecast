@@ -1,0 +1,118 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://market-forecast.io/schemas/context/capsule.schema.json",
+  "title": "Context Capsule Schema",
+  "description": "Portable JSON schema for Context Capsule V1 navigation receipts.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "capsule_id",
+    "content_digest",
+    "task_identity",
+    "fingerprints",
+    "authority",
+    "routing",
+    "access",
+    "implementation",
+    "impact",
+    "verification",
+    "freshness"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "capsule_id": {
+      "type": "string",
+      "pattern": "^capsule-[a-zA-Z0-9_#-]+-[a-f0-9]{12}$"
+    },
+    "content_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "task_identity": {
+      "type": "object",
+      "required": ["repository", "task_id", "issued_at"],
+      "properties": {
+        "repository": { "type": "string" },
+        "task_id": { "type": "string" },
+        "issued_at": { "type": "string" }
+      }
+    },
+    "fingerprints": {
+      "type": "object",
+      "required": ["base_code", "worktree", "authority", "index", "builder"],
+      "properties": {
+        "base_code": { "type": "string" },
+        "worktree": { "type": "string" },
+        "authority": { "type": "string" },
+        "index": { "type": "string" },
+        "builder": { "type": "string" }
+      }
+    },
+    "authority": {
+      "type": "object",
+      "required": ["primary_refs", "required_decisions", "superseded_refs", "historical_refs", "unresolved_authority"],
+      "properties": {
+        "primary_refs": { "type": "array", "items": { "type": "string" } },
+        "required_decisions": { "type": "array", "items": { "type": "string" } },
+        "superseded_refs": { "type": "array", "items": { "type": "string" } },
+        "historical_refs": { "type": "array", "items": { "type": "string" } },
+        "unresolved_authority": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "routing": {
+      "type": "object",
+      "required": ["modules"],
+      "properties": {
+        "capability": { "type": ["string", "null"] },
+        "owner": { "type": ["string", "null"] },
+        "modules": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "access": {
+      "type": "object",
+      "required": ["must_read", "writable", "verify_only", "forbidden"],
+      "properties": {
+        "must_read": { "type": "array", "items": { "type": "string" } },
+        "writable": { "type": "array", "items": { "type": "string" } },
+        "verify_only": { "type": "array", "items": { "type": "string" } },
+        "forbidden": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "implementation": {
+      "type": "object",
+      "required": ["target_symbols", "target_files"],
+      "properties": {
+        "target_symbols": { "type": "array", "items": { "type": "string" } },
+        "target_files": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "impact": {
+      "type": "object",
+      "required": ["direct_consumers", "interface_boundaries", "unresolved_relations"],
+      "properties": {
+        "direct_consumers": { "type": "array", "items": { "type": "string" } },
+        "interface_boundaries": { "type": "array", "items": { "type": "string" } },
+        "unresolved_relations": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "required": ["relevant_tests", "required_commands", "contract_checks"],
+      "properties": {
+        "relevant_tests": { "type": "array", "items": { "type": "string" } },
+        "required_commands": { "type": "array", "items": { "type": "string" } },
+        "contract_checks": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "freshness": {
+      "type": "object",
+      "required": ["issued_against", "invalidation_conditions"],
+      "properties": {
+        "issued_against": { "type": "object" },
+        "invalidation_conditions": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}
