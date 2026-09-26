@@ -195,3 +195,155 @@ Before any production contract file is added, contract tests will assert:
 - minute bars and corporate actions stay separate;
 - public annotations do not expose provider SDK/HTTP/DataFrame/raw JSON types or an ambiguous `adjusted: bool` field.
 
+
+
+## Task #11 S1 — strict deterministic realized-variance core
+
+Task #11 starts with a provider-neutral pure-domain slice stacked on the exact #10 contract candidate. Live provider/session
+completeness remains a separate dependency-gated integration concern.
+
+### Exact public files
+
+| Path | Public symbol | Purpose |
+|---|---|---|
+| `src/libs/realized_variance/dtos/aggregated_intraday_bar.py` | `AggregatedIntradayBar` | deterministic N-minute OHLCV bucket |
+| `src/libs/realized_variance/dtos/intraday_realized_measures.py` | `IntradayRealizedMeasures` | regular-session RV/RQ/semivariance result |
+| `src/libs/realized_variance/dtos/daily_realized_measures.py` | `DailyRealizedMeasures` | regular + overnight + whole-day result |
+| `src/libs/realized_variance/exceptions/invalid_realized_variance_input_error.py` | `InvalidRealizedVarianceInputError` | stable fail-closed input error |
+| `src/libs/realized_variance/domain/services/aggregate_minute_bars.py` | `aggregate_minute_bars` | strict 1m→5m/10m/15m aggregation |
+| `src/libs/realized_variance/domain/services/calculate_intraday_realized_measures.py` | `calculate_intraday_realized_measures` | interval-return RV/RQ/semivariance |
+| `src/libs/realized_variance/domain/services/calculate_overnight_log_return.py` | `calculate_overnight_log_return` | previous regular close → current regular open |
+| `src/libs/realized_variance/domain/services/calculate_daily_realized_measures.py` | `calculate_daily_realized_measures` | whole-day composition |
+
+No `__init__.py`, provider adapter, DataFrame, network type or CLI surface is added.
+
+### AggregatedIntradayBar
+
+Required keys:
+
+- `security: SecurityIdentity`
+- `session_date: date`
+- `bar_start_utc: datetime`
+- `interval_minutes: Literal[5, 10, 15]`
+- `open: float`
+- `high: float`
+- `low: float`
+- `close: float`
+- `volume: float`
+- `price_basis: Literal["as_printed", "split_adjusted"]`
+- `source_minute_count: int`
+
+The strict kernel requires `source_minute_count == interval_minutes`.
+
+### IntradayRealizedMeasures
+
+Required keys:
+
+- `security: SecurityIdentity`
+- `session_date: date`
+- `sampling_minutes: Literal[5, 10, 15]`
+- `observation_count: int`
+- `realized_variance: float`
+- `realized_quarticity: float`
+- `positive_semivariance: float`
+- `negative_semivariance: float`
+
+### DailyRealizedMeasures
+
+Required keys:
+
+- `security: SecurityIdentity`
+- `session_date: date`
+- `sampling_minutes: Literal[5, 10, 15]`
+- `regular_session_variance: float`
+- `overnight_log_return: float`
+- `overnight_variance: float`
+- `whole_day_variance: float`
+- `regular_positive_semivariance: float`
+- `regular_negative_semivariance: float`
+- `whole_day_positive_semivariance: float`
+- `whole_day_negative_semivariance: float`
+- `realized_quarticity: float`
+- `observation_count: int`
+
+### Strict aggregation invariants
+
+`aggregate_minute_bars(bars, interval_minutes, session_start_utc)`:
+
+- supports only 5 / 10 / 15;
+- requires a non-empty tuple of `CanonicalMinuteBar`;
+- requires exactly one security, one local `session_date`, and one `price_basis`;
+- requires aware zero-offset UTC `bar_start_utc` and `session_start_utc`;
+- requires first minute timestamp exactly equal to `session_start_utc`;
+- requires timestamps strictly ordered and exactly one minute apart;
+- requires total minute count divisible by the selected interval;
+- never forward-fills or synthesizes bars;
+- returns contiguous full buckets only;
+- OHLCV aggregation is first open / max high / min low / last close / summed volume.
+
+Any violation raises `InvalidRealizedVarianceInputError` with stable
+`type = "invalid_realized_variance_input"`.
+
+Legitimate provider/session shapes that do not fit the strict kernel must be resolved by explicit #4/#12 policy after live
+acceptance; the kernel is not weakened speculatively.
+
+### Interval returns and realized measures
+
+For aggregated bars `b_0 ... b_(M-1)`:
+
+```text
+r_0 = log(close_0 / open_0)
+r_i = log(close_i / close_(i-1)), i >= 1
+
+RV  = Σ r_i²
+RQ  = (M / 3) × Σ r_i⁴
+RS+ = Σ r_i² where r_i >= 0
+RS- = Σ r_i² where r_i < 0
+```
+
+All prices used in log returns must be finite and strictly positive. Input bars must have one security/session/sampling interval
+and remain strictly ordered. `RS+ + RS-` must equal `RV` within floating-point tolerance.
+
+### Overnight and whole-day composition
+
+`calculate_overnight_log_return(previous_regular_close, current_regular_open)`:
+
+```text
+r_ON = log(current_regular_open / previous_regular_close)
+```
+
+Both prices must be finite and strictly positive.
+
+`calculate_daily_realized_measures(intraday, overnight_log_return)`:
+
+```text
+overnight_variance = r_ON²
+whole_day_variance = intraday.realized_variance + overnight_variance
+```
+
+The overnight variance is added to whole-day positive semivariance when `r_ON >= 0`, otherwise to whole-day negative
+semivariance. Realized quarticity remains the regular-session high-frequency measure; Task #11 does not invent a whole-day RQ.
+
+### S2 frozen test oracles
+
+Before production implementation, tests must cover:
+
+Positive:
+- deterministic 1m→5m aggregation with exact OHLCV;
+- same canonical minutes produce deterministic 10m and 15m results;
+- hand-computed two/three-interval RV/RQ/RS+/RS-;
+- semivariance identity;
+- hand-computed overnight and whole-day composition.
+
+Negative:
+- unsupported interval;
+- empty input;
+- non-UTC / naive timestamp;
+- first-minute anchor mismatch;
+- duplicate/out-of-order/gapped minute;
+- mixed security/session/price basis;
+- non-divisible final bucket;
+- non-positive return price;
+- mixed sampling/session input to realized-measures calculation.
+
+Provider-specific missing-bar meaning, early-close/auction classification and live completeness are outside S1–S4.
