@@ -1,0 +1,45 @@
+policy_version: "1.0.0"
+invariant: "DENY_BEFORE_READ_FOR_INDEXING"
+
+canonical_path_resolution:
+  resolve_symlinks_before_check: true
+  reject_traversal_escaping_repo_root: true
+
+prohibited_patterns:
+  - "*.pem"
+  - "*.key"
+  - "*.token"
+  - "*.env"
+  - "*.env.*"
+  - "*credential*"
+  - "*secret*"
+  - "data/raw/**"
+  - "data/provider/**"
+  - "data/holdout/**"
+  - "artifacts/private/**"
+  - ".venv/**"
+  - ".git/**"
+  - "__pycache__/**"
+  - ".pytest_cache/**"
+  - ".ruff_cache/**"
+
+prohibited_extensions:
+  - ".pem"
+  - ".key"
+  - ".token"
+  - ".env"
+  - ".sqlite"
+  - ".sqlite3"
+  - ".parquet"
+  - ".csv"
+  - ".zip"
+  - ".tar"
+  - ".gz"
+
+allowed_binary_extensions: []
+
+descriptions:
+  credentials: "Never read/index secrets or provider credentials"
+  raw_market_data: "Do not index licensed/raw market data as model context"
+  holdout: "Keep untouched outcome data out of model-selection context"
+  ephemeral: "Exclude caches, virtualenvs and build artifacts"
