@@ -1,6 +1,8 @@
 from ast import Import, ImportFrom, parse, walk
 from pathlib import Path
 
+from pytest import mark
+
 SRC = Path(__file__).resolve().parents[4]
 PUBLIC_SURFACE = {"ports", "dtos", "constants", "exceptions"}
 FORBIDDEN_FILENAMES = {
@@ -16,6 +18,7 @@ FORBIDDEN_FILENAMES = {
 FORBIDDEN_DIRECTORY_NAMES = {"contracts", "public", "shared", "types"}
 
 
+@mark.architecture
 def test_repository_architecture() -> None:
     files = sorted(SRC.rglob("*.py"))
 
