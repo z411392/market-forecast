@@ -1,0 +1,133 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://market-forecast.io/schemas/context/benchmark.schema.json",
+  "title": "Context Index Benchmark Suite and Run Evaluation Schema",
+  "description": "Portable JSON schema for Context Index empirical benchmark suite evaluation and adoption gate receipts.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "evaluated_at",
+    "commit_sha",
+    "total_cases",
+    "passed_cases",
+    "gate_evaluation",
+    "rollout_decision",
+    "case_results"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "evaluated_at": {
+      "type": "string"
+    },
+    "commit_sha": {
+      "type": "string"
+    },
+    "total_cases": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "passed_cases": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "gate_evaluation": {
+      "type": "object",
+      "required": [
+        "authority_recall_pass",
+        "required_contract_recall_pass",
+        "zero_false_current_pass",
+        "zero_security_denied_pass",
+        "zero_sensitive_leak_pass",
+        "unauthorized_changes_pass",
+        "all_cases_pass",
+        "verdict"
+      ],
+      "properties": {
+        "authority_recall_pass": { "type": "boolean" },
+        "required_contract_recall_pass": { "type": "boolean" },
+        "zero_false_current_pass": { "type": "boolean" },
+        "zero_security_denied_pass": { "type": "boolean" },
+        "zero_sensitive_leak_pass": { "type": "boolean" },
+        "unauthorized_changes_pass": { "type": "boolean" },
+        "all_cases_pass": { "type": "boolean" },
+        "shadow_evaluation_pass": { "type": "boolean" },
+        "historical_restore_pass": { "type": "boolean" },
+        "verdict": {
+          "type": "string",
+          "enum": ["ACCEPT", "REVISION_REQUIRED"]
+        }
+      }
+    },
+    "rollout_decision": {
+      "type": "object",
+      "required": [
+        "ctx_v1_shadow_evaluation",
+        "rollout_recommendation",
+        "default_rollout_authorized",
+        "enforced_rollout_authorized"
+      ],
+      "properties": {
+        "ctx_v1_shadow_evaluation": {
+          "type": "string",
+          "enum": ["ACCEPT", "REVISION_REQUIRED"]
+        },
+        "rollout_recommendation": {
+          "type": "string",
+          "enum": ["SHADOW_CONTINUE", "ASSISTED_CANDIDATE"]
+        },
+        "default_rollout_authorized": {
+          "type": "string",
+          "enum": ["NO"]
+        },
+        "enforced_rollout_authorized": {
+          "type": "string",
+          "enum": ["NO"]
+        }
+      }
+    },
+    "case_results": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "case_id",
+          "name",
+          "category",
+          "passed",
+          "authority_recall",
+          "required_contract_recall",
+          "false_current_authority_count",
+          "security_denied_hits",
+          "sensitive_leak_hits"
+        ],
+        "properties": {
+          "case_id": { "type": "string" },
+          "name": { "type": "string" },
+          "category": { "type": "string" },
+          "passed": { "type": "boolean" },
+          "failure_reasons": { "type": "array", "items": { "type": "string" } },
+          "authority_recall": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+          "required_contract_recall": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+          "false_current_authority_count": { "type": "integer", "minimum": 0 },
+          "security_denied_hits": { "type": "integer", "minimum": 0 },
+          "sensitive_leak_hits": { "type": "integer", "minimum": 0 },
+          "precision": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+          "consumer_recall": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+          "test_recall": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+          "unresolved_detected": { "type": "boolean" },
+          "files_opened": { "type": "integer", "minimum": 0 },
+          "lines_read": { "type": "integer", "minimum": 0 },
+          "estimated_tool_calls": { "type": "integer", "minimum": 0 },
+          "line_reduction_pct": { "type": "number" },
+          "tool_reduction_pct": { "type": "number" }
+        }
+      }
+    },
+    "shadow_comparison": {
+      "type": "object"
+    }
+  }
+}
