@@ -1,7 +1,12 @@
 from datetime import date, datetime, timedelta, timezone
 from math import log
 
+from pytest import approx, mark, raises
+
 from libs.market_data.dtos.security_identity import SecurityIdentity
+from libs.realized_variance.constants.realized_variance_algorithm_version import (
+    REALIZED_VARIANCE_ALGORITHM_VERSION,
+)
 from libs.realized_variance.domain.services.calculate_intraday_realized_measures import (
     calculate_intraday_realized_measures,
 )
@@ -9,7 +14,6 @@ from libs.realized_variance.dtos.aggregated_intraday_bar import AggregatedIntrad
 from libs.realized_variance.exceptions.invalid_realized_variance_input_error import (
     InvalidRealizedVarianceInputError,
 )
-from pytest import approx, mark, raises
 
 
 def _security() -> SecurityIdentity:
@@ -34,6 +38,7 @@ def _bar(start: datetime, index: int, opening: float, close: float) -> Aggregate
         "volume": 1000.0,
         "price_basis": "as_printed",
         "source_minute_count": 5,
+        "algorithm_version": REALIZED_VARIANCE_ALGORITHM_VERSION,
     }
 
 
@@ -60,6 +65,7 @@ def test_calculate_intraday_realized_measures() -> None:
     assert result["session_date"] == date(2026, 9, 25)
     assert result["sampling_minutes"] == 5
     assert result["price_basis"] == "as_printed"
+    assert result["algorithm_version"] == REALIZED_VARIANCE_ALGORITHM_VERSION
     assert result["observation_count"] == 3
     assert result["realized_variance"] == approx(expected_rv)
     assert result["realized_quarticity"] == approx(expected_rq)
@@ -84,6 +90,11 @@ def test_calculate_intraday_realized_measures() -> None:
     mixed_basis[1] = {**mixed_basis[1], "price_basis": "split_adjusted"}
     with raises(InvalidRealizedVarianceInputError):
         calculate_intraday_realized_measures(tuple(mixed_basis))
+
+    unsupported_version = list(bars)
+    unsupported_version[1] = {**unsupported_version[1], "algorithm_version": "rv-core-v2"}
+    with raises(InvalidRealizedVarianceInputError):
+        calculate_intraday_realized_measures(tuple(unsupported_version))
 
     gapped = list(bars)
     gapped[1] = {**gapped[1], "bar_start_utc": start + timedelta(minutes=10)}

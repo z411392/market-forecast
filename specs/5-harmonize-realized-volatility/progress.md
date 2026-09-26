@@ -185,6 +185,36 @@ What remains unproven:
 Therefore Task #11 is not Done and measurement is not frozen by this candidate.
 
 
+### Task #11 S5c — downstream price-basis contract correction
+
+Status: RED ORACLE REFROZEN; PRODUCTION NOT YET UPDATED.
+
+Downstream Task #12 found that `IntradayRealizedMeasures` and `DailyRealizedMeasures` dropped the explicit
+`price_basis` already present in canonical/aggregated bars. That would make later 5m/10m/15m comparisons unable to prove
+that all measurements use the same adjustment basis.
+
+Correction frozen in tests/design before production changes:
+- both realized-measure DTOs require `price_basis: Literal["as_printed", "split_adjusted"]`;
+- intraday calculation must propagate the homogeneous aggregated-bar basis;
+- daily composition must propagate that basis unchanged;
+- no formula, sampling, RV/RQ/semivariance or overnight behavior changes.
+
+This refreeze intentionally makes the current production candidate incomplete until the follow-up GREEN commit lands.
+
+### Task #12 upstream reconciliation — algorithm identity
+
+Upstream exact candidate: `93da5e2d9ac4ab899181832583b33d3fb77897b6`.
+
+Reconciled before any Task #12 production implementation:
+- `price_basis` remains preserved through aggregated → intraday → daily measurements;
+- `REALIZED_VARIANCE_ALGORITHM_VERSION = "rv-core-v1"` is now present;
+- aggregated, intraday and daily measurement DTOs all carry `algorithm_version`;
+- aggregation stamps the current version;
+- intraday/daily calculation fails closed on unsupported algorithm versions and preserves the current version.
+
+Task #12-specific RED audit/target tests remain owned by #12 and are preserved unchanged by this reconciliation.
+No audit statistic, future-target production function, sampling choice, provider call or empirical freeze is added here.
+
 ### Task #12 S1 — audit/target contract freeze
 
 Status: COMPLETE AS DESIGN; NO PRODUCTION CODE YET.

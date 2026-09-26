@@ -1,5 +1,8 @@
 from math import isclose, isfinite
 
+from libs.realized_variance.constants.realized_variance_algorithm_version import (
+    REALIZED_VARIANCE_ALGORITHM_VERSION,
+)
 from libs.realized_variance.dtos.daily_realized_measures import DailyRealizedMeasures
 from libs.realized_variance.dtos.intraday_realized_measures import IntradayRealizedMeasures
 from libs.realized_variance.exceptions.invalid_realized_variance_input_error import (
@@ -13,6 +16,8 @@ def calculate_daily_realized_measures(
 ) -> DailyRealizedMeasures:
     if not isfinite(overnight_log_return):
         raise InvalidRealizedVarianceInputError("invalid_overnight_log_return")
+    if intraday["algorithm_version"] != REALIZED_VARIANCE_ALGORITHM_VERSION:
+        raise InvalidRealizedVarianceInputError("unsupported_algorithm_version")
     if intraday["observation_count"] <= 0:
         raise InvalidRealizedVarianceInputError("invalid_observation_count")
 
@@ -58,6 +63,7 @@ def calculate_daily_realized_measures(
         "whole_day_negative_semivariance": whole_day_negative_semivariance,
         "realized_quarticity": intraday["realized_quarticity"],
         "observation_count": intraday["observation_count"],
+        "algorithm_version": intraday["algorithm_version"],
     }
 
 
