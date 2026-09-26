@@ -8,6 +8,7 @@ class DailyRealizedMeasures(TypedDict):
     security: SecurityIdentity
     session_date: date
     sampling_minutes: Literal[5, 10, 15]
+    price_basis: Literal["as_printed", "split_adjusted"]
     regular_session_variance: float
     overnight_log_return: float
     overnight_variance: float
