@@ -18,7 +18,7 @@ body:
     id: roadmap_phase
     attributes:
       label: "Roadmap phase"
-      description: "產品 P1–P6；不填工程 Analysis／Design／Implement 階段。"
+      description: "產品 P0–P4；不填工程 Analysis／Design／Implement 階段。"
     validations:
       required: true
   - type: textarea

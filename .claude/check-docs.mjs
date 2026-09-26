@@ -64,6 +64,7 @@ const requiredGovernance = [
   '.github/ISSUE_TEMPLATE/bug.yml',
   '.github/ISSUE_TEMPLATE/spike.yml',
   '.github/pull_request_template.md',
+  '.claude/scripts/bootstrap-agents.sh',
 ];
 
 for (const path of requiredGovernance) {
@@ -158,8 +159,27 @@ const gitignore = read(join(root, '.gitignore'));
 check(gitignore.includes('data/'), '.gitignore must exclude data/');
 check(gitignore.includes('.env'), '.gitignore must exclude env files');
 
-// Active rules must not retain Kaledoxa-specific current product/runtime identities.
-const activeRuleText = requiredRules.map((path) => read(join(root, path))).join('\n');
+const bootstrapPath = join(root, '.claude/scripts/bootstrap-agents.sh');
+check(
+  (lstatSync(bootstrapPath).mode & 0o111) !== 0,
+  '.claude/scripts/bootstrap-agents.sh must remain executable'
+);
+
+// Active governance must not retain source-product current identities.
+const inheritedCurrentTruthPaths = [
+  ...requiredRules,
+  'docs/architecture/authority-aware-repository-context-methodology.md',
+  'specs/README.md',
+  '.github/ISSUE_TEMPLATE/epic.yml',
+  '.github/ISSUE_TEMPLATE/story.yml',
+  '.github/ISSUE_TEMPLATE/task.yml',
+  '.github/ISSUE_TEMPLATE/bug.yml',
+  '.github/ISSUE_TEMPLATE/spike.yml',
+  '.github/pull_request_template.md',
+];
+const inheritedCurrentTruthText = inheritedCurrentTruthPaths
+  .map((path) => read(join(root, path)))
+  .join('\n');
 for (const retired of [
   'Camoufox',
   'KALEDOXA_',
@@ -169,10 +189,18 @@ for (const retired of [
   'news-reading',
   'semantic-grouping',
   'product-ui',
-  '01a0bf82-',
+  'Thesiscope',
+  'CLEAN REBUILD AUTHORIZED',
+  'Entity Workspace',
+  'Verified Facts',
+  'browser profiles',
+  'private tenant exports',
   'Gemini 3.8 Flash',
 ]) {
-  check(!activeRuleText.includes(retired), 'Inherited product/runtime identity remains in active rules: ' + retired);
+  check(
+    !inheritedCurrentTruthText.includes(retired),
+    'Inherited source-product current identity remains in active governance: ' + retired
+  );
 }
 
 // Human-readable Markdown link and formatting checks.

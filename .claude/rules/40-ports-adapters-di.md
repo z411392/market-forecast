@@ -36,7 +36,7 @@ Outbound port 是 application 向外取得能力的契約。
 - Driven adapter 只放在 `libs/<feature>/adapters/driven/`，實作一個或多個 outbound ports。
 - 不准放在 `apps/`。App 只有 driving adapter 與 composition root。
 - 以 constructor parameter 接收已解析的設定，絕不自己讀環境變數。
-- 可擁有 SQLite connection、FAISS index、LadybugDB connection、HTTP client 或 browser resource。
+- 可擁有 SQLite connection、HTTP client、檔案／cache handle 或 market-data provider SDK/resource。
 - 基礎設施資源不得是 module-level global。
 - 來源 adapter 回傳 feature DTO，不讓外部 SDK response 穿過 port。
 
@@ -51,7 +51,7 @@ Outbound port 是 application 向外取得能力的契約。
 
 ## 資源 identity
 
-多個 outbound ports 必須共用同一 transaction、browser lease 或 store instance 時，providers 必須回傳
+多個 outbound ports 必須共用同一 transaction、provider client 或 store instance 時，providers 必須回傳
 同一個 memoized adapter。兩個獨立 `@singleton` provider 仍可能各建立一個物件。
 
 ## DI smoke test

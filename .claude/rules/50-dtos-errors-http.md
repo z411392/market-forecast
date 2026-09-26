@@ -72,5 +72,5 @@ row: dict = {"entity_id": entity_id, "label": label}
 - 成功或失敗由 HTTP status code 決定。
 - `type` 是前端可以穩定分支的機器碼。
 - Handler 使用具名 DTO，不手拼匿名 response records。
-- API 不回傳 session 路徑、登入帳號、cookie、token、完整指紋或未遮蔽的內部錯誤。
+- API 不回傳本機／內部路徑、provider account／billing identity、token／credential 或未遮蔽的內部錯誤。
 - 一個 major version 內只保留一種成功 envelope。

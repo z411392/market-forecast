@@ -46,7 +46,7 @@ MECE 是每種資訊有一個清楚 owner 且所需資訊都有位置；不是�
 
 Root README、工具入口與 docs README 只導覽，不重複產品正文。
 工程 rules 與執行必要的 OpenAPI／資料 schema 留在原有技術位置，不據此恢復產品規劃副本。
-BC 的 docs 與 frontend 產品文件集中在 backend docs；不建立相容 shim、第二套 WI 或控制面。
+feature／app 的產品文件集中在 root `docs/` 與 Story `specs/` 的唯一 owner；不在程式目錄建立相容 shim、第二套 WI 或平行控制面。
 
 本產品以五類文件存放、以 BC 提供閱讀導覽，兩個維度不互相取代。BC 表達模型／業務責任，ports／adapters 表達互動邊界，
 apps／libs 表達程式封裝及入口；三者不必一對一。實作導航集中在 Context Map，程式搬家不自動搬動領域文件或重切 BC。
