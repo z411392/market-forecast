@@ -44,6 +44,12 @@ def test_repository_architecture() -> None:
     assert import_violations == []
     assert dependency_cycle is None, "feature dependency cycle: " + " -> ".join(dependency_cycle or [])
 
+    assert _path_violations([_SRC / "libs/market_data/__init__.py"]) != []
+    assert _path_violations([_SRC / "apps/cli/domain/calculate.py"]) != []
+    assert _path_violations([_SRC / "apps/cli/adapters/driven/provider.py"]) != []
+    assert _path_violations([_SRC / "apps/cli/adapters/driving/measure.py"]) == []
+    assert _path_violations([_SRC / "libs/market_data/ports/read_minute_bars_port.py"]) == []
+
     forbidden_examples = (
         ("libs.kernel.clock", "libs.market_data.dtos.canonical_minute_bar"),
         ("libs.realized_variance.domain.calculate_rv", "apps.cli.entrypoints"),
