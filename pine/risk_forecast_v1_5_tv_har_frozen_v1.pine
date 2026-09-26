@@ -57,7 +57,7 @@ bool exactDaily = timeframe.isdaily and timeframe.multiplier == 1
 if not exactDaily
     runtime.error("Risk Forecast HAR Frozen v1 must run on a 1D chart.")
 
-string tickerId = syminfo.tickerid
+string tickerId = ticker.standard(syminfo.tickerid)
 float beta0 = na
 float betaD = na
 float betaW = na
