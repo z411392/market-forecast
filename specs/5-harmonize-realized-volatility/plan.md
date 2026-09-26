@@ -98,6 +98,8 @@ Provider-specific payload parsing remains in future driven adapters; public sign
 
 ### DTO field contract
 
+All seven DTO symbols below are `TypedDict` contracts; no dataclass/Pydantic/provider SDK type is used in the public boundary.
+
 `SecurityIdentity` required keys:
 
 - `symbol: str` — canonical research symbol.
@@ -170,7 +172,7 @@ from the public closure.
 
 Driven adapters are responsible for rejecting provider observations that cannot be represented by the frozen contract,
 including ambiguous adjustment state or timestamp/session identity. They map such failures to
-`InvalidMarketDataContractError`; the exception type is stable and provider-neutral. Adapter-specific parser functions
+`InvalidMarketDataContractError`; the exception exposes stable machine `type = "invalid_market_data_contract"` and remains provider-neutral. Exception messages must not contain credentials, provider account identity or raw provider responses. Adapter-specific parser functions
 and provider error mappings are not implemented by Task #10.
 
 ### S2 frozen contract-test oracle
