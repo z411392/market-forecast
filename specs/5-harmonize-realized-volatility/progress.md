@@ -28,3 +28,37 @@ Provisional rulings:
 - TWSE Data E-Shop: official Taiwan reference/institutional fallback. Historical intraday products extend to 2006; the detailed intraday product is internal-use licensed and publicly priced at NT$10,000 per subscribed month, so it is not the first private-pilot source.
 
 Next: S2 freezes provider-port semantics, timestamp/session identity, adjusted-vs-as-printed policy and acceptance oracles before any live provider call.
+
+
+### Spike #4 S2 — provider boundary semantics
+
+Status: COMPLETE.
+
+Frozen before live data access:
+
+- canonical bar timestamp is UTC bar-start plus explicit local session date;
+- provider/raw adjustment convention is explicit;
+- provider adapters do not forward-fill or synthesize missing minutes;
+- regular-session and overnight components remain separate;
+- raw/as-observed bars and dated corporate-action facts remain distinct;
+- corporate-action normalization is a versioned downstream transform;
+- REST adjusted data and flat-file/provider unadjusted data cannot be silently concatenated.
+
+Commit: `ca00cef9a9c33130fa56c7c4a65a8cc6096de5ac`.
+
+### Spike #4 S3 — narrow live acceptance plan
+
+Status: READY AS A PLAN; LIVE EXECUTION BLOCKED BY PROVIDER ACCESS/AUTHORIZATION.
+
+Predeclared pilot instruments:
+- AAPL
+- NVDA
+- TWSE 2330
+
+Required evidence classes:
+- ordinary regular session;
+- U.S. early-close session;
+- U.S. corporate-action boundary (NVDA 2024-06-10 split is the initial candidate);
+- recent date overlapping existing TradingView manual-export evidence.
+
+The live step must not start until credentials/subscription access and quota/spend authorization are explicit. No bulk backfill is part of the acceptance run.
