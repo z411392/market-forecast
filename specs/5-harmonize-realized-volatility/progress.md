@@ -62,3 +62,16 @@ Required evidence classes:
 - recent date overlapping existing TradingView manual-export evidence.
 
 The live step must not start until credentials/subscription access and quota/spend authorization are explicit. No bulk backfill is part of the acceptance run.
+
+### Task #10 — canonical minute-bar / corporate-action contracts
+
+Status: IN PROGRESS on `codex/10-canonical-minute-bar-contracts`.
+
+S1 design finding:
+- #4 live provider acceptance remains blocked, but its S2/S3 provider-neutral design is sufficient for #10.
+- Public contracts are owned by `market_data`; no app, provider adapter, network call or provider promotion is part of this Task.
+- Exact DTO/port/error paths and fields are frozen in `plan.md` before contract tests and production symbols.
+- Missing minutes remain absence of observation; corporate actions remain separate dated facts.
+- Story target formula formatting was repaired; product semantics are unchanged.
+
+Next: S2 adds frozen positive/negative contract tests before production contract implementation.

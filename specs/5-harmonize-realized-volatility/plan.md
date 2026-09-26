@@ -75,3 +75,112 @@ Acceptance compares:
 7. overlap against TradingView only as secondary parity evidence.
 
 No provider is promoted from documentation alone.
+
+## Task #10 S1 — canonical market-data contract design
+
+Task #10 makes the `market_data` public contract concrete without selecting or calling a provider.
+Provider-specific payload parsing remains in future driven adapters; public signatures contain owner DTOs only.
+
+### Exact files and public symbols
+
+| Path | Public symbol | Purpose |
+|---|---|---|
+| `src/libs/market_data/dtos/security_identity.py` | `SecurityIdentity` | canonical symbol/exchange/timezone/calendar identity |
+| `src/libs/market_data/dtos/minute_bars_query.py` | `MinuteBarsQuery` | 1-minute read request by local session-date range |
+| `src/libs/market_data/dtos/source_provenance.py` | `SourceProvenance` | provider/dataset/source-symbol/retrieval/raw artifact identity |
+| `src/libs/market_data/dtos/canonical_minute_bar.py` | `CanonicalMinuteBar` | one observed 60-second OHLCV bar |
+| `src/libs/market_data/dtos/minute_bars_batch.py` | `MinuteBarsBatch` | homogeneous query + provenance + immutable bar tuple |
+| `src/libs/market_data/dtos/corporate_actions_query.py` | `CorporateActionsQuery` | dated corporate-action read request |
+| `src/libs/market_data/dtos/corporate_action_fact.py` | `CorporateActionFact` | separate dated split/symbol-change/dividend/other fact |
+| `src/libs/market_data/ports/read_minute_bars_port.py` | `ReadMinuteBarsPort` | provider-neutral minute-bar outbound port |
+| `src/libs/market_data/ports/read_corporate_actions_port.py` | `ReadCorporateActionsPort` | provider-neutral corporate-action outbound port |
+| `src/libs/market_data/exceptions/invalid_market_data_contract_error.py` | `InvalidMarketDataContractError` | stable adapter/parser contract failure |
+
+### DTO field contract
+
+`SecurityIdentity` required keys:
+
+- `symbol: str` — canonical research symbol.
+- `exchange: str` — canonical exchange identity.
+- `timezone: str` — IANA timezone used for local session semantics.
+- `calendar_id: str` — exchange-calendar identity used by downstream coverage/session logic.
+
+`MinuteBarsQuery` required keys:
+
+- `security: SecurityIdentity`
+- `start_session_date: date`
+- `end_session_date: date`
+- `session_scope: Literal["regular", "all_observed"]`
+
+`SourceProvenance` required keys:
+
+- `provider: str`
+- `provider_dataset: str`
+- `source_symbol: str`
+- `requested_start_session_date: date`
+- `requested_end_session_date: date`
+- `retrieved_at_utc: datetime`
+- `raw_artifact_id: str`
+- `raw_content_sha256: str`
+
+`CanonicalMinuteBar` required keys:
+
+- `security: SecurityIdentity`
+- `bar_start_utc: datetime`
+- `session_date: date`
+- `open: float`
+- `high: float`
+- `low: float`
+- `close: float`
+- `volume: float`
+- `price_basis: Literal["as_printed", "split_adjusted"]`
+
+`MinuteBarsBatch` required keys:
+
+- `query: MinuteBarsQuery`
+- `provenance: SourceProvenance`
+- `bars: tuple[CanonicalMinuteBar, ...]`
+
+A missing minute is represented only by absence from `bars`; no DTO field authorizes forward-fill or synthetic bars.
+
+`CorporateActionsQuery` required keys:
+
+- `security: SecurityIdentity`
+- `start_date: date`
+- `end_date: date`
+
+`CorporateActionFact` required keys:
+
+- `security: SecurityIdentity`
+- `action_type: Literal["split", "symbol_change", "cash_dividend", "other"]`
+- `effective_date: date`
+- `provenance: SourceProvenance`
+
+Optional action-specific keys use `NotRequired`: `ratio: float`, `previous_symbol: str`, `new_symbol: str`,
+`cash_amount: float`, `currency: str`.
+
+### Port and failure contract
+
+`ReadMinuteBarsPort.__call__(query: MinuteBarsQuery) -> MinuteBarsBatch`.
+
+`ReadCorporateActionsPort.__call__(query: CorporateActionsQuery) -> tuple[CorporateActionFact, ...]`.
+
+Both are ABCs owned by `market_data`. Provider SDK objects, DataFrame, raw JSON and HTTP response types are forbidden
+from the public closure.
+
+Driven adapters are responsible for rejecting provider observations that cannot be represented by the frozen contract,
+including ambiguous adjustment state or timestamp/session identity. They map such failures to
+`InvalidMarketDataContractError`; the exception type is stable and provider-neutral. Adapter-specific parser functions
+and provider error mappings are not implemented by Task #10.
+
+### S2 frozen contract-test oracle
+
+Before any production contract file is added, contract tests will assert:
+
+- exact TypedDict required/optional key sets;
+- `price_basis` and action-type Literal alternatives;
+- UTC/session/provenance fields remain present in public annotations;
+- port ABC signatures reference owner DTOs only;
+- minute bars and corporate actions stay separate;
+- public annotations do not expose provider SDK/HTTP/DataFrame/raw JSON types or an ambiguous `adjusted: bool` field.
+

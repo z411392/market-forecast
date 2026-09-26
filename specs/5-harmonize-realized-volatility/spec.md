@@ -18,15 +18,15 @@
 
 ## Primary target after freeze
 
-[
-Y_{t,5}=rac{1}{5}sum_{h=1}^{5}V^{WD}_{t+h}
-]
+\[
+Y_{t,5}=\frac{1}{5}\sum_{h=1}^{5}V^{WD}_{t+h}
+\]
 
 where:
 
-[
+\[
 V^{WD}_t=V^{RS}_t+r^2_{ON,t}
-]
+\]
 
 H=20 uses the same construction only as confirmatory.
 
