@@ -1,0 +1,16 @@
+version: "1.0.0"
+authorities:
+  - id: sample_authority
+    path: docs/spec.md
+    class: ACTIVE
+    domain: PRODUCT_SEMANTICS
+    provenance: "Issue #1 / Approved"
+    supersedes:
+      - old_spec
+  - id: old_spec
+    path: docs/old.md
+    class: SUPERSEDED
+    domain: PRODUCT_SEMANTICS
+    provenance: "Superseded by sample_authority"
+    historical_reference_of:
+      - sample_authority
