@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://market-forecast.io/schemas/context/common.schema.json",
+  "title": "Market Forecast Context Common Schema Definitions",
+  "$defs": {
+    "authority_class": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "CANDIDATE",
+        "LEGACY",
+        "SUPERSEDED",
+        "HISTORICAL_ONLY",
+        "UNKNOWN"
+      ]
+    },
+    "authority_edge_type": {
+      "type": "string",
+      "enum": [
+        "SUPERSEDES",
+        "AMENDS",
+        "IMPLEMENTS",
+        "CANDIDATE_FOR",
+        "HISTORICAL_REFERENCE_OF"
+      ]
+    },
+    "authority_domain": {
+      "type": "string",
+      "enum": [
+        "PRODUCT_SEMANTICS",
+        "ARCHITECTURE_BOUNDARY",
+        "DOMAIN_EVENT_MODEL",
+        "PRODUCT_REQUIREMENTS",
+        "DELIVERY_ROADMAP",
+        "CANONICAL_GOVERNANCE",
+        "UI_SPECIFICATION",
+        "IMPLEMENTATION_EVIDENCE",
+        "WORKFLOW_STATE"
+      ]
+    },
+    "provenance": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "object",
+          "required": ["source_ref"],
+          "properties": {
+            "source_ref": { "type": "string" },
+            "source_digest": { "type": "string" },
+            "rationale": { "type": "string" }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "scope_kind": {
+      "type": "string",
+      "enum": [
+        "GLOBAL_GOVERNANCE",
+        "PRODUCT_SSOT",
+        "BOUNDED_CONTEXT",
+        "STORY",
+        "TASK",
+        "PUBLIC_CONTRACT",
+        "SHARED_CONTRACT",
+        "PILOT"
+      ]
+    }
+  }
+}
