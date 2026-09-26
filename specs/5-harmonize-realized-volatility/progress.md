@@ -129,7 +129,7 @@ Structural readback after S3 found:
 - zero `__init__.py`;
 - one public symbol per new Python file;
 - no relative or function-local imports;
-- frozen S2 contract-test blobs unchanged after S3.
+- current contract-test blobs differ only because of the later import-order correction; assertion readback is unchanged from the original S2 oracle (minute-bar 33/33, corporate-action 15/15, ports 11/11).
 
 Remaining gate:
 - repository-executed contract / architecture gates are not available through the current GitHub-only execution surface;
