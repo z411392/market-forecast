@@ -460,6 +460,7 @@ Required behavior:
 Required keys:
 
 - `security: SecurityIdentity`
+- `sampling_minutes: Literal[5, 10, 15]`
 - `price_basis: Literal["as_printed", "split_adjusted"]`
 - `origin_session_date: date`
 - `horizon_sessions: Literal[5, 20]`
@@ -480,6 +481,7 @@ Input:
 Required behavior:
 
 - accepts one security, one sampling interval, and one `price_basis` per call;
+- propagates that sampling interval and price basis unchanged to every `FutureVarianceTarget`;
 - requires `measurements` and `expected_session_dates` to have identical length;
 - requires measurement session dates to exactly match `expected_session_dates` in order;
 - requires strictly increasing, unique expected session dates;

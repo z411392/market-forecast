@@ -234,3 +234,19 @@ Corrected contract:
 
 No statistical formula, horizon definition, sampling choice, or provider behavior changed.
 S2 remains intentionally unstarted until this corrected design is durable.
+
+
+### Task #12 S1 correction — preserve sampling identity in future targets
+
+Status: DESIGN CORRECTED BEFORE TEST FREEZE.
+
+Fresh-read found that the target builder accepted one sampling interval per call but `FutureVarianceTarget` did not record it.
+That would make 5m-, 10m-, and 15m-based targets indistinguishable after construction.
+
+Corrected contract:
+- `FutureVarianceTarget` requires `sampling_minutes: Literal[5, 10, 15]`;
+- `build_future_variance_targets` propagates the single input sampling interval unchanged;
+- mixed sampling remains a negative oracle;
+- this change does not select or promote any sampling frequency.
+
+S2 remains intentionally unstarted until this measurement-identity correction is durable.
