@@ -168,6 +168,7 @@ check(
 // Active governance must not retain source-product current identities.
 const inheritedCurrentTruthPaths = [
   ...requiredRules,
+  'docs/architecture/authority-aware-repository-context-methodology.md',
   'specs/README.md',
   '.github/ISSUE_TEMPLATE/epic.yml',
   '.github/ISSUE_TEMPLATE/story.yml',
@@ -190,6 +191,10 @@ for (const retired of [
   'product-ui',
   'Thesiscope',
   'CLEAN REBUILD AUTHORIZED',
+  'Entity Workspace',
+  'Verified Facts',
+  'browser profiles',
+  'private tenant exports',
   'Gemini 3.8 Flash',
 ]) {
   check(

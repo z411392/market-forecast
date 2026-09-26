@@ -211,9 +211,9 @@ Runtime operational truth 必須 query-time fresh-read，不升格為 Product se
 例如：
 
 ```yaml
-owner: semantic_grouping
+owner: realized_variance
 provenance:
-  source_ref: docs/architecture/context-map.md#semantic-grouping
+  source_ref: docs/architecture/context-map.md
   source_digest: sha256:...
 ```
 
@@ -732,10 +732,10 @@ parse / tokenize / hash / index
 - credentials
 - `.env`
 - tokens
-- cookies
-- browser profiles
-- sessions
-- private tenant exports
+- provider API credentials
+- provider account／billing identity
+- licensed raw provider exports
+- holdout outcomes
 - holdout / restricted research data
 - database dumps
 - generated private artifacts

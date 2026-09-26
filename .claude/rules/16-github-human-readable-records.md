@@ -436,7 +436,7 @@ Closed historical leaf 可縮短，但仍要涵蓋「目的／重要轉折（若
 但在人類段必須說明。例如：
 
 - `REVISION_REQUIRED` →「這版方向大致正確，但目前還不能 merge，因為仍存在會讓 X 被錯誤當成 Y 的漏洞。」
-- `BLOCKED_BY #73` →「Entity Workspace 的其他部分可以做，但 Verified Facts 的 final API binding 必須等 #73 backend contract 通過，否則前端會綁到可能被退回的 DTO。」
+- `BLOCKED_BY #4` →「measurement contract 的其他文件工作可以做，但 provider adapter 實作必須等 #4 完成來源能力查證，否則可能把尚未接受的 provider schema 凍結成 canonical DTO。」
 
 ---
 
