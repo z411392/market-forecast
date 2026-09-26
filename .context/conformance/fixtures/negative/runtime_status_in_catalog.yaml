@@ -1,0 +1,38 @@
+version: "1.0.0"
+catalog_depth: 1
+
+repository_identity:
+  name: "sample-repo"
+  owner: "sample-org"
+
+meta_index:
+  description: "Negative fixture: catalog illegally persisting volatile runtime status"
+  authority_ref: "docs/methodology.md"
+  prohibit_recursive_catalog: true
+
+domains:
+  - id: sample_domain
+    path: ".context/sample_domain.yaml"
+    description: "Sample domain descriptor"
+    coverage: "Sample BC"
+    authority_class: "DURABLE_NAVIGATION"
+    provenance: "Test spec #1"
+
+rebuild_descriptors:
+  builder_version: "1.0.0"
+  index_db_path: ".cache/test.sqlite"
+  rebuild_command: "build"
+  freshness_check_command: "check"
+
+runtime_state_policy: "QUERY_TIME_FRESH_READ"
+security_policy: "DENY_BEFORE_READ_FOR_INDEXING"
+
+freshness_clocks:
+  code_clock: "code"
+  authority_clock: "auth"
+  builder_clock: "builder"
+  catalog_digest: "digest"
+
+# ILLEGAL: volatile workflow runtime status embedded in catalog
+status: "IN_PROGRESS"
+assignee: "Gemini"
