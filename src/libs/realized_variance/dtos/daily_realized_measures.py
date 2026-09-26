@@ -19,3 +19,4 @@ class DailyRealizedMeasures(TypedDict):
     whole_day_negative_semivariance: float
     realized_quarticity: float
     observation_count: int
+    algorithm_version: str

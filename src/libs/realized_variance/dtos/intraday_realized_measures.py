@@ -14,3 +14,4 @@ class IntradayRealizedMeasures(TypedDict):
     realized_quarticity: float
     positive_semivariance: float
     negative_semivariance: float
+    algorithm_version: str

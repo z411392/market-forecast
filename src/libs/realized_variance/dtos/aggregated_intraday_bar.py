@@ -16,3 +16,4 @@ class AggregatedIntradayBar(TypedDict):
     volume: float
     price_basis: Literal["as_printed", "split_adjusted"]
     source_minute_count: int
+    algorithm_version: str

@@ -210,6 +210,7 @@ completeness remains a separate dependency-gated integration concern.
 | `src/libs/realized_variance/dtos/intraday_realized_measures.py` | `IntradayRealizedMeasures` | regular-session RV/RQ/semivariance result |
 | `src/libs/realized_variance/dtos/daily_realized_measures.py` | `DailyRealizedMeasures` | regular + overnight + whole-day result |
 | `src/libs/realized_variance/exceptions/invalid_realized_variance_input_error.py` | `InvalidRealizedVarianceInputError` | stable fail-closed input error |
+| `src/libs/realized_variance/constants/realized_variance_algorithm_version.py` | `REALIZED_VARIANCE_ALGORITHM_VERSION` | deterministic core identity (`rv-core-v1`) |
 | `src/libs/realized_variance/domain/services/aggregate_minute_bars.py` | `aggregate_minute_bars` | strict 1m→5m/10m/15m aggregation |
 | `src/libs/realized_variance/domain/services/calculate_intraday_realized_measures.py` | `calculate_intraday_realized_measures` | interval-return RV/RQ/semivariance |
 | `src/libs/realized_variance/domain/services/calculate_overnight_log_return.py` | `calculate_overnight_log_return` | previous regular close → current regular open |
@@ -232,8 +233,9 @@ Required keys:
 - `volume: float`
 - `price_basis: Literal["as_printed", "split_adjusted"]`
 - `source_minute_count: int`
+- `algorithm_version: str`
 
-The strict kernel requires `source_minute_count == interval_minutes`.
+The strict kernel requires `source_minute_count == interval_minutes`. `algorithm_version` is fixed to `REALIZED_VARIANCE_ALGORITHM_VERSION = "rv-core-v1"` for this contract version.
 
 ### IntradayRealizedMeasures
 
@@ -248,6 +250,7 @@ Required keys:
 - `realized_quarticity: float`
 - `positive_semivariance: float`
 - `negative_semivariance: float`
+- `algorithm_version: str`
 
 ### DailyRealizedMeasures
 
@@ -267,8 +270,9 @@ Required keys:
 - `whole_day_negative_semivariance: float`
 - `realized_quarticity: float`
 - `observation_count: int`
+- `algorithm_version: str`
 
-### Price-basis propagation invariant
+### Measurement-identity propagation invariant
 
 The adjustment basis is part of measurement identity and must survive every downstream transform:
 
@@ -277,9 +281,14 @@ CanonicalMinuteBar.price_basis
 → AggregatedIntradayBar.price_basis
 → IntradayRealizedMeasures.price_basis
 → DailyRealizedMeasures.price_basis
+
+REALIZED_VARIANCE_ALGORITHM_VERSION
+→ AggregatedIntradayBar.algorithm_version
+→ IntradayRealizedMeasures.algorithm_version
+→ DailyRealizedMeasures.algorithm_version
 ```
 
-No downstream measurement/audit/target code may compare or combine values while silently dropping this field.
+No downstream measurement/audit/target code may compare or combine values while silently dropping either identity field.
 
 ### Strict aggregation invariants
 

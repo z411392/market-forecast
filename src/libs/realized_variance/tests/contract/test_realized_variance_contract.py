@@ -1,15 +1,18 @@
 from datetime import date, datetime
 from typing import get_args, get_type_hints
 
+from pytest import mark
+
 from libs.market_data.dtos.security_identity import SecurityIdentity
+from libs.realized_variance.constants.realized_variance_algorithm_version import (
+    REALIZED_VARIANCE_ALGORITHM_VERSION,
+)
 from libs.realized_variance.dtos.aggregated_intraday_bar import AggregatedIntradayBar
 from libs.realized_variance.dtos.daily_realized_measures import DailyRealizedMeasures
 from libs.realized_variance.dtos.intraday_realized_measures import IntradayRealizedMeasures
 from libs.realized_variance.exceptions.invalid_realized_variance_input_error import (
     InvalidRealizedVarianceInputError,
 )
-from pytest import mark
-
 
 @mark.contract
 def test_realized_variance_contract() -> None:
@@ -26,6 +29,7 @@ def test_realized_variance_contract() -> None:
             "volume",
             "price_basis",
             "source_minute_count",
+            "algorithm_version",
         }
     )
     bar_hints = get_type_hints(AggregatedIntradayBar)
@@ -40,6 +44,7 @@ def test_realized_variance_contract() -> None:
     assert bar_hints["volume"] is float
     assert get_args(bar_hints["price_basis"]) == ("as_printed", "split_adjusted")
     assert bar_hints["source_minute_count"] is int
+    assert bar_hints["algorithm_version"] is str
 
     assert IntradayRealizedMeasures.__required_keys__ == frozenset(
         {
@@ -48,10 +53,12 @@ def test_realized_variance_contract() -> None:
             "sampling_minutes",
             "price_basis",
             "observation_count",
+            "algorithm_version",
             "realized_variance",
             "realized_quarticity",
             "positive_semivariance",
             "negative_semivariance",
+            "algorithm_version",
         }
     )
     intraday_hints = get_type_hints(IntradayRealizedMeasures)
@@ -64,6 +71,7 @@ def test_realized_variance_contract() -> None:
     assert intraday_hints["realized_quarticity"] is float
     assert intraday_hints["positive_semivariance"] is float
     assert intraday_hints["negative_semivariance"] is float
+    assert intraday_hints["algorithm_version"] is str
 
     assert DailyRealizedMeasures.__required_keys__ == frozenset(
         {
@@ -101,6 +109,8 @@ def test_realized_variance_contract() -> None:
     ):
         assert daily_hints[field] is float
     assert daily_hints["observation_count"] is int
+    assert daily_hints["algorithm_version"] is str
+    assert REALIZED_VARIANCE_ALGORITHM_VERSION == "rv-core-v1"
 
     assert issubclass(InvalidRealizedVarianceInputError, ValueError)
     assert InvalidRealizedVarianceInputError.type == "invalid_realized_variance_input"
