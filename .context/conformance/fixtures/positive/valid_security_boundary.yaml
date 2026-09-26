@@ -1,0 +1,21 @@
+policy_version: "1.0.0"
+invariant: "DENY_BEFORE_READ_FOR_INDEXING"
+
+canonical_path_resolution:
+  resolve_symlinks_before_check: true
+  reject_traversal_escaping_repo_root: true
+
+prohibited_patterns:
+  - "*.pem"
+  - "*.key"
+  - ".env"
+
+prohibited_path_components:
+  - "sessions"
+  - "tokens"
+  - "credentials"
+
+prohibited_extensions:
+  - ".pem"
+  - ".key"
+  - ".env"
