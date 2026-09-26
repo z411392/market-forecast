@@ -1,0 +1,32 @@
+version: "1.0.0"
+catalog_depth: 2
+
+repository_identity:
+  name: "sample-repo"
+  owner: "sample-org"
+
+meta_index:
+  description: "Negative fixture: recursive or depth > 1 catalog"
+  authority_ref: "docs/methodology.md"
+
+domains:
+  - id: sample_domain
+    path: ".context/sample_domain.yaml"
+    description: "Sample domain descriptor"
+    coverage: "Sample BC"
+    authority_class: "DURABLE_NAVIGATION"
+
+rebuild_descriptors:
+  builder_version: "1.0.0"
+  index_db_path: ".cache/test.sqlite"
+  rebuild_command: "build"
+  freshness_check_command: "check"
+
+runtime_state_policy: "QUERY_TIME_FRESH_READ"
+security_policy: "DENY_BEFORE_READ_FOR_INDEXING"
+
+freshness_clocks:
+  code_clock: "code"
+  authority_clock: "auth"
+  builder_clock: "builder"
+  catalog_digest: "digest"
