@@ -1,6 +1,6 @@
 # 規則索引
 
-此目錄是三種 coding agent 共用的工程規則真相。`.agents` 是未追蹤的本機相容 alias（`.agents -> .claude`），不是遠端閱讀依賴；正式 tracked 來源是本目錄。
+此目錄是三種 coding agent 共用的工程規則真相。`.agents` 是 tracked 相容軟連結（`.agents -> .claude`），不是另一份規則來源；正式內容仍只在本目錄。
 規則不放產品範圍、業務 AC、工作進度或模型清單；這些各自的入口見 [docs/README.md](../../docs/README.md)。
 
 ## 必讀清單
