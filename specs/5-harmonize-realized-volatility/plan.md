@@ -392,6 +392,7 @@ Required keys:
 
 - `security: SecurityIdentity`
 - `session_date: date`
+- `price_basis: Literal["as_printed", "split_adjusted"]`
 - `whole_day_variance_5m: float`
 - `whole_day_variance_10m: float`
 - `whole_day_variance_15m: float`
@@ -408,6 +409,7 @@ The row keeps date-level disagreement visible so outlier dates can be reported w
 Required keys:
 
 - `security: SecurityIdentity`
+- `price_basis: Literal["as_printed", "split_adjusted"]`
 - `observation_count: int`
 - `pearson_log_rv_5m_10m: float`
 - `pearson_log_rv_5m_15m: float`
@@ -432,7 +434,7 @@ Abs log gap = mean(abs(log(V5 / Vx)))
 
 Spearman ties use average ranks. All variances entering log metrics must be finite and strictly positive.
 
-A summary requires at least two rows and rejects undefined correlations caused by zero variance in either compared vector.
+A summary requires at least two rows, one common `price_basis`, and rejects undefined correlations caused by zero variance in either compared vector. The summary propagates that basis unchanged.
 
 ### build_measurement_audit_rows
 
@@ -443,8 +445,10 @@ Input:
 Required behavior:
 
 - accepts only one `SecurityIdentity`;
+- accepts only one `price_basis` across the call;
 - accepts only sampling intervals 5 / 10 / 15;
 - requires exactly one observation for every `(session_date, sampling_minutes)` combination represented in the output;
+- requires the 5m / 10m / 15m observations aligned to a session to share the same `price_basis`;
 - rejects duplicate interval observations for a session;
 - rejects any session missing one of 5m / 10m / 15m;
 - rejects non-finite or non-positive `whole_day_variance`;
@@ -456,6 +460,7 @@ Required behavior:
 Required keys:
 
 - `security: SecurityIdentity`
+- `price_basis: Literal["as_printed", "split_adjusted"]`
 - `origin_session_date: date`
 - `horizon_sessions: Literal[5, 20]`
 - `first_target_session_date: date`
@@ -474,7 +479,7 @@ Input:
 
 Required behavior:
 
-- accepts one security and one sampling interval per call;
+- accepts one security, one sampling interval, and one `price_basis` per call;
 - requires `measurements` and `expected_session_dates` to have identical length;
 - requires measurement session dates to exactly match `expected_session_dates` in order;
 - requires strictly increasing, unique expected session dates;
@@ -501,6 +506,7 @@ Measurement audit positive:
 
 Measurement audit negative:
 - mixed security;
+- mixed price basis;
 - duplicate interval/date;
 - missing 5m/10m/15m member;
 - unsupported sampling;
@@ -518,7 +524,7 @@ Future target negative:
 - measurement/date length mismatch;
 - date sequence mismatch;
 - duplicate or non-increasing session dates;
-- mixed security / mixed sampling;
+- mixed security / mixed sampling / mixed price basis;
 - unsupported horizon;
 - non-finite or negative variance.
 

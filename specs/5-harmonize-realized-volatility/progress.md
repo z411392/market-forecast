@@ -215,3 +215,22 @@ Reason:
 - Task #12 now consumes that exact corrected source/test contract before S2 audit tests begin.
 
 This reconciliation does not add measurement-audit behavior, select a sampling frequency, or change RV/RQ/semivariance formulas.
+
+
+### Task #12 S1 correction — preserve price basis through audit and target identity
+
+Status: DESIGN CORRECTED BEFORE TEST FREEZE.
+
+Downstream readback found that the initial Task #12 S1 DTO design would have dropped `price_basis` again even though
+Task #11 now preserves it through daily realized measurements.
+
+Corrected contract:
+- `MeasurementAuditRow`, `MeasurementAuditSummary`, and `FutureVarianceTarget` all require explicit
+  `price_basis: Literal["as_printed", "split_adjusted"]`;
+- audit alignment rejects mixed basis across 5m / 10m / 15m and across the call;
+- audit summary propagates the common basis unchanged;
+- future-target construction accepts one basis per call and propagates it to every target;
+- mixed basis is explicitly included in the negative S2 oracle.
+
+No statistical formula, horizon definition, sampling choice, or provider behavior changed.
+S2 remains intentionally unstarted until this corrected design is durable.
