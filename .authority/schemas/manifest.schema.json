@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Market Forecast Authority Manifest Schema",
+  "description": "Schema for authority manifests mapping an inspected code version/tree to its governing authority receipts and Git authorities under FAH v2.0.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "manifest_id",
+    "code_tree_identifier",
+    "authority_receipts",
+    "git_authorities",
+    "generated_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "manifest_id": {
+      "type": "string",
+      "pattern": "^market-forecast:manifest:[a-z0-9_.-]+$"
+    },
+    "code_tree_identifier": {
+      "type": "string",
+      "description": "Identifies the code version, tree hash, or baseline reference. Must NOT attempt to inject the commit's own SHA into itself."
+    },
+    "authority_receipts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "authority_id",
+          "content_digest",
+          "scope_kind",
+          "receipt_relpath"
+        ],
+        "properties": {
+          "authority_id": { "type": "string", "pattern": "^market-forecast:[a-z0-9_-]+:[a-z0-9_.-]+$" },
+          "content_digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "scope_kind": { "type": "string" },
+          "receipt_relpath": { "type": "string", "pattern": "^(?!.*\\.\\.)(?!/).+$" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "git_authorities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "scope_kind", "blob_sha"],
+        "properties": {
+          "path": { "type": "string", "pattern": "^(?!.*\\.\\.)(?!/).+$" },
+          "blob_sha": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+          "scope_kind": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "machine_contracts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "path", "schema_digest"],
+        "properties": {
+          "name": { "type": "string" },
+          "path": { "type": "string", "pattern": "^(?!.*\\.\\.)(?!/).+$" },
+          "schema_digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "metadata": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": false
+}
