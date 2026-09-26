@@ -1,0 +1,68 @@
+schema_version: market-forecast-context-capsule-v1
+capsule_id: capsule-TASK-145-a1b2c3d4e5f6
+content_digest: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+task_identity:
+  repository: z411392/market-forecast
+  task_id: "145"
+  issued_at: "2026-09-23T10:00:00Z"
+fingerprints:
+  base_code: 63e74789876786245beec5b7be06a309eb874391
+  worktree: clean
+  authority: auth-digest-1234567890abcdef
+  index: idx-digest-1234567890abcdef
+  builder: builder-v1.0.0
+authority:
+  primary_refs:
+    - specs/139-ctx-v1/spec.md
+    - docs/architecture/context-map.md
+  required_decisions:
+    - ADR-029
+  superseded_refs:
+    - specs/retired/spec.md
+  historical_refs:
+    - docs/historical/old-plan.md
+  unresolved_authority: []
+routing:
+  capability: context-index-benchmark
+  owner: context_index
+  modules:
+    - src/tools/context_index
+access:
+  must_read:
+    - specs/139-ctx-v1/spec.md
+    - src/tools/context_index/eval_benchmark.py
+  writable:
+    - src/tools/context_index/eval_benchmark.py
+  verify_only:
+    - src/tools/context_index/tests/test_negative_oracles.py
+  forbidden:
+    - .env
+    - credentials.json
+implementation:
+  target_symbols:
+    - run_benchmark_suite
+  target_files:
+    - src/tools/context_index/eval_benchmark.py
+impact:
+  direct_consumers:
+    - src/tools/context_index/cli.py
+  interface_boundaries:
+    - src/tools/context_index/capsule.py
+  unresolved_relations: []
+verification:
+  relevant_tests:
+    - src/tools/context_index/tests/test_ctx04_benchmark_conformance.py
+  required_commands:
+    - uv run pytest src/tools/context_index/tests/
+  contract_checks:
+    - node .agents/check-docs.mjs
+    - git diff --check
+freshness:
+  issued_against:
+    code_clock:
+      git_head_sha: 63e74789876786245beec5b7be06a309eb874391
+    authority_clock:
+      digest: auth-digest-1234567890abcdef
+  invalidation_conditions:
+    - dirty_worktree_changed
+    - authority_digest_mismatch
