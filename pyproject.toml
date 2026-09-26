@@ -1,0 +1,60 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "market-forecast"
+version = "0.1.0"
+description = "Cross-market realized-volatility research and TradingView/Pine deployment"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "arch>=7.2",
+    "exchange-calendars>=4.8",
+    "fire>=0.7",
+    "httpx>=0.27",
+    "injector>=0.22",
+    "numpy>=2.1",
+    "polars>=1.12",
+    "pyarrow>=17",
+    "scikit-learn>=1.5",
+    "scipy>=1.14",
+]
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.411",
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.8",
+]
+
+[tool.uv]
+package = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/apps", "src/libs"]
+
+[tool.pytest.ini_options]
+testpaths = ["src"]
+addopts = ["--import-mode=importlib"]
+markers = [
+    "unit: pure domain/model tests",
+    "contract: ports/schema/provider contract tests",
+    "integration: local adapter integration tests",
+    "live_external: opt-in provider network verification",
+    "architecture: structural boundary tests",
+    "governance: governance/conformance checks",
+]
+
+[tool.ruff]
+line-length = 110
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["F", "E", "W", "I", "ERA"]
+
+[tool.pyright]
+include = ["src/apps/cli", "src/libs"]
+exclude = ["src/**/tests"]
+typeCheckingMode = "basic"
+pythonVersion = "3.12"
