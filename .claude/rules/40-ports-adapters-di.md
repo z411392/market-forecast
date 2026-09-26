@@ -62,20 +62,21 @@ Outbound port 是 application 向外取得能力的契約。
 ## 正確
 
 ```python
-class ListRadarTopicsPort(ABC):
-    def __call__(self, query: RadarTopicQuery) -> RadarTopicPage: ...
+class BuildRealizedVariancePort(ABC):
+    def __call__(self, request: BuildRealizedVarianceRequest) -> RealizedVarianceResult: ...
 
 
-class ReadRadarPort(ABC):
-    def list_topics(self, query: RadarTopicQuery) -> RadarTopicPage: ...
+class ReadMinuteBarsPort(ABC):
+    def __call__(self, query: MinuteBarsQuery) -> list[CanonicalMinuteBar]: ...
 
 
-class ListRadarTopics(ListRadarTopicsPort):
-    def __init__(self, radar_store: ReadRadarPort) -> None:
-        self._radar_store = radar_store
+class BuildRealizedVariance(BuildRealizedVariancePort):
+    def __init__(self, read_minute_bars: ReadMinuteBarsPort) -> None:
+        self._read_minute_bars = read_minute_bars
 
-    def __call__(self, query: RadarTopicQuery) -> RadarTopicPage:
-        return self._radar_store.list_topics(query)
+    def __call__(self, request: BuildRealizedVarianceRequest) -> RealizedVarianceResult:
+        bars = self._read_minute_bars(request.bars_query)
+        return calculate_realized_variance(bars)
 
 
 class MassiveAdapter(ReadMinuteBarsPort):
@@ -84,27 +85,28 @@ class MassiveAdapter(ReadMinuteBarsPort):
 ```
 
 ```python
-def list_radar_topics(injector: Injector, cursor: str | None = None) -> None:
-    page = injector.get(ListRadarTopicsPort)(RadarTopicQuery(cursor=cursor))
-    print(dumps(page))
+def measure(injector: Injector, symbol: str, trading_date: str) -> None:
+    request = BuildRealizedVarianceRequest(symbol=symbol, trading_date=trading_date)
+    result = injector.get(BuildRealizedVariancePort)(request)
+    print(dumps(result))
 ```
 
 ## 錯誤
 
 ```python
-# apps/cli/ports/source_fetcher_port.py
-class SourceFetcherPort(ABC):
-    def fetch(self, request: SourceFetchRequest) -> TargetFetchResult: ...
+# apps/cli/ports/read_minute_bars_port.py
+class ReadMinuteBarsPort(ABC):
+    def __call__(self, query: MinuteBarsQuery) -> list[CanonicalMinuteBar]: ...
 ```
 
 ```python
-class RunPipelineHandler(RunPipelinePort):
-    def __call__(self, request: PipelineRequest) -> PipelineReceipt:
+class MeasureHandler(BuildRealizedVariancePort):
+    def __call__(self, request: BuildRealizedVarianceRequest) -> RealizedVarianceResult:
         ...
 ```
 
 ```python
-class SqliteRadarAdapter(ReadRadarPort):
+class MassiveAdapter(ReadMinuteBarsPort):
     def __init__(self) -> None:
         self._api_key = environ["MASSIVE_API_KEY"]
 ```
@@ -116,8 +118,7 @@ class BuildRealizedVariance:
 ```
 
 ```python
-def get_radar(request: Request) -> ApiResponse:
-    content = request.app.state.injector.get(ReadContentPort)
-    embeddings = request.app.state.injector.get(SearchEmbeddingsPort)
-    radar = request.app.state.injector.get(ReadRadarPort)
+def measure(request: Request) -> ApiResponse:
+    adapter = request.app.state.injector.get(ReadMinuteBarsPort)
+    use_case = BuildRealizedVariance(adapter)
 ```

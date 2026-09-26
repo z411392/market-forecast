@@ -23,25 +23,26 @@ SQLite 來繞過 inbound port。
 ## 正確
 
 ```python
-class ListRadarTopics(ListRadarTopicsPort):
-    def __init__(self, radar_store: ReadRadarPort) -> None:
-        self._radar_store = radar_store
+class BuildRealizedVariance(BuildRealizedVariancePort):
+    def __init__(self, read_minute_bars: ReadMinuteBarsPort) -> None:
+        self._read_minute_bars = read_minute_bars
 
-    def __call__(self, query: RadarTopicQuery) -> RadarTopicPage:
-        return self._radar_store.list_topics(query)
+    def __call__(self, request: BuildRealizedVarianceRequest) -> RealizedVarianceResult:
+        bars = self._read_minute_bars(request.bars_query)
+        return calculate_realized_variance(bars)
 ```
 
 ## 錯誤
 
 ```python
-def list_topics(request: Request) -> JSONResponse:
-    rows = connect("radar.db").execute("SELECT ...")
-    return JSONResponse({"rows": rows.fetchall()})
+def build_realized_variance(request: Request) -> RealizedVarianceResult:
+    rows = connect("market.db").execute("SELECT ...")
+    return calculate_realized_variance(rows.fetchall())
 ```
 
 ```python
-class ListRadarTopics:
-    def __init__(self, adapter: SqliteRadarAdapter) -> None:
+class BuildRealizedVariance:
+    def __init__(self, adapter: MassiveAdapter) -> None:
         self._adapter = adapter
 ```
 
@@ -51,7 +52,7 @@ Domain service 是具名、無狀態、純計算的業務或演算法規則。
 
 - 不得有 I/O、環境變數、framework type 或 adapter dependency。
 - 由 application 直接建立；純 service 不放進 DI。
-- Generic helper 沒有領域語意。決定 grouping、selection、sentiment target 或 topic admission 的規則屬於
+- Generic helper 沒有領域語意。realized-variance aggregation、forecast feature transformation 或 promotion statistic 等純規則若具有 owner 語意，屬於
   domain service。
 - 不為了形式導入 Aggregate、Entity 或 Value Object；只有具體 invariant、穩定 identity 或 consistency
   boundary 時才建立。
