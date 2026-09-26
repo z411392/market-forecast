@@ -3,9 +3,9 @@ from pathlib import Path
 
 from pytest import mark
 
-SRC = Path(__file__).resolve().parents[4]
-PUBLIC_SURFACE = {"ports", "dtos", "constants", "exceptions"}
-FORBIDDEN_FILENAMES = {
+_SRC = Path(__file__).resolve().parents[4]
+_PUBLIC_SURFACE = {"ports", "dtos", "constants", "exceptions"}
+_FORBIDDEN_FILENAMES = {
     "__init__.py",
     "common.py",
     "composition.py",
@@ -15,12 +15,12 @@ FORBIDDEN_FILENAMES = {
     "service.py",
     "utils.py",
 }
-FORBIDDEN_DIRECTORY_NAMES = {"contracts", "public", "shared", "types"}
+_FORBIDDEN_DIRECTORY_NAMES = {"contracts", "public", "shared", "types"}
 
 
 @mark.architecture
 def test_repository_architecture() -> None:
-    files = sorted(SRC.rglob("*.py"))
+    files = sorted(_SRC.rglob("*.py"))
 
     path_violations = _path_violations(files)
     import_violations = [
@@ -80,13 +80,13 @@ def _path_violations(files: list[Path]) -> list[str]:
     violations: list[str] = []
 
     for path in files:
-        relative = path.relative_to(SRC)
+        relative = path.relative_to(_SRC)
 
-        if path.name in FORBIDDEN_FILENAMES:
+        if path.name in _FORBIDDEN_FILENAMES:
             violations.append(f"forbidden filename: {relative}")
 
         parts = set(relative.parts)
-        forbidden_dirs = sorted(parts & FORBIDDEN_DIRECTORY_NAMES)
+        forbidden_dirs = sorted(parts & _FORBIDDEN_DIRECTORY_NAMES)
         for directory in forbidden_dirs:
             violations.append(f"forbidden directory '{directory}': {relative}")
 
@@ -102,7 +102,7 @@ def _path_violations(files: list[Path]) -> list[str]:
 
 
 def _module_imports(path: Path) -> tuple[str, list[str]]:
-    module = ".".join(path.relative_to(SRC).with_suffix("").parts)
+    module = ".".join(path.relative_to(_SRC).with_suffix("").parts)
     tree = parse(path.read_text(encoding="utf-8"), filename=str(path))
     imports: list[str] = []
 
@@ -161,7 +161,7 @@ def _import_violation(importer: str, imported: str) -> str | None:
             return "kernel must not depend on a feature"
 
         layer = imported_parts[2] if len(imported_parts) > 2 else ""
-        if layer not in PUBLIC_SURFACE:
+        if layer not in _PUBLIC_SURFACE:
             return (
                 "a feature may only depend on another feature through "
                 "ports/dtos/constants/exceptions"
@@ -175,7 +175,7 @@ def _import_violation(importer: str, imported: str) -> str | None:
         layer = imported_parts[2] if len(imported_parts) > 2 else ""
         is_driving = len(importer_parts) > 4 and importer_parts[2:4] == ["adapters", "driving"]
 
-        if is_driving and layer not in PUBLIC_SURFACE:
+        if is_driving and layer not in _PUBLIC_SURFACE:
             return "a driving adapter must depend on a feature public contract"
         return None
 
