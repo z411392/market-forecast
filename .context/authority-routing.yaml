@@ -1,0 +1,64 @@
+version: "1.0.0"
+authorities:
+  - id: governance_source
+    authority_id: "market-forecast:governance:source"
+    path: docs/governance-source.md
+    class: ACTIVE
+    scope_kind: GLOBAL_GOVERNANCE
+    domain: CANONICAL_GOVERNANCE
+    canonical_owner: governance
+    write_target: CONDITIONAL_WRITE
+
+  - id: engineering_rules_index
+    authority_id: "market-forecast:governance:rules-index"
+    path: .claude/rules/00-index.md
+    class: ACTIVE
+    scope_kind: GLOBAL_GOVERNANCE
+    domain: CANONICAL_GOVERNANCE
+    canonical_owner: governance
+    write_target: NOT_WRITE_TARGET
+
+  - id: context_map
+    authority_id: "market-forecast:architecture:context-map"
+    path: docs/architecture/context-map.md
+    class: ACTIVE
+    scope_kind: PRODUCT_SSOT
+    domain: ARCHITECTURE_BOUNDARY
+    canonical_owner: architecture
+    write_target: CONDITIONAL_WRITE
+
+  - id: event_storming
+    authority_id: "market-forecast:architecture:event-storming"
+    path: docs/architecture/event-storming.md
+    class: ACTIVE
+    scope_kind: PRODUCT_SSOT
+    domain: DOMAIN_EVENT_MODEL
+    canonical_owner: architecture
+    write_target: CONDITIONAL_WRITE
+
+  - id: requirements
+    authority_id: "market-forecast:delivery:requirements"
+    path: docs/delivery/requirements-specification.md
+    class: ACTIVE
+    scope_kind: PRODUCT_SSOT
+    domain: PRODUCT_REQUIREMENTS
+    canonical_owner: product_owner
+    write_target: CONDITIONAL_WRITE
+
+  - id: roadmap
+    authority_id: "market-forecast:delivery:mvp-phases"
+    path: docs/delivery/mvp-phases.md
+    class: ACTIVE
+    scope_kind: PRODUCT_SSOT
+    domain: DELIVERY_ROADMAP
+    canonical_owner: delivery
+    write_target: CONDITIONAL_WRITE
+
+  - id: measurement_story
+    authority_id: "market-forecast:story:5"
+    path: specs/5-harmonize-realized-volatility/spec.md
+    class: ACTIVE
+    scope_kind: STORY
+    domain: PRODUCT_SEMANTICS
+    canonical_owner: realized-variance
+    write_target: CONDITIONAL_WRITE
