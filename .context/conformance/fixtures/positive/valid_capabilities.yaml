@@ -1,0 +1,12 @@
+version: "1.0.0"
+capabilities:
+  - id: sample_capability
+    aliases: ["測試能力", "sample-cap"]
+    owner: sample_bc
+    module_roots:
+      - src/libs/sample
+    authority_refs:
+      - docs/spec.md
+    index_routes:
+      - docs/map.md
+    description: "Sample capability for positive conformance"
