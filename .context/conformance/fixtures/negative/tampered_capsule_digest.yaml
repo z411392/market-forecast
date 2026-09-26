@@ -1,0 +1,40 @@
+schema_version: market-forecast-context-capsule-v1
+capsule_id: capsule-TASK-145-a1b2c3d4e5f6
+content_digest: not_a_valid_64_char_hex_hash
+task_identity:
+  repository: z411392/market-forecast
+  task_id: "145"
+  issued_at: "2026-09-23T10:00:00Z"
+fingerprints:
+  base_code: 63e74789876786245beec5b7be06a309eb874391
+  worktree: clean
+  authority: auth-digest
+  index: idx-digest
+  builder: builder-v1
+authority:
+  primary_refs: []
+  required_decisions: []
+  superseded_refs: []
+  historical_refs: []
+  unresolved_authority: []
+routing:
+  modules: []
+access:
+  must_read: []
+  writable: []
+  verify_only: []
+  forbidden: []
+implementation:
+  target_symbols: []
+  target_files: []
+impact:
+  direct_consumers: []
+  interface_boundaries: []
+  unresolved_relations: []
+verification:
+  relevant_tests: []
+  required_commands: []
+  contract_checks: []
+freshness:
+  issued_against: {}
+  invalidation_conditions: []
