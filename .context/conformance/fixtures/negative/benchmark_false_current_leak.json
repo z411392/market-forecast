@@ -1,0 +1,23 @@
+{
+  "schema_version": "market-forecast-context-benchmark-v1",
+  "evaluated_at": "2026-09-23T10:00:00Z",
+  "commit_sha": "63e74789876786245beec5b7be06a309eb874391",
+  "total_cases": 1,
+  "passed_cases": 0,
+  "gate_evaluation": {
+    "authority_recall_pass": false,
+    "required_contract_recall_pass": true,
+    "zero_false_current_pass": false,
+    "zero_security_denied_pass": true,
+    "zero_sensitive_leak_pass": true,
+    "all_cases_pass": false,
+    "verdict": "INVALID_VERDICT_NOT_IN_ENUM"
+  },
+  "rollout_decision": {
+    "ctx_v1_shadow_evaluation": "REVISION_REQUIRED",
+    "rollout_recommendation": "SHADOW_CONTINUE",
+    "default_rollout_authorized": "NO",
+    "enforced_rollout_authorized": "NO"
+  },
+  "case_results": []
+}
