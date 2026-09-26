@@ -1,6 +1,9 @@
 from datetime import datetime, timedelta
 from math import isfinite, log
 
+from libs.realized_variance.constants.realized_variance_algorithm_version import (
+    REALIZED_VARIANCE_ALGORITHM_VERSION,
+)
 from libs.realized_variance.dtos.aggregated_intraday_bar import AggregatedIntradayBar
 from libs.realized_variance.dtos.intraday_realized_measures import IntradayRealizedMeasures
 from libs.realized_variance.exceptions.invalid_realized_variance_input_error import (
@@ -35,6 +38,8 @@ def calculate_intraday_realized_measures(
             raise InvalidRealizedVarianceInputError("mixed_sampling_interval")
         if bar["price_basis"] != price_basis:
             raise InvalidRealizedVarianceInputError("mixed_price_basis")
+        if bar["algorithm_version"] != REALIZED_VARIANCE_ALGORITHM_VERSION:
+            raise InvalidRealizedVarianceInputError("unsupported_algorithm_version")
         if bar["source_minute_count"] != sampling_minutes:
             raise InvalidRealizedVarianceInputError("partial_aggregated_bar")
         if not _is_utc_datetime(bar["bar_start_utc"]):
@@ -85,6 +90,7 @@ def calculate_intraday_realized_measures(
         "realized_quarticity": realized_quarticity,
         "positive_semivariance": positive_semivariance,
         "negative_semivariance": negative_semivariance,
+        "algorithm_version": REALIZED_VARIANCE_ALGORITHM_VERSION,
     }
 
 

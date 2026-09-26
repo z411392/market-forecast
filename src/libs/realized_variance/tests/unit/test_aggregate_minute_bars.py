@@ -1,12 +1,16 @@
 from datetime import date, datetime, timedelta, timezone
 
+from pytest import approx, mark, raises
+
 from libs.market_data.dtos.canonical_minute_bar import CanonicalMinuteBar
 from libs.market_data.dtos.security_identity import SecurityIdentity
+from libs.realized_variance.constants.realized_variance_algorithm_version import (
+    REALIZED_VARIANCE_ALGORITHM_VERSION,
+)
 from libs.realized_variance.domain.services.aggregate_minute_bars import aggregate_minute_bars
 from libs.realized_variance.exceptions.invalid_realized_variance_input_error import (
     InvalidRealizedVarianceInputError,
 )
-from pytest import approx, mark, raises
 
 
 def _security() -> SecurityIdentity:
@@ -50,6 +54,7 @@ def test_aggregate_minute_bars() -> None:
     assert first_5m["bar_start_utc"] == start
     assert first_5m["interval_minutes"] == 5
     assert first_5m["source_minute_count"] == 5
+    assert first_5m["algorithm_version"] == REALIZED_VARIANCE_ALGORITHM_VERSION
     assert first_5m["open"] == approx(100.0)
     assert first_5m["high"] == approx(100.6)
     assert first_5m["low"] == approx(99.8)

@@ -2,6 +2,9 @@ from datetime import datetime, timedelta
 from typing import Literal
 
 from libs.market_data.dtos.canonical_minute_bar import CanonicalMinuteBar
+from libs.realized_variance.constants.realized_variance_algorithm_version import (
+    REALIZED_VARIANCE_ALGORITHM_VERSION,
+)
 from libs.realized_variance.dtos.aggregated_intraday_bar import AggregatedIntradayBar
 from libs.realized_variance.exceptions.invalid_realized_variance_input_error import (
     InvalidRealizedVarianceInputError,
@@ -57,6 +60,7 @@ def aggregate_minute_bars(
                 "volume": sum(bar["volume"] for bar in bucket),
                 "price_basis": price_basis,
                 "source_minute_count": len(bucket),
+                "algorithm_version": REALIZED_VARIANCE_ALGORITHM_VERSION,
             }
         )
 
