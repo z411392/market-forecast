@@ -22,10 +22,10 @@ governance-check:
 test:
 	uv run pytest -m "not live_external"
 
-test-fast:
+test-fast: governance-check
 	uv run pytest -m "architecture or unit"
 
-test-contract:
+test-contract: governance-check
 	uv run pytest -m "architecture or contract"
 
 test-pkg:
