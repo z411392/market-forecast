@@ -1334,14 +1334,12 @@ Production artifact：
 | local-session purge / target maturity | PROVEN | Tasks #29 / #31 |
 | paired date-block bootstrap | PROVEN | Tasks #23 / #25 / #27 / #29 / #31 |
 | train-only scaling | PROVEN | replay runners |
-| per-symbol HAR/GARCH mandatory baseline on final supplied panel | CURRENT-MAIN GAP | artifacts remain only in old Draft PR #21 |
-| recent-variance / EWMA / naive comparator on final supplied panel | CURRENT-MAIN GAP | artifacts remain only in old Draft PR #21 |
+| per-symbol HAR/GARCH mandatory baseline on final supplied panel | PROVEN | Task #35 |
+| recent-variance / EWMA / naive comparator on final supplied panel | PROVEN | Task #35 |
 
-因此截至 2026-09-27：
+因此截至 2026-09-27，Story #6 的 supplied 4+3 pilot model/validation evidence 已在 current main durable；不再有 comparator replay gap。
 
-> #13 / Story #6 尚不應關閉。唯一 bounded current-main evidence gap 是把舊 PR #21 的 final per-symbol HAR/GARCH/EWMA/naive comparator materialize 成可重播 current-main evidence。
-
-這個 gap 與 production Frozen v1 已可執行是兩件不同的事；不能因 deployment 已完成就假裝 Story #6 mandatory baseline 已 current-main durable。
+但 #13 / Story #6 仍不應 formal close，因兩者明確依賴 Story #5 canonical target freeze。Story #5 / Task #12 的 final empirical measurement freeze 仍被 #4 live provider acceptance 擋住。現在的 TradingView 5m whole-day RV 是 practical pilot reference，不應被重新命名成已完成的 canonical cross-market frozen target。
 
 ### 23.9 Market identity hypothesis 的最新狀態
 
@@ -1360,3 +1358,73 @@ Does market identity add stable incremental forecast information?
 - Taiwan-specific parameters 沒有得到支持。
 
 但 broad universe（例如原計畫 30+30）、完整 measurement harmonization 與真正 hierarchical shrinkage 仍未完成，因此不能把這個 pilot 上升成 universal market-identity theorem。
+
+
+### 23.10 Final HAR / GARCH / EWMA / naive comparator 已 current-main replay
+
+Task #35 將舊 Draft PR #21 的 final comparator 重新做成 hash-pinned、dependency-light、可執行的 current-main evidence。
+
+Alignment oracle：
+
+- 35 / 35 symbol × comparator 的 origin forecast / matured exported QLIKE 對齊檢查通過；
+- worst max absolute difference = `1.7763568394002505e-15`；
+- declared tolerance = `1e-12`。
+
+Final-window overall paired date-block bootstrap：
+
+```text
+HAR - Global   = -0.013993
+95% CI         = [-0.044484, +0.003130]
+
+HAR - GARCH    = -0.022675
+95% CI         = [-0.053313, -0.006911]
+
+HARQ - HAR     = +0.000506
+95% CI         = [-0.000383, +0.001776]
+
+EWMA - HAR     = +0.012462
+95% CI         = [+0.000081, +0.034094]
+
+Naive - HAR    = +0.066828
+95% CI         = [+0.037997, +0.111866]
+```
+
+決議：
+
+- causal Pine Level-HAR 保留為 supplied-panel primary baseline；
+- GARCH 保留 comparator，不作 primary；
+- HARQ 不 promotion；
+- EWMA 不勝 HAR overall；
+- naive / recent-variance baseline 明確較弱；
+- global Ridge-HAR 不足以取代 causal Pine HAR；
+- 不建立 ticker-specific winner switch。
+
+Current-main artifacts：
+
+- `docs/research/experiments/run_task_35_final_comparator_replay.py`
+- `docs/research/experiments/task-35-final-comparator-per-symbol.csv`
+- `docs/research/experiments/task-35-final-comparator-bootstrap.csv`
+- `docs/research/experiments/task-35-final-comparator-alignment.csv`
+- `docs/research/experiments/task-35-final-comparator-replay.md`
+
+### 23.11 Story #6 closure status：pilot evidence complete，formal closure dependency-blocked
+
+截至 Task #35：
+
+```text
+Story #6 supplied-panel model matrix      COMPLETE
+H=5 primary transfer evidence            COMPLETE
+H=20 confirmatory evidence               COMPLETE
+multiple-window expanding OOS            COMPLETE
+per-symbol HAR/GARCH/EWMA/naive baseline COMPLETE
+current-main replayability               COMPLETE
+
+Story #5 canonical target freeze         NOT COMPLETE
+Task #12 final empirical freeze          BLOCKED by #4 live provider acceptance
+```
+
+因此目前最精確的狀態是：
+
+> Story #6 / Task #13 在 supplied 4+3 pilot 的 model-selection / validation evidence 上已完成，但 formal Story closure 仍受上游 Story #5 canonical measurement freeze 約束。
+
+這不是模型證據不足，也不是要求再 specification mining。下一步若要解除 formal blocker，應回到 Story #5 / #4 / #12 的 data-source acceptance 與 empirical measurement freeze，而不是再增加 forecasting model。
