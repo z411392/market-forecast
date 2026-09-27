@@ -88,6 +88,7 @@ def test_realized_variance_contract() -> None:
             "whole_day_negative_semivariance",
             "realized_quarticity",
             "observation_count",
+            "algorithm_version",
         }
     )
     daily_hints = get_type_hints(DailyRealizedMeasures)
