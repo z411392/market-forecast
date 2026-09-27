@@ -26,7 +26,7 @@ def build_future_variance_targets(
         )
     if any(
         current_date >= next_date
-        for current_date, next_date in zip(dates, dates[1:], strict=True)
+        for current_date, next_date in zip(dates, dates[1:])
     ):
         raise InvalidRealizedVarianceInputError(
             "session dates must be strictly increasing"
