@@ -18,15 +18,26 @@ def decode_shioaji_stock_kbars(
     expected_session_date: date,
     price_basis: Literal["as_printed", "split_adjusted"],
 ) -> tuple[tuple[CanonicalMinuteBar, ...], ClosingAuctionObservation]:
-    fields = {
-        name: _sequence(payload.get(name))
-        for name in ("ts", "Open", "High", "Low", "Close", "Volume")
-    }
-    if any(value is None for value in fields.values()):
+    timestamps = _sequence(payload.get("ts"))
+    opens = _sequence(payload.get("Open"))
+    highs = _sequence(payload.get("High"))
+    lows = _sequence(payload.get("Low"))
+    closes = _sequence(payload.get("Close"))
+    volumes = _sequence(payload.get("Volume"))
+    if (
+        timestamps is None
+        or opens is None
+        or highs is None
+        or lows is None
+        or closes is None
+        or volumes is None
+    ):
         raise InvalidProviderCaptureInputError("shioaji_kbars_missing_field")
 
-    lengths = {len(value) for value in fields.values() if value is not None}
-    if len(lengths) != 1 or not lengths or next(iter(lengths)) == 0:
+    count = len(timestamps)
+    if count == 0 or any(
+        len(values) != count for values in (opens, highs, lows, closes, volumes)
+    ):
         raise InvalidProviderCaptureInputError("shioaji_kbars_inconsistent_lengths")
 
     try:
@@ -34,20 +45,11 @@ def decode_shioaji_stock_kbars(
     except (ZoneInfoNotFoundError, TypeError, ValueError) as error:
         raise InvalidProviderCaptureInputError("shioaji_invalid_timezone") from error
 
-    timestamps = fields["ts"]
-    opens = fields["Open"]
-    highs = fields["High"]
-    lows = fields["Low"]
-    closes = fields["Close"]
-    volumes = fields["Volume"]
-    if None in (timestamps, opens, highs, lows, closes, volumes):
-        raise InvalidProviderCaptureInputError("shioaji_kbars_missing_field")
-
     bars: list[CanonicalMinuteBar] = []
     closing_auction: ClosingAuctionObservation | None = None
     previous_label: datetime | None = None
 
-    for index in range(len(timestamps)):
+    for index in range(count):
         local_label = _local_label(timestamps[index], local_timezone)
         if local_label.date() != expected_session_date:
             raise InvalidProviderCaptureInputError("shioaji_session_date_mismatch")
@@ -59,7 +61,12 @@ def decode_shioaji_stock_kbars(
         low_price = _positive_number(lows[index])
         close_price = _positive_number(closes[index])
         volume = _non_negative_number(volumes[index])
-        if None in (open_price, high_price, low_price, close_price):
+        if (
+            open_price is None
+            or high_price is None
+            or low_price is None
+            or close_price is None
+        ):
             raise InvalidProviderCaptureInputError("shioaji_invalid_price")
         if volume is None:
             raise InvalidProviderCaptureInputError("shioaji_invalid_volume")
@@ -71,8 +78,10 @@ def decode_shioaji_stock_kbars(
 
         label_time = local_label.time()
         if label_time == time(13, 30):
-            if index != len(timestamps) - 1 or closing_auction is not None:
-                raise InvalidProviderCaptureInputError("shioaji_invalid_closing_auction_position")
+            if index != count - 1 or closing_auction is not None:
+                raise InvalidProviderCaptureInputError(
+                    "shioaji_invalid_closing_auction_position"
+                )
             closing_auction = {
                 "security": security,
                 "session_date": expected_session_date,
@@ -83,21 +92,22 @@ def decode_shioaji_stock_kbars(
             }
         else:
             if label_time < time(9, 1) or label_time > time(13, 25):
-                raise InvalidProviderCaptureInputError("shioaji_unexpected_regular_label")
+                raise InvalidProviderCaptureInputError(
+                    "shioaji_unexpected_regular_label"
+                )
             bar_start_local = local_label - timedelta(minutes=1)
-            bars.append(
-                {
-                    "security": security,
-                    "bar_start_utc": bar_start_local.astimezone(timezone.utc),
-                    "session_date": expected_session_date,
-                    "open": open_price,
-                    "high": high_price,
-                    "low": low_price,
-                    "close": close_price,
-                    "volume": volume,
-                    "price_basis": price_basis,
-                }
-            )
+            bar: CanonicalMinuteBar = {
+                "security": security,
+                "bar_start_utc": bar_start_local.astimezone(timezone.utc),
+                "session_date": expected_session_date,
+                "open": open_price,
+                "high": high_price,
+                "low": low_price,
+                "close": close_price,
+                "volume": volume,
+                "price_basis": price_basis,
+            }
+            bars.append(bar)
 
         previous_label = local_label
 
