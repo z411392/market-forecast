@@ -29,13 +29,15 @@ jobs:
           test -n "${MARKET_FORECAST_SHIOAJI_API_KEY:-}"
           test -n "${MARKET_FORECAST_SHIOAJI_SECRET_KEY:-}"
 
-      - name: Replay frozen XTAI sessions through production RV path
+      - name: Replay bounded XTAI v3 sessions through production RV path
         run: |
           uv run --with "shioaji==1.7.6"             python docs/research/provider-acceptance/run_task_86_xtai_rv_replay.py
 
       - name: Upload secret-free replay summary
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: task-86-xtai-live-replay
           path: artifacts/private/provider-captures/task-86-xtai-rv/summary.json
+          if-no-files-found: ignore
           retention-days: 14
