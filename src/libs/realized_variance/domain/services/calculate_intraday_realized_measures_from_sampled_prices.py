@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from math import isfinite, log
 
+from libs.market_data.dtos.session_open_price_observation import SessionOpenPriceObservation
 from libs.realized_variance.constants.xtai_realized_variance_algorithm_version import (
     XTAI_REALIZED_VARIANCE_ALGORITHM_VERSION,
 )
@@ -13,8 +14,9 @@ from libs.realized_variance.exceptions.invalid_realized_variance_input_error imp
 
 def calculate_intraday_realized_measures_from_sampled_prices(
     samples: tuple[SampledIntradayPrice, ...],
+    session_open: SessionOpenPriceObservation,
 ) -> IntradayRealizedMeasures:
-    if len(samples) < 2:
+    if not samples:
         raise InvalidRealizedVarianceInputError("insufficient_sampled_prices")
 
     first = samples[0]
@@ -28,13 +30,33 @@ def calculate_intraday_realized_measures_from_sampled_prices(
         raise InvalidRealizedVarianceInputError("unsupported_sampling_interval")
     if algorithm_version != XTAI_REALIZED_VARIANCE_ALGORITHM_VERSION:
         raise InvalidRealizedVarianceInputError("unsupported_algorithm_version")
-    if first["role"] != "session_open":
-        raise InvalidRealizedVarianceInputError("missing_session_open_sample")
+    if first["role"] != "regular_interval_close":
+        raise InvalidRealizedVarianceInputError("invalid_first_sample_role")
     if samples[-1]["role"] != "closing_auction_close":
         raise InvalidRealizedVarianceInputError("missing_closing_auction_sample")
 
+    if session_open["security"] != security:
+        raise InvalidRealizedVarianceInputError("session_open_security_mismatch")
+    if session_open["session_date"] != session_date:
+        raise InvalidRealizedVarianceInputError("session_open_session_mismatch")
+    if session_open["price_basis"] != price_basis:
+        raise InvalidRealizedVarianceInputError("session_open_price_basis_mismatch")
+    if not _is_utc_datetime(session_open["source_interval_start_utc"]):
+        raise InvalidRealizedVarianceInputError("session_open_source_time_not_utc")
+    if not isfinite(session_open["price"]) or session_open["price"] <= 0.0:
+        raise InvalidRealizedVarianceInputError("invalid_session_open_price")
+
     expected_step = timedelta(minutes=sampling_minutes)
+    first_sample_at = first["observed_at_utc"]
+    if (
+        session_open["source_interval_start_utc"] >= first_sample_at
+        or first_sample_at - session_open["source_interval_start_utc"] > expected_step
+    ):
+        raise InvalidRealizedVarianceInputError("session_open_outside_first_sampling_bucket")
+
     returns: list[float] = []
+    previous_price = session_open["price"]
+    previous_sample_at: datetime | None = None
 
     for index, sample in enumerate(samples):
         if sample["security"] != security:
@@ -52,15 +74,15 @@ def calculate_intraday_realized_measures_from_sampled_prices(
         if not isfinite(sample["price"]) or sample["price"] <= 0.0:
             raise InvalidRealizedVarianceInputError("non_positive_or_non_finite_price")
 
-        if index == 0:
-            continue
-
         if index < len(samples) - 1 and sample["role"] != "regular_interval_close":
             raise InvalidRealizedVarianceInputError("invalid_regular_sample_role")
-        if sample["observed_at_utc"] - samples[index - 1]["observed_at_utc"] != expected_step:
-            raise InvalidRealizedVarianceInputError("non_uniform_sampling_grid")
+        if previous_sample_at is not None:
+            if sample["observed_at_utc"] - previous_sample_at != expected_step:
+                raise InvalidRealizedVarianceInputError("non_uniform_sampling_grid")
 
-        returns.append(log(sample["price"] / samples[index - 1]["price"]))
+        returns.append(log(sample["price"] / previous_price))
+        previous_price = sample["price"]
+        previous_sample_at = sample["observed_at_utc"]
 
     squared = tuple(value * value for value in returns)
     realized_variance = sum(squared)
