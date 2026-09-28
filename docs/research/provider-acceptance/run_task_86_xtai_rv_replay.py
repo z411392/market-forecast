@@ -72,9 +72,6 @@ def main() -> None:
                 session_date,
                 "as_printed",
             )
-            if len(bars) != 265:
-                raise RuntimeError("unexpected_canonical_regular_minute_count")
-
             interval_results: list[dict[str, object]] = []
             for interval in (5, 10, 15):
                 sampled = build_xtai_sampling_prices(bars, closing, interval)
@@ -103,7 +100,7 @@ def main() -> None:
                 {
                     "session_date": session_date.isoformat(),
                     "provider_bar_count": len(payload["ts"]),
-                    "canonical_regular_minute_count": len(bars),
+                    "observed_trade_bearing_minute_count": len(bars),
                     "closing_auction_at_utc": closing["matched_at_utc"].isoformat(),
                     "closing_auction_price": closing["price"],
                     "intervals": interval_results,
