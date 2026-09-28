@@ -117,6 +117,9 @@ def main() -> None:
     if secret_key is None or not secret_key.strip():
         raise RuntimeError("missing MARKET_FORECAST_SHIOAJI_SECRET_KEY")
 
+    api_key = api_key.strip()
+    secret_key = secret_key.strip()
+
     OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
     summary: dict[str, object] = {
         "task": 85,
