@@ -25,17 +25,23 @@ jobs:
       - name: Sync environment
         run: uv sync
 
+      - name: Compile v3 replay runner
+        run: |
+          uv run python -m py_compile \
+            docs/research/provider-acceptance/run_task_86_xtai_rv_replay.py
+
       - name: Run Task 86 oracles
         run: |
-          uv run pytest -q             src/libs/market_data/tests/contract/test_closing_auction_observation_contract.py             src/libs/realized_variance/tests/contract/test_sampled_intraday_price_contract.py             src/libs/market_data/tests/unit/test_decode_shioaji_stock_kbars.py             src/libs/realized_variance/tests/unit/test_build_xtai_sampling_prices.py             src/libs/realized_variance/tests/unit/test_calculate_intraday_realized_measures_from_sampled_prices.py             src/libs/realized_variance/tests/unit/test_calculate_daily_realized_measures_xtai.py
+          uv run pytest -q             src/libs/market_data/tests/contract/test_closing_auction_observation_contract.py             src/libs/market_data/tests/contract/test_session_open_price_observation_contract.py             src/libs/realized_variance/tests/contract/test_sampled_intraday_price_contract.py             src/libs/market_data/tests/unit/test_decode_shioaji_stock_kbars.py             src/libs/realized_variance/tests/unit/test_build_xtai_sampling_prices.py             src/libs/realized_variance/tests/unit/test_calculate_intraday_realized_measures_from_sampled_prices.py             src/libs/realized_variance/tests/unit/test_calculate_daily_realized_measures_xtai.py
 
       - name: Run market-data and RV regression suites
         run: uv run pytest -q src/libs/market_data/tests src/libs/realized_variance/tests
 
       - name: Lint Task 86 production files
         run: |
-          uv run ruff check             src/libs/market_data/dtos/closing_auction_observation.py             src/libs/market_data/services/decode_shioaji_stock_kbars.py             src/libs/realized_variance/constants/xtai_realized_variance_algorithm_version.py             src/libs/realized_variance/dtos/sampled_intraday_price.py             src/libs/realized_variance/domain/services/build_xtai_sampling_prices.py             src/libs/realized_variance/domain/services/calculate_intraday_realized_measures_from_sampled_prices.py             src/libs/realized_variance/domain/services/calculate_daily_realized_measures.py
+          uv run ruff check             src/libs/market_data/dtos/closing_auction_observation.py             src/libs/market_data/dtos/session_open_price_observation.py             src/libs/market_data/services/decode_shioaji_stock_kbars.py             src/libs/realized_variance/constants/xtai_realized_variance_algorithm_version.py             src/libs/realized_variance/dtos/sampled_intraday_price.py             src/libs/realized_variance/domain/services/build_xtai_sampling_prices.py             src/libs/realized_variance/domain/services/calculate_intraday_realized_measures_from_sampled_prices.py             src/libs/realized_variance/domain/services/calculate_daily_realized_measures.py \
+            docs/research/provider-acceptance/run_task_86_xtai_rv_replay.py
 
       - name: Typecheck Task 86 production files
         run: |
-          uv run pyright             src/libs/market_data/dtos/closing_auction_observation.py             src/libs/market_data/services/decode_shioaji_stock_kbars.py             src/libs/realized_variance/constants/xtai_realized_variance_algorithm_version.py             src/libs/realized_variance/dtos/sampled_intraday_price.py             src/libs/realized_variance/domain/services/build_xtai_sampling_prices.py             src/libs/realized_variance/domain/services/calculate_intraday_realized_measures_from_sampled_prices.py             src/libs/realized_variance/domain/services/calculate_daily_realized_measures.py
+          uv run pyright             src/libs/market_data/dtos/closing_auction_observation.py             src/libs/market_data/dtos/session_open_price_observation.py             src/libs/market_data/services/decode_shioaji_stock_kbars.py             src/libs/realized_variance/constants/xtai_realized_variance_algorithm_version.py             src/libs/realized_variance/dtos/sampled_intraday_price.py             src/libs/realized_variance/domain/services/build_xtai_sampling_prices.py             src/libs/realized_variance/domain/services/calculate_intraday_realized_measures_from_sampled_prices.py             src/libs/realized_variance/domain/services/calculate_daily_realized_measures.py
