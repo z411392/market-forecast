@@ -1,0 +1,30 @@
+name: task-86-xtai-closing-auction-rv
+
+on:
+  push:
+    branches:
+      - codex/86-xtai-closing-auction-rv
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  task-86:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Run Task 86 oracles
+        run: |
+          uv run pytest -q             src/libs/market_data/tests/contract/test_closing_auction_observation_contract.py             src/libs/realized_variance/tests/contract/test_sampled_intraday_price_contract.py             src/libs/market_data/tests/unit/test_decode_shioaji_stock_kbars.py             src/libs/realized_variance/tests/unit/test_build_xtai_sampling_prices.py             src/libs/realized_variance/tests/unit/test_calculate_intraday_realized_measures_from_sampled_prices.py             src/libs/realized_variance/tests/unit/test_calculate_daily_realized_measures_xtai.py
