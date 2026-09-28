@@ -1,0 +1,115 @@
+{
+  "artifact_version": "task-86-xtai-rv-live-replay-reference-v1",
+  "task": 86,
+  "provider": "shioaji",
+  "provider_version": "1.7.6",
+  "source_symbol": "2330",
+  "environment": "production",
+  "simulation": false,
+  "subscribe_trade": false,
+  "ca_activated": false,
+  "algorithm_version": "rv-core-v1+xtai-closing-auction-v1",
+  "workflow": {
+    "run_id": 36464564115,
+    "candidate_sha": "db95d0c374684cea61d4bc3f516bdd1b3e0fa8fc",
+    "artifact_id": 10988866851,
+    "artifact_sha256": "be7e0e05598943b3cfda37deadbd572fc408091ffd437df0dc0dc5d28109f334",
+    "summary_sha256": "87a72030fef847a446a03227f99e8814547eb0104a3e3f69eb015d07a9ab6bad"
+  },
+  "sampling_rule": {
+    "session_open_local": "09:00",
+    "continuous_matching_end_local": "13:25",
+    "closing_auction_match_local": "13:30",
+    "synthetic_13_26_to_13_29_minutes": false,
+    "sampled_price_intervals_minutes": [5, 10, 15],
+    "observation_counts": {
+      "5": 54,
+      "10": 27,
+      "15": 18
+    }
+  },
+  "sessions": {
+    "ordinary": {
+      "session_date": "2024-07-02",
+      "provider_bar_count": 266,
+      "canonical_regular_minute_count": 265,
+      "closing_auction_at_utc": "2024-07-02T05:30:00+00:00",
+      "closing_auction_price": 960.0,
+      "measurements": {
+        "5": {
+          "sampled_price_count": 55,
+          "observation_count": 54,
+          "regular_session_variance": 0.00010221288319299749,
+          "realized_quarticity": 1.3266413081009821e-08,
+          "positive_semivariance": 4.0860702240333556e-05,
+          "negative_semivariance": 6.135218095266392e-05
+        },
+        "10": {
+          "sampled_price_count": 28,
+          "observation_count": 27,
+          "regular_session_variance": 8.706959301028129e-05,
+          "realized_quarticity": 4.465159736605335e-09,
+          "positive_semivariance": 3.114349238995011e-05,
+          "negative_semivariance": 5.592610062033118e-05
+        },
+        "15": {
+          "sampled_price_count": 19,
+          "observation_count": 18,
+          "regular_session_variance": 0.00013856332496125267,
+          "realized_quarticity": 2.165046143573998e-08,
+          "positive_semivariance": 4.294806738180947e-05,
+          "negative_semivariance": 9.561525757944319e-05
+        }
+      }
+    },
+    "parity": {
+      "session_date": "2026-09-24",
+      "provider_bar_count": 266,
+      "canonical_regular_minute_count": 265,
+      "closing_auction_at_utc": "2026-09-24T05:30:00+00:00",
+      "closing_auction_price": 2475.0,
+      "measurements": {
+        "5": {
+          "sampled_price_count": 55,
+          "observation_count": 54,
+          "regular_session_variance": 0.00010964302898558377,
+          "realized_quarticity": 8.014440139057491e-09,
+          "positive_semivariance": 5.278502121202979e-05,
+          "negative_semivariance": 5.685800777355397e-05
+        },
+        "10": {
+          "sampled_price_count": 28,
+          "observation_count": 27,
+          "regular_session_variance": 5.283407680026145e-05,
+          "realized_quarticity": 3.716970087105676e-09,
+          "positive_semivariance": 2.0315761960302512e-05,
+          "negative_semivariance": 3.251831483995894e-05
+        },
+        "15": {
+          "sampled_price_count": 19,
+          "observation_count": 18,
+          "regular_session_variance": 3.659131792395245e-05,
+          "realized_quarticity": 8.926199468259528e-10,
+          "positive_semivariance": 1.6259165681215402e-05,
+          "negative_semivariance": 2.0332152242737054e-05
+        }
+      }
+    }
+  },
+  "verification": {
+    "task_86_oracles": "pass",
+    "market_data_and_realized_variance_regressions": "pass",
+    "ruff_changed_production_files": "pass",
+    "pyright_changed_production_files": "pass",
+    "static_workflow_run_id": 36464564019,
+    "live_replay": "pass"
+  },
+  "limitations": {
+    "whole_day_variance_not_frozen": true,
+    "overnight_return_not_in_live_replay": true,
+    "tradingview_5m_count_reference": 53,
+    "canonical_5m_return_count": 54,
+    "tradingview_is_parity_evidence_not_canonical_authority": true,
+    "u_s_provider_leg_unresolved": true
+  }
+}
