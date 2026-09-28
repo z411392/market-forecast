@@ -3,8 +3,8 @@ import math
 import os
 import statistics
 import time as time_module
-from collections import defaultdict
-from datetime import date, datetime, time as clock_time, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
+from datetime import time as clock_time
 from hashlib import sha256
 from pathlib import Path
 from typing import Any
@@ -34,7 +34,6 @@ from libs.realized_variance.domain.services.calculate_overnight_log_return impor
 from libs.realized_variance.domain.services.summarize_measurement_audit import (
     summarize_measurement_audit,
 )
-
 
 SYMBOLS = ("2330", "2317", "2454")
 END_SESSION = date(2026, 9, 24)
