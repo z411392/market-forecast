@@ -126,7 +126,9 @@ def test_execute_and_persist_provider_capture_acceptance(monkeypatch) -> None:
     assert actual is receipt
     assert fetch.calls == [("massive", request)]
     assert acceptance_calls == [raw_response]
+    assert acceptance_calls[0] is raw_response
     assert persist.calls == [(raw_response, receipt)]
+    assert persist.calls[0][0] is raw_response
 
     failing_fetch = _FakeFetchProviderRawResponse(error=RuntimeError("fetch_failed"))
     persist_after_fetch_failure = _FakePersistProviderCaptureEvidence()
@@ -147,6 +149,37 @@ def test_execute_and_persist_provider_capture_acceptance(monkeypatch) -> None:
         )
     assert persist_after_fetch_failure.calls == []
 
+    def failing_acceptance(**kwargs) -> ProviderCaptureAcceptanceReceipt:
+        raise ValueError("acceptance_failed")
+
+    monkeypatch.setattr(
+        "libs.market_data.services.execute_and_persist_provider_capture_acceptance."
+        "build_provider_capture_acceptance",
+        failing_acceptance,
+    )
+    persist_after_acceptance_failure = _FakePersistProviderCaptureEvidence()
+    with raises(ValueError, match="acceptance_failed"):
+        execute_and_persist_provider_capture_acceptance(
+            fetch_raw_response=fetch,
+            persist_evidence=persist_after_acceptance_failure,
+            request=request,
+            provider="massive",
+            source_symbol="AAPL",
+            retrieval_date=date(2026, 9, 28),
+            security=_security(),
+            session_date=date(2025, 11, 26),
+            expected_session_start_utc=datetime(2025, 11, 26, 14, 30, tzinfo=timezone.utc),
+            expected_session_end_utc_exclusive=datetime(2025, 11, 26, 14, 32, tzinfo=timezone.utc),
+            expected_minute_count=2,
+            price_basis="as_printed",
+        )
+    assert persist_after_acceptance_failure.calls == []
+
+    monkeypatch.setattr(
+        "libs.market_data.services.execute_and_persist_provider_capture_acceptance."
+        "build_provider_capture_acceptance",
+        fake_build_provider_capture_acceptance,
+    )
     persist_failure = _FakePersistProviderCaptureEvidence(error=RuntimeError("persist_failed"))
     with raises(RuntimeError, match="persist_failed"):
         execute_and_persist_provider_capture_acceptance(
@@ -163,5 +196,5 @@ def test_execute_and_persist_provider_capture_acceptance(monkeypatch) -> None:
             expected_minute_count=2,
             price_basis="as_printed",
         )
-    assert fetch.calls == [("massive", request), ("massive", request)]
+    assert fetch.calls == [("massive", request), ("massive", request), ("massive", request)]
     assert persist_failure.calls == [(raw_response, receipt)]
