@@ -28,7 +28,6 @@ def test_sampled_intraday_price_contract() -> None:
     assert hints["observed_at_utc"] is datetime
     assert get_args(hints["sampling_minutes"]) == (5, 10, 15)
     assert get_args(hints["role"]) == (
-        "session_open",
         "regular_interval_close",
         "closing_auction_close",
     )
