@@ -58,9 +58,19 @@ def _payload() -> dict[str, object]:
     }
 
 
+def _drop_regular_prefix(payload: dict[str, object], count: int) -> dict[str, object]:
+    result: dict[str, object] = {}
+    for key, values in payload.items():
+        if not isinstance(values, list):
+            result[key] = values
+            continue
+        result[key] = [*values[count:-1], values[-1]]
+    return result
+
+
 @mark.unit
 def test_decode_shioaji_stock_kbars() -> None:
-    bars, closing = decode_shioaji_stock_kbars(
+    bars, session_open, closing = decode_shioaji_stock_kbars(
         _payload(),
         _security(),
         date(2026, 9, 24),
@@ -73,6 +83,19 @@ def test_decode_shioaji_stock_kbars() -> None:
     assert bars[0]["session_date"] == date(2026, 9, 24)
     assert bars[0]["price_basis"] == "as_printed"
 
+    assert session_open["security"] == _security()
+    assert session_open["session_date"] == date(2026, 9, 24)
+    assert session_open["source_interval_start_utc"] == datetime(
+        2026,
+        9,
+        24,
+        1,
+        0,
+        tzinfo=timezone.utc,
+    )
+    assert session_open["price"] == approx(100.0)
+    assert session_open["price_basis"] == "as_printed"
+
     payload = _payload()
     assert closing["security"] == _security()
     assert closing["session_date"] == date(2026, 9, 24)
@@ -80,6 +103,26 @@ def test_decode_shioaji_stock_kbars() -> None:
     assert closing["price"] == approx(payload["Close"][-1])
     assert closing["volume"] == approx(payload["Volume"][-1])
     assert closing["price_basis"] == "as_printed"
+
+    delayed = _drop_regular_prefix(_payload(), 2)
+    delayed_bars, delayed_open, delayed_closing = decode_shioaji_stock_kbars(
+        delayed,
+        _security(),
+        date(2026, 9, 24),
+        "as_printed",
+    )
+    assert delayed_bars[0]["bar_start_utc"] == datetime(
+        2026,
+        9,
+        24,
+        1,
+        2,
+        tzinfo=timezone.utc,
+    )
+    assert delayed_open["source_interval_start_utc"] == delayed_bars[0]["bar_start_utc"]
+    assert delayed_open["price"] == delayed_bars[0]["open"]
+    assert delayed_open["price"] == approx(100.02)
+    assert delayed_closing == closing
 
     missing_close = _payload()
     for key in ("ts", "Open", "High", "Low", "Close", "Volume", "Amount"):
