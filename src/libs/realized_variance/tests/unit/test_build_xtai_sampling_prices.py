@@ -87,7 +87,7 @@ def test_build_xtai_sampling_prices() -> None:
         assert sampled[-1]["price"] == 103.0
         assert sampled[-1]["algorithm_version"] == XTAI_REALIZED_VARIANCE_ALGORITHM_VERSION
 
-        for previous, current in zip(sampled, sampled[1:], strict=True):
+        for previous, current in zip(sampled, sampled[1:]):
             assert current["observed_at_utc"] - previous["observed_at_utc"] == timedelta(
                 minutes=interval
             )
