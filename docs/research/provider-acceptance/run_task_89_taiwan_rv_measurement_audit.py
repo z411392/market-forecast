@@ -80,8 +80,9 @@ def main() -> None:
     audit_sessions = expected_sessions[1:]
     summary: dict[str, Any] = {
         "task": 89,
-        "audit_semantics_version": "taiwan-rv-audit-v2",
+        "audit_semantics_version": "taiwan-rv-audit-v3",
         "missing_regular_minute_labels_are_diagnostic": True,
+        "session_open_price_semantics": "first_matched_trade_via_first_kbar_open",
         "provider": "shioaji",
         "provider_version": sj.__version__,
         "symbols": list(SYMBOLS),
@@ -201,7 +202,7 @@ def main() -> None:
                 "timezone": "Asia/Taipei",
                 "calendar_id": "XTAI",
             }
-            decoded: dict[date, tuple[Any, Any]] = {}
+            decoded: dict[date, tuple[Any, Any, Any]] = {}
             for session_date in expected_sessions:
                 decoded[session_date] = decode_shioaji_stock_kbars(
                     provider_sessions[session_date],
@@ -216,20 +217,26 @@ def main() -> None:
                 10: [],
                 15: [],
             }
-            previous_closing = decoded[prior_session][1]
+            previous_closing = decoded[prior_session][2]
 
             for session_date in audit_sessions:
-                bars, closing = decoded[session_date]
+                bars, session_open, closing = decoded[session_date]
                 overnight_log_return = calculate_overnight_log_return(
                     previous_closing["price"],
-                    bars[0]["open"],
+                    session_open["price"],
                 )
 
                 for interval in (5, 10, 15):
-                    sampled = build_xtai_sampling_prices(bars, closing, interval)
+                    sampled = build_xtai_sampling_prices(
+                        bars,
+                        session_open,
+                        closing,
+                        interval,
+                    )
                     intraday = (
                         calculate_intraday_realized_measures_from_sampled_prices(
-                            sampled
+                            sampled,
+                            session_open,
                         )
                     )
                     daily = calculate_daily_realized_measures(
