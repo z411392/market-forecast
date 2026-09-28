@@ -1,0 +1,62 @@
+{
+  "artifact_version": "shioaji-2330-feasibility-reference-v1",
+  "task": 85,
+  "provider": "shioaji",
+  "provider_version": "1.7.6",
+  "source_symbol": "2330",
+  "environment": "production",
+  "simulation": false,
+  "subscribe_trade": false,
+  "ca_activated": false,
+  "workflow": {
+    "run_id": 36453755813,
+    "candidate_sha": "d10a6434ae45a5d21fd9611aae966129342f8129",
+    "artifact_id": 10985240496,
+    "artifact_sha256": "e5c00ede7c3ae06c7d1c282dd1f6471e90ac025085c6e7a47781afadfd7a277d"
+  },
+  "session_structure_version": "xtai-normal-session-shioaji-v1",
+  "session_semantics": {
+    "timezone": "Asia/Taipei",
+    "continuous_labels_local": "09:01..13:25",
+    "closing_auction_label_local": "13:30",
+    "structural_non_labels_local": [
+      "13:26",
+      "13:27",
+      "13:28",
+      "13:29"
+    ],
+    "expected_reference_bar_count": 266,
+    "missing_bars_must_not_be_synthesized": true
+  },
+  "sessions": {
+    "ordinary": {
+      "session_date": "2024-07-02",
+      "observed_provider_bar_count": 266,
+      "first_ts_local": "2024-07-02T09:01:00+08:00",
+      "first_ts_utc": "2024-07-02T01:01:00+00:00",
+      "last_ts_local": "2024-07-02T13:30:00+08:00",
+      "last_ts_utc": "2024-07-02T05:30:00+00:00",
+      "sdk_payload_sha256": "943ef04e879a6f7965ba1954745c807dcbbfb98683808fc7d9b401e9c48bd44d",
+      "reference_session_structure_match": true,
+      "tradingview_intrabar_count_5m_reference": 53
+    },
+    "parity": {
+      "session_date": "2026-09-24",
+      "observed_provider_bar_count": 266,
+      "first_ts_local": "2026-09-24T09:01:00+08:00",
+      "first_ts_utc": "2026-09-24T01:01:00+00:00",
+      "last_ts_local": "2026-09-24T13:30:00+08:00",
+      "last_ts_utc": "2026-09-24T05:30:00+00:00",
+      "sdk_payload_sha256": "8606f8d4b0047eae7d21321b6de4f6abb4f16022ff43186ae96dd247f741f763",
+      "reference_session_structure_match": true,
+      "tradingview_intrabar_count_5m_reference": 53
+    }
+  },
+  "ruling": {
+    "credential_delivery": "accepted",
+    "production_login": "accepted",
+    "historical_kbars_access": "accepted",
+    "source_feasibility": "accepted",
+    "canonical_rv_provider_promotion": "pending_session_semantics_integration"
+  }
+}
