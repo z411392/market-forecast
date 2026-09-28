@@ -2,7 +2,7 @@ import hashlib
 import json
 from collections.abc import Mapping
 from datetime import date, datetime
-from typing import Literal
+from typing import Literal, NoReturn
 
 from libs.market_data.dtos.canonical_minute_bar import CanonicalMinuteBar
 from libs.market_data.dtos.provider_capture_manifest import ProviderCaptureManifest
@@ -42,8 +42,8 @@ def assemble_provider_capture_sample(
 
     raw_artifact_sha256 = hashlib.sha256(raw_response).hexdigest()
     try:
-        payload = json.loads(raw_response)
-    except (json.JSONDecodeError, UnicodeDecodeError) as error:
+        payload = json.loads(raw_response, parse_constant=_reject_non_json_constant)
+    except (json.JSONDecodeError, UnicodeDecodeError, ValueError) as error:
         raise InvalidProviderCaptureInputError("raw_response_invalid_json") from error
 
     if not isinstance(payload, Mapping):
@@ -78,3 +78,7 @@ def assemble_provider_capture_sample(
     }
     validated_bars = validate_provider_capture_sample(manifest, bars)
     return manifest, validated_bars
+
+
+def _reject_non_json_constant(value: str) -> NoReturn:
+    raise ValueError(value)
