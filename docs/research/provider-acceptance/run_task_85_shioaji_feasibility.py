@@ -126,13 +126,13 @@ def main() -> None:
         "provider": "shioaji",
         "provider_version": sj.__version__,
         "symbol": "2330",
-        "simulation": True,
+        "simulation": False,
         "subscribe_trade": False,
         "ca_activated": False,
         "sessions": [],
     }
 
-    api = sj.Shioaji(simulation=True)
+    api = sj.Shioaji(simulation=False)
     try:
         api.login(
             api_key=api_key,
