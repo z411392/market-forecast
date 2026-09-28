@@ -8,7 +8,6 @@ from typing import Any
 
 import shioaji as sj
 
-
 SYMBOL = "2330"
 SESSIONS = (date(2026, 9, 24), date(2026, 8, 24))
 OUTPUT = Path(
