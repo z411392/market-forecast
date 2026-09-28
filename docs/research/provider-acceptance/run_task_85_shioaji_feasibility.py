@@ -1,9 +1,10 @@
 import json
 import math
 import os
-from datetime import datetime, timezone
+from datetime import date, datetime, time, timedelta, timezone
 from hashlib import sha256
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import shioaji as sj
 
@@ -11,6 +12,7 @@ import shioaji as sj
 SESSIONS = ("2024-07-02", "2026-09-24")
 OUTPUT_ROOT = Path("artifacts/private/provider-captures/task-85-shioaji")
 SUMMARY_PATH = OUTPUT_ROOT / "summary.json"
+TAIPEI = ZoneInfo("Asia/Taipei")
 
 
 def _as_list(value: object) -> list[object]:
@@ -34,7 +36,7 @@ def _normalize_number(value: object) -> int | float:
     raise TypeError(f"unsupported market-data number: {type(value).__name__}")
 
 
-def _timestamp_iso_utc(value: object) -> str:
+def _timestamp_local(value: object) -> datetime:
     numeric = _normalize_number(value)
     seconds = float(numeric)
     absolute = abs(seconds)
@@ -44,7 +46,17 @@ def _timestamp_iso_utc(value: object) -> str:
         seconds /= 1_000_000
     elif absolute >= 1e11:
         seconds /= 1_000
-    return datetime.fromtimestamp(seconds, timezone.utc).isoformat()
+
+    wall_clock = datetime.fromtimestamp(seconds, timezone.utc).replace(tzinfo=None)
+    return wall_clock.replace(tzinfo=TAIPEI)
+
+
+def _reference_session_labels(session_date: str) -> tuple[datetime, ...]:
+    local_date = date.fromisoformat(session_date)
+    first = datetime.combine(local_date, time(9, 1), tzinfo=TAIPEI)
+    continuous = tuple(first + timedelta(minutes=index) for index in range(265))
+    closing_auction = datetime.combine(local_date, time(13, 30), tzinfo=TAIPEI)
+    return (*continuous, closing_auction)
 
 
 def _serialize_kbars(kbars: object, session_date: str) -> tuple[bytes, dict[str, object]]:
@@ -61,9 +73,8 @@ def _serialize_kbars(kbars: object, session_date: str) -> tuple[bytes, dict[str,
     if len(set(lengths.values())) != 1:
         raise ValueError(f"inconsistent Shioaji Kbars lengths: {lengths}")
 
-    count = lengths["ts"]
     records: list[dict[str, int | float]] = []
-    for index in range(count):
+    for index in range(lengths["ts"]):
         records.append(
             {
                 "ts": _normalize_number(fields["ts"][index]),
@@ -93,18 +104,31 @@ def _serialize_kbars(kbars: object, session_date: str) -> tuple[bytes, dict[str,
         + "\n"
     ).encode("utf-8")
 
+    observed_labels = tuple(_timestamp_local(record["ts"]) for record in records)
+    expected_labels = _reference_session_labels(session_date)
     summary: dict[str, object] = {
         "session_date": session_date,
-        "observed_minute_count": count,
-        "expected_full_session_count": 270,
-        "full_session_count_match": count == 270,
+        "observed_provider_bar_count": len(records),
+        "expected_reference_bar_count": len(expected_labels),
+        "reference_session_structure_match": observed_labels == expected_labels,
+        "closing_auction_gap_local": [
+            f"{session_date}T13:26:00+08:00",
+            f"{session_date}T13:27:00+08:00",
+            f"{session_date}T13:28:00+08:00",
+            f"{session_date}T13:29:00+08:00",
+        ],
         "sdk_payload_sha256": sha256(encoded).hexdigest(),
+        "timestamp_semantics": "provider_local_wall_clock_encoded_ns",
     }
     if records:
+        first_local = observed_labels[0]
+        last_local = observed_labels[-1]
         summary["first_ts_raw"] = records[0]["ts"]
         summary["last_ts_raw"] = records[-1]["ts"]
-        summary["first_ts_utc"] = _timestamp_iso_utc(records[0]["ts"])
-        summary["last_ts_utc"] = _timestamp_iso_utc(records[-1]["ts"])
+        summary["first_ts_local"] = first_local.isoformat()
+        summary["last_ts_local"] = last_local.isoformat()
+        summary["first_ts_utc"] = first_local.astimezone(timezone.utc).isoformat()
+        summary["last_ts_utc"] = last_local.astimezone(timezone.utc).isoformat()
 
     return encoded, summary
 
@@ -129,6 +153,7 @@ def main() -> None:
         "simulation": False,
         "subscribe_trade": False,
         "ca_activated": False,
+        "session_structure_version": "xtai-normal-session-shioaji-v1",
         "sessions": [],
     }
 
@@ -151,6 +176,9 @@ def main() -> None:
                 timeout=15000,
             )
             payload, session_summary = _serialize_kbars(kbars, session_date)
+            if not session_summary["reference_session_structure_match"]:
+                raise RuntimeError(f"unexpected_shioaji_session_structure:{session_date}")
+
             (OUTPUT_ROOT / f"2330-{session_date}.kbars.json").write_bytes(payload)
             summary["sessions"].append(session_summary)
             _write_summary(summary)
