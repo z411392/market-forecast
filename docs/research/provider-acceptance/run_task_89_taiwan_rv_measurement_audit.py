@@ -4,7 +4,7 @@ import os
 import statistics
 import time as time_module
 from collections import defaultdict
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, time as clock_time, timedelta, timezone
 from hashlib import sha256
 from pathlib import Path
 from typing import Any
@@ -151,6 +151,25 @@ def main() -> None:
                 _write_summary(summary)
                 raise RuntimeError(
                     f"session_coverage_mismatch:{symbol}:missing={len(missing)}:extra={len(extra)}"
+                )
+
+            shape_outliers = [
+                diagnostic
+                for session_date in expected_sessions
+                if (
+                    diagnostic := _session_shape_diagnostic(
+                        provider_sessions[session_date],
+                        session_date,
+                    )
+                )
+                is not None
+            ]
+            symbol_result["session_shape_outliers"] = shape_outliers
+            if shape_outliers:
+                symbol_result["status"] = "session_shape_failed"
+                _write_summary(summary)
+                raise RuntimeError(
+                    f"session_shape_mismatch:{symbol}:outliers={len(shape_outliers)}"
                 )
 
             security: SecurityIdentity = {
@@ -407,6 +426,59 @@ def _merge_sessions(
         for field, values in payload.items():
             target[field].append(values[index])
 
+
+def _session_shape_diagnostic(
+    payload: dict[str, list[int | float]],
+    session_date: date,
+) -> dict[str, Any] | None:
+    expected_labels = tuple(
+        (
+            datetime.combine(session_date, clock_time(9, 1))
+            + timedelta(minutes=index)
+        ).strftime("%H:%M")
+        for index in range(265)
+    ) + ("13:30",)
+
+    observed_labels: list[str] = []
+    wrong_date_labels: list[str] = []
+    for raw_ts in payload["ts"]:
+        if not isinstance(raw_ts, int):
+            raise RuntimeError("unexpected_shioaji_timestamp_type")
+        seconds, nanoseconds = divmod(raw_ts, 1_000_000_000)
+        if nanoseconds != 0:
+            raise RuntimeError("unexpected_shioaji_timestamp_precision")
+        wall_clock = datetime.fromtimestamp(seconds, tz=timezone.utc).replace(
+            tzinfo=None
+        )
+        if wall_clock.date() != session_date:
+            wrong_date_labels.append(wall_clock.isoformat())
+        else:
+            observed_labels.append(wall_clock.strftime("%H:%M"))
+
+    expected_set = set(expected_labels)
+    observed_set = set(observed_labels)
+    missing_labels = sorted(expected_set - observed_set)
+    extra_labels = sorted(observed_set - expected_set)
+    duplicate_count = len(observed_labels) - len(observed_set)
+
+    if (
+        len(observed_labels) == len(expected_labels)
+        and not missing_labels
+        and not extra_labels
+        and duplicate_count == 0
+        and not wrong_date_labels
+    ):
+        return None
+
+    return {
+        "session_date": session_date.isoformat(),
+        "observed_provider_bar_count": len(observed_labels),
+        "expected_provider_bar_count": len(expected_labels),
+        "missing_labels_local": missing_labels,
+        "extra_labels_local": extra_labels,
+        "duplicate_label_count": duplicate_count,
+        "wrong_date_labels": wrong_date_labels,
+    }
 
 def _serialize_audit_summary(value: dict[str, Any]) -> dict[str, Any]:
     result = dict(value)
