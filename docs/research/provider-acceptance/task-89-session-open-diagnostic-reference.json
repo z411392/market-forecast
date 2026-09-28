@@ -1,0 +1,50 @@
+{
+  "artifact_version": "task-89-session-open-diagnostic-v1",
+  "task": 89,
+  "candidate_sha": "42ba446ca28fcb1aba340718cba4137bf3748359",
+  "workflow_run_id": 36471072390,
+  "static_run_id": 36471072137,
+  "artifact_id": 10992060353,
+  "artifact_sha256": "51e30f2cf4e0c4f8538bf8912551b48d76f0725c5aea5f530370c09c0196fc5b",
+  "summary_sha256": "e90679914e0c7f543f73f2de694e8b72f8582df396a94f3564045fe23d86ac3a",
+  "symbol": "2317",
+  "official_opening_price_rule": {
+    "definition": "first matched trade price of the current session",
+    "source": "https://twse-regulation.twse.com.tw/ENG/EN/law/DAT07.aspx?FLCODE=FL007304&FLNO=58-8&LDATE=20251020&LSID=FL007304&TY=L"
+  },
+  "sessions": {
+    "blocker": {
+      "session_date": "2025-11-17",
+      "first_tick_local": "2025-11-17T09:02:00",
+      "first_tick_price": 241.0,
+      "first_tick_volume": 2368,
+      "ticks_before_09_02": 0,
+      "first_kbar_label_local": "2025-11-17T09:03:00",
+      "first_kbar_interval_start_local": "2025-11-17T09:02:00",
+      "first_kbar_open": 241.0,
+      "first_tick_equals_first_kbar_open": true,
+      "first_kbar_ohlc_matches_preceding_minute_ticks": true,
+      "first_kbar_preceding_minute_tick_count": 444
+    },
+    "normal_reference": {
+      "session_date": "2026-09-24",
+      "first_tick_local": "2026-09-24T09:00:03",
+      "first_tick_price": 253.0,
+      "first_tick_volume": 956,
+      "first_kbar_label_local": "2026-09-24T09:01:00",
+      "first_kbar_interval_start_local": "2026-09-24T09:00:00",
+      "first_kbar_open": 253.0,
+      "first_tick_equals_first_kbar_open": true,
+      "first_kbar_ohlc_matches_preceding_minute_ticks": true,
+      "first_kbar_preceding_minute_tick_count": 182
+    }
+  },
+  "ruling": {
+    "session_open_price_recoverable": true,
+    "session_open_price_source": "first_matched_trade",
+    "session_open_timestamp_may_be_after_09_00": true,
+    "synthetic_09_00_minute_bar_allowed": false,
+    "previous_close_substitution_allowed": false,
+    "next_required_change": "decouple session-open price observation from the first canonical minute bar before rerunning the 252-session Taiwan audit"
+  }
+}
