@@ -42,6 +42,13 @@ AUDIT_SESSION_COUNT = 252
 QUERY_CHUNK_CALENDAR_DAYS = 28
 OUTPUT = Path("artifacts/private/provider-captures/task-89-taiwan-rv-audit/summary.json")
 FIELDS = ("ts", "Open", "High", "Low", "Close", "Volume", "Amount")
+AD_HOC_FULL_DAY_CLOSURES = {
+    date(2026, 7, 10): {
+        "reason": "typhoon_bavi_twse_full_day_closure",
+        "source": "https://www.twse.com.tw/en/clearing/suspended.html",
+        "event_evidence": "https://www.cna.com.tw/news/afe/202607090360.aspx",
+    }
+}
 
 
 def main() -> None:
@@ -49,13 +56,19 @@ def main() -> None:
     secret_key = _required_secret("MARKET_FORECAST_SHIOAJI_SECRET_KEY")
 
     calendar = xcals.get_calendar("XTAI")
-    expected_sessions = tuple(
+    scheduled_window = tuple(
         timestamp.date()
         for timestamp in calendar.sessions_window(
             END_SESSION.isoformat(),
-            -(AUDIT_SESSION_COUNT + 1),
+            -(AUDIT_SESSION_COUNT + 10),
         )
     )
+    adjusted_window = tuple(
+        session_date
+        for session_date in scheduled_window
+        if session_date not in AD_HOC_FULL_DAY_CLOSURES
+    )
+    expected_sessions = adjusted_window[-(AUDIT_SESSION_COUNT + 1) :]
     if len(expected_sessions) != AUDIT_SESSION_COUNT + 1:
         raise RuntimeError("unexpected_xtai_calendar_window_length")
     if expected_sessions[-1] != END_SESSION:
@@ -78,6 +91,14 @@ def main() -> None:
         "first_audit_session": audit_sessions[0].isoformat(),
         "last_audit_session": audit_sessions[-1].isoformat(),
         "query_chunk_calendar_days": QUERY_CHUNK_CALENDAR_DAYS,
+        "calendar_adjustments": [
+            {
+                "session_date": session_date.isoformat(),
+                **details,
+            }
+            for session_date, details in sorted(AD_HOC_FULL_DAY_CLOSURES.items())
+            if expected_sessions[0] <= session_date <= expected_sessions[-1]
+        ],
         "symbols_result": [],
     }
     _write_summary(summary)
