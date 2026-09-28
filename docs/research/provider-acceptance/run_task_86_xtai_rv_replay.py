@@ -66,7 +66,7 @@ def main() -> None:
                 timeout=15000,
             )
             payload = provider.dict()
-            bars, closing = decode_shioaji_stock_kbars(
+            bars, session_open, closing = decode_shioaji_stock_kbars(
                 payload,
                 security,
                 session_date,
@@ -74,9 +74,15 @@ def main() -> None:
             )
             interval_results: list[dict[str, object]] = []
             for interval in (5, 10, 15):
-                sampled = build_xtai_sampling_prices(bars, closing, interval)
+                sampled = build_xtai_sampling_prices(
+                    bars,
+                    session_open,
+                    closing,
+                    interval,
+                )
                 measures = calculate_intraday_realized_measures_from_sampled_prices(
-                    sampled
+                    sampled,
+                    session_open,
                 )
                 expected_observation_count = 270 // interval
                 if measures["observation_count"] != expected_observation_count:
@@ -101,6 +107,10 @@ def main() -> None:
                     "session_date": session_date.isoformat(),
                     "provider_bar_count": len(payload["ts"]),
                     "observed_trade_bearing_minute_count": len(bars),
+                    "session_open_source_interval_start_utc": (
+                        session_open["source_interval_start_utc"].isoformat()
+                    ),
+                    "session_open_price": session_open["price"],
                     "closing_auction_at_utc": closing["matched_at_utc"].isoformat(),
                     "closing_auction_price": closing["price"],
                     "intervals": interval_results,
