@@ -7,6 +7,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from libs.market_data.dtos.canonical_minute_bar import CanonicalMinuteBar
 from libs.market_data.dtos.closing_auction_observation import ClosingAuctionObservation
 from libs.market_data.dtos.security_identity import SecurityIdentity
+from libs.market_data.dtos.session_open_price_observation import SessionOpenPriceObservation
 from libs.market_data.exceptions.invalid_provider_capture_input_error import (
     InvalidProviderCaptureInputError,
 )
@@ -17,7 +18,11 @@ def decode_shioaji_stock_kbars(
     security: SecurityIdentity,
     expected_session_date: date,
     price_basis: Literal["as_printed", "split_adjusted"],
-) -> tuple[tuple[CanonicalMinuteBar, ...], ClosingAuctionObservation]:
+) -> tuple[
+    tuple[CanonicalMinuteBar, ...],
+    SessionOpenPriceObservation,
+    ClosingAuctionObservation,
+]:
     timestamps = _sequence(payload.get("ts"))
     opens = _sequence(payload.get("Open"))
     highs = _sequence(payload.get("High"))
@@ -46,6 +51,7 @@ def decode_shioaji_stock_kbars(
         raise InvalidProviderCaptureInputError("shioaji_invalid_timezone") from error
 
     bars: list[CanonicalMinuteBar] = []
+    session_open: SessionOpenPriceObservation | None = None
     closing_auction: ClosingAuctionObservation | None = None
     previous_label: datetime | None = None
 
@@ -96,9 +102,10 @@ def decode_shioaji_stock_kbars(
                     "shioaji_unexpected_regular_label"
                 )
             bar_start_local = local_label - timedelta(minutes=1)
+            bar_start_utc = bar_start_local.astimezone(timezone.utc)
             bar: CanonicalMinuteBar = {
                 "security": security,
-                "bar_start_utc": bar_start_local.astimezone(timezone.utc),
+                "bar_start_utc": bar_start_utc,
                 "session_date": expected_session_date,
                 "open": open_price,
                 "high": high_price,
@@ -107,14 +114,24 @@ def decode_shioaji_stock_kbars(
                 "volume": volume,
                 "price_basis": price_basis,
             }
+            if session_open is None:
+                session_open = {
+                    "security": security,
+                    "session_date": expected_session_date,
+                    "source_interval_start_utc": bar_start_utc,
+                    "price": open_price,
+                    "price_basis": price_basis,
+                }
             bars.append(bar)
 
         previous_label = local_label
 
+    if session_open is None:
+        raise InvalidProviderCaptureInputError("shioaji_session_open_missing")
     if closing_auction is None:
         raise InvalidProviderCaptureInputError("shioaji_closing_auction_missing")
 
-    return tuple(bars), closing_auction
+    return tuple(bars), session_open, closing_auction
 
 
 def _sequence(value: object) -> tuple[object, ...] | None:
