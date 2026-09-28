@@ -80,6 +80,8 @@ def main() -> None:
     audit_sessions = expected_sessions[1:]
     summary: dict[str, Any] = {
         "task": 89,
+        "audit_semantics_version": "taiwan-rv-audit-v2",
+        "missing_regular_minute_labels_are_diagnostic": True,
         "provider": "shioaji",
         "provider_version": sj.__version__,
         "symbols": list(SYMBOLS),
