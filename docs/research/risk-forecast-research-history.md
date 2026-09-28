@@ -2,7 +2,7 @@
 
 > Status: `REFERENCE_HISTORY`
 >
-> As of: 2026-09-27
+> As of: 2026-09-28
 >
 > 本文件是研究歷程、重要轉折與設計決議的長期閱讀入口，不是第二份產品 authority、roadmap、Story status 或 decision log。
 > 現行規則仍以 `docs/delivery/requirements-specification.md`、Story specs、GitHub Issues、Context Map 與相應 architecture authority 為準。
@@ -1428,3 +1428,67 @@ Task #12 final empirical freeze          BLOCKED by #4 live provider acceptance
 > Story #6 / Task #13 在 supplied 4+3 pilot 的 model-selection / validation evidence 上已完成，但 formal Story closure 仍受上游 Story #5 canonical measurement freeze 約束。
 
 這不是模型證據不足，也不是要求再 specification mining。下一步若要解除 formal blocker，應回到 Story #5 / #4 / #12 的 data-source acceptance 與 empirical measurement freeze，而不是再增加 forecasting model。
+
+
+## 24. 2026-09-28 TradingView deployment status reconciliation
+
+Current-main readback confirms the production deployment path is no longer the old external-source bridge experiment.
+
+### 24.1 Story #7 is implementation-complete
+
+Story #7 declared one child Task:
+
+- #14 — Freeze model manifest and verify Pine parity.
+
+Task #14 is closed/completed, and current `main` contains the accepted deployment artifacts:
+
+- `pine/risk_forecast_v1_5_tv_har_frozen_v1.pine`;
+- `artifacts/model-manifests/risk_forecast_har_frozen_v1.json`;
+- `artifacts/model-manifests/risk_forecast_har_frozen_v1_golden.csv`.
+
+Current-main identities at reconciliation time:
+
+- production Pine blob: `5fe0de0f55b1a0d44cc83278aaae068bdd9bdd6e`;
+- model manifest blob: `261c6dcfaba545ced19cb28f1ad5d7fc4ab976f7`;
+- golden fixture blob: `78e683e74b4bb368afb2cecfec938b64a3b7e0f4`.
+
+The deployment AC are satisfied:
+
+- coefficients/spec/freeze date/input semantics/version are traceable through the manifest;
+- Python/golden parity exists and was executed;
+- corrected GOOGL TradingView runtime/export parity passed;
+- Pine performs deterministic inference only and does not refit;
+- output semantics remain volatility/risk, not direction probability or Buy/Sell.
+
+Story #7 can therefore be treated as completed even though Story #6 remains formally open on its upstream Story #5 measurement-freeze dependency. Story #7 required a promotion ruling, and the supplied-panel ruling used by Task #14 already exists; it did not require Story #6 itself to be closed.
+
+### 24.2 Task #20 is superseded, not a production path
+
+Task #20 created `pine/experiments/market_forecast_risk_bridge.pine` as an `EXPERIMENT_ONLY` fallback when the exact current Pine sources were unavailable.
+
+Its own contract said the bridge was:
+
+- external-source only;
+- no model fitting;
+- no coefficient changes;
+- fully replaceable once exact source / frozen model artifacts were available.
+
+That replacement condition is now satisfied by Task #14 Frozen v1.
+
+Therefore Task #20 is retained only as historical integration evidence and should be closed as superseded / not planned. It must not be confused with the current production deployment path.
+
+### 24.3 Current deployment authority
+
+Current deployment authority is:
+
+```text
+Frozen v1 manifest
+    +
+deterministic HAR Frozen v1 Pine
+    +
+golden fixtures
+    +
+TradingView runtime parity evidence
+```
+
+The external-source bridge is not required for production operation or acceptance.
