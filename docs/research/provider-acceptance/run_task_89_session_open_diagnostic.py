@@ -7,7 +7,6 @@ from typing import Any
 
 import shioaji as sj
 
-
 SYMBOL = "2317"
 SESSIONS = (
     date(2025, 11, 17),
