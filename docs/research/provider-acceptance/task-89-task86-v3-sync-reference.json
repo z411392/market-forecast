@@ -1,0 +1,68 @@
+{
+  "artifact_version": "task-89-task86-v3-sync-reference-v1",
+  "task": 89,
+  "upstream": {
+    "task": 86,
+    "accepted_head_sha": "935a44880ae03f5a957db4c7692877a5aac979e1",
+    "algorithm_version": "rv-core-v1+xtai-closing-auction-v3",
+    "live_reference": "docs/research/provider-acceptance/task-86-session-open-v3-live-reference.json"
+  },
+  "sync_candidate": {
+    "head_sha": "5e0b862fd136950a1bcea10537db8fb1909c7e70",
+    "static_run_id": 36475020360,
+    "static_result": "pass",
+    "live_provider_calls": 0
+  },
+  "call_site_reconciliation": {
+    "audit_semantics_version": "taiwan-rv-audit-v3",
+    "decoder_outputs": [
+      "bars",
+      "session_open",
+      "closing_auction"
+    ],
+    "overnight_open_source": "session_open.price",
+    "sampler_receives_session_open": true,
+    "intraday_calculator_receives_session_open": true,
+    "previous_closing_index_corrected": true
+  },
+  "upstream_blob_equality": {
+    "match_count": 17,
+    "mismatch_count": 0,
+    "paths": [
+      ".github/workflows/task-86-xtai-closing-auction-rv.yml",
+      ".github/workflows/task-86-xtai-live-replay.yml",
+      "docs/research/provider-acceptance/run_task_86_xtai_rv_replay.py",
+      "docs/research/provider-acceptance/task-86-session-open-v3-live-reference.json",
+      "docs/research/provider-acceptance/task-86-session-open-v3-static-reference.json",
+      "docs/research/provider-acceptance/task-86-xtai-rv-live-replay-reference.json",
+      "src/libs/market_data/dtos/session_open_price_observation.py",
+      "src/libs/market_data/services/decode_shioaji_stock_kbars.py",
+      "src/libs/market_data/tests/contract/test_session_open_price_observation_contract.py",
+      "src/libs/market_data/tests/unit/test_decode_shioaji_stock_kbars.py",
+      "src/libs/realized_variance/constants/xtai_realized_variance_algorithm_version.py",
+      "src/libs/realized_variance/domain/services/build_xtai_sampling_prices.py",
+      "src/libs/realized_variance/domain/services/calculate_intraday_realized_measures_from_sampled_prices.py",
+      "src/libs/realized_variance/dtos/sampled_intraday_price.py",
+      "src/libs/realized_variance/tests/contract/test_sampled_intraday_price_contract.py",
+      "src/libs/realized_variance/tests/unit/test_build_xtai_sampling_prices.py",
+      "src/libs/realized_variance/tests/unit/test_calculate_intraday_realized_measures_from_sampled_prices.py"
+    ]
+  },
+  "verification": {
+    "task_89_runners_compile": "pass",
+    "task_86_v3_focused_tests": "pass",
+    "market_data_and_realized_variance_regressions": "pass",
+    "ruff": "pass",
+    "pyright_v3_production": "pass",
+    "live_workflows_skipped": [
+      "task-89-taiwan-rv-measurement-audit",
+      "task-89-tick-kbar-diagnostic",
+      "task-89-session-open-diagnostic"
+    ]
+  },
+  "next_bounded_slice": {
+    "action": "run one 3-symbol x 252-session live audit under v3 semantics",
+    "must_use_marker": "[live-audit]",
+    "must_stop_on_first_new_empirical_blocker": true
+  }
+}
