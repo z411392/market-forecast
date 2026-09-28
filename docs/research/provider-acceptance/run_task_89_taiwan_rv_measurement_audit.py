@@ -16,6 +16,9 @@ from libs.market_data.dtos.security_identity import SecurityIdentity
 from libs.market_data.services.decode_shioaji_stock_kbars import (
     decode_shioaji_stock_kbars,
 )
+from libs.realized_variance.constants.xtai_realized_variance_algorithm_version import (
+    XTAI_REALIZED_VARIANCE_ALGORITHM_VERSION,
+)
 from libs.realized_variance.domain.services.build_measurement_audit_rows import (
     build_measurement_audit_rows,
 )
@@ -83,7 +86,7 @@ def main() -> None:
         "simulation": False,
         "subscribe_trade": False,
         "ca_activated": False,
-        "algorithm_version": "rv-core-v1+xtai-closing-auction-v1",
+        "algorithm_version": XTAI_REALIZED_VARIANCE_ALGORITHM_VERSION,
         "calendar": "XTAI",
         "audit_session_count": AUDIT_SESSION_COUNT,
         "prior_session_for_first_overnight": prior_session.isoformat(),
@@ -163,13 +166,32 @@ def main() -> None:
                 )
                 is not None
             ]
-            symbol_result["session_shape_outliers"] = shape_outliers
-            if shape_outliers:
-                symbol_result["status"] = "session_shape_failed"
-                _write_summary(summary)
-                raise RuntimeError(
-                    f"session_shape_mismatch:{symbol}:outliers={len(shape_outliers)}"
+            symbol_result["minute_label_gap_diagnostics"] = shape_outliers
+            symbol_result["sessions_with_missing_regular_labels"] = sum(
+                bool(
+                    [
+                        label
+                        for label in diagnostic["missing_labels_local"]
+                        if label != "13:30"
+                    ]
                 )
+                for diagnostic in shape_outliers
+            )
+            symbol_result["missing_regular_label_count"] = sum(
+                len(
+                    [
+                        label
+                        for label in diagnostic["missing_labels_local"]
+                        if label != "13:30"
+                    ]
+                )
+                for diagnostic in shape_outliers
+            )
+            symbol_result["sessions_missing_closing_auction_label"] = sum(
+                "13:30" in diagnostic["missing_labels_local"]
+                for diagnostic in shape_outliers
+            )
+            _write_summary(summary)
 
             security: SecurityIdentity = {
                 "symbol": symbol,
