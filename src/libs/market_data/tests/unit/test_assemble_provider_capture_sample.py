@@ -169,6 +169,20 @@ def test_assemble_provider_capture_sample() -> None:
             price_basis="as_printed",
         )
 
+    with raises(InvalidProviderCaptureInputError, match="raw_response_invalid_json"):
+        assemble_provider_capture_sample(
+            provider="massive",
+            raw_response=b'{"value":NaN}',
+            source_symbol="AAPL",
+            retrieval_date=date(2026, 9, 28),
+            security=_us_security(),
+            session_date=date(2025, 11, 26),
+            expected_session_start_utc=us_start,
+            expected_session_end_utc_exclusive=us_start + timedelta(minutes=2),
+            expected_minute_count=2,
+            price_basis="as_printed",
+        )
+
     with raises(InvalidProviderCaptureInputError, match="raw_response_not_object"):
         assemble_provider_capture_sample(
             provider="massive",
