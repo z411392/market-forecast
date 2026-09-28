@@ -10,7 +10,6 @@ class SampledIntradayPrice(TypedDict):
     observed_at_utc: datetime
     sampling_minutes: Literal[5, 10, 15]
     role: Literal[
-        "session_open",
         "regular_interval_close",
         "closing_auction_close",
     ]
