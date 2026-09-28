@@ -1,9 +1,11 @@
 from datetime import datetime, time, timedelta, timezone
+from math import isclose, isfinite
 from typing import Literal
 from zoneinfo import ZoneInfo
 
 from libs.market_data.dtos.canonical_minute_bar import CanonicalMinuteBar
 from libs.market_data.dtos.closing_auction_observation import ClosingAuctionObservation
+from libs.market_data.dtos.session_open_price_observation import SessionOpenPriceObservation
 from libs.realized_variance.constants.xtai_realized_variance_algorithm_version import (
     XTAI_REALIZED_VARIANCE_ALGORITHM_VERSION,
 )
@@ -15,6 +17,7 @@ from libs.realized_variance.exceptions.invalid_realized_variance_input_error imp
 
 def build_xtai_sampling_prices(
     bars: tuple[CanonicalMinuteBar, ...],
+    session_open: SessionOpenPriceObservation,
     closing_auction: ClosingAuctionObservation,
     interval_minutes: Literal[5, 10, 15],
 ) -> tuple[SampledIntradayPrice, ...]:
@@ -59,8 +62,30 @@ def build_xtai_sampling_prices(
             raise InvalidRealizedVarianceInputError("non_increasing_xtai_regular_minutes")
         previous_start = bar["bar_start_utc"]
 
-    if first["bar_start_utc"] != session_start_utc:
-        raise InvalidRealizedVarianceInputError("missing_xtai_session_open_observation")
+    if session_open["security"] != security:
+        raise InvalidRealizedVarianceInputError("session_open_security_mismatch")
+    if session_open["session_date"] != session_date:
+        raise InvalidRealizedVarianceInputError("session_open_session_mismatch")
+    if session_open["price_basis"] != price_basis:
+        raise InvalidRealizedVarianceInputError("session_open_price_basis_mismatch")
+    if not _is_utc_datetime(session_open["source_interval_start_utc"]):
+        raise InvalidRealizedVarianceInputError("session_open_source_time_not_utc")
+    if session_open["source_interval_start_utc"] != first["bar_start_utc"]:
+        raise InvalidRealizedVarianceInputError("session_open_source_interval_mismatch")
+    if not isfinite(session_open["price"]) or session_open["price"] <= 0.0:
+        raise InvalidRealizedVarianceInputError("invalid_session_open_price")
+    if not isclose(
+        session_open["price"],
+        first["open"],
+        rel_tol=1e-12,
+        abs_tol=1e-15,
+    ):
+        raise InvalidRealizedVarianceInputError("session_open_price_mismatch")
+
+    first_boundary_utc = session_start_utc + timedelta(minutes=interval_minutes)
+    if session_open["source_interval_start_utc"] >= first_boundary_utc:
+        raise InvalidRealizedVarianceInputError("session_open_outside_first_sampling_bucket")
+
     if closing_auction["security"] != security:
         raise InvalidRealizedVarianceInputError("closing_auction_security_mismatch")
     if closing_auction["session_date"] != session_date:
@@ -70,20 +95,8 @@ def build_xtai_sampling_prices(
     if closing_auction["matched_at_utc"] != closing_at_utc:
         raise InvalidRealizedVarianceInputError("unexpected_xtai_closing_auction_time")
 
-    sampled: list[SampledIntradayPrice] = [
-        {
-            "security": security,
-            "session_date": session_date,
-            "observed_at_utc": session_start_utc,
-            "sampling_minutes": interval_minutes,
-            "role": "session_open",
-            "price": first["open"],
-            "price_basis": price_basis,
-            "algorithm_version": XTAI_REALIZED_VARIANCE_ALGORITHM_VERSION,
-        }
-    ]
-
-    boundary = session_start_utc + timedelta(minutes=interval_minutes)
+    sampled: list[SampledIntradayPrice] = []
+    boundary = first_boundary_utc
     window_start = session_start_utc
     bar_index = 0
 
