@@ -1,0 +1,69 @@
+{
+  "artifact_version": "task-89-taiwan-rv-audit-s9-checkpoint-v1",
+  "task": 89,
+  "candidate_sha": "53aeb14a852870998db454acbace635499942783",
+  "workflow_run_id": 36470285569,
+  "static_run_id": 36470285637,
+  "artifact_id": 10990918959,
+  "artifact_sha256": "211717b9275a76cde411b97dc5386abd185b9b48241098fd08acbd0dde5a07bd",
+  "summary_sha256": "80c42ec0cd87d082d9d849032229ce9655717562a79320e17ba751636f109994",
+  "audit_semantics_version": "taiwan-rv-audit-v2",
+  "algorithm_version": "rv-core-v1+xtai-closing-auction-v2",
+  "window": {
+    "prior_session_for_first_overnight": "2025-09-10",
+    "first_audit_session": "2025-09-11",
+    "last_audit_session": "2026-09-24",
+    "audit_session_count": 252,
+    "calendar_adjustments": [
+      {
+        "session_date": "2026-07-10",
+        "reason": "typhoon_bavi_twse_full_day_closure"
+      }
+    ]
+  },
+  "symbols": {
+    "2330": {
+      "status": "accepted",
+      "audit_row_count": 252,
+      "sessions_with_missing_regular_labels": 16,
+      "missing_regular_label_count": 45,
+      "sessions_missing_closing_auction_label": 0,
+      "measurement_audit_summary": {
+        "pearson_log_rv_5m_10m": 0.964760067522253,
+        "pearson_log_rv_5m_15m": 0.9427371940552034,
+        "spearman_rv_5m_10m": 0.9387423016385428,
+        "spearman_rv_5m_15m": 0.9090144222657647,
+        "geometric_bias_5m_vs_10m_pct": 22.157116159055224,
+        "geometric_bias_5m_vs_15m_pct": 36.91875544885694,
+        "mean_abs_log_gap_5m_10m": 0.21527701354360665,
+        "mean_abs_log_gap_5m_15m": 0.33156182425170116
+      },
+      "monotonic_frequency_pct": {
+        "rv_5m_gt_10m": 86.90476190476191,
+        "rv_10m_gt_15m": 69.04761904761905,
+        "rv_5m_gt_10m_gt_15m": 58.333333333333336
+      }
+    },
+    "2317": {
+      "status": "blocked",
+      "blocker": "missing_xtai_session_open_observation",
+      "blocker_session_date": "2025-11-17",
+      "missing_labels_local": ["09:01", "09:02"],
+      "sessions_missing_closing_auction_label": 0,
+      "additional_regular_gap_sessions": {
+        "2026-05-15": ["09:06"],
+        "2026-08-20": ["11:53", "11:54"],
+        "2026-09-15": ["12:07"]
+      }
+    },
+    "2454": {
+      "status": "not_reached_due_fail_closed_2317_blocker"
+    }
+  },
+  "ruling": {
+    "status": "partial_empirical_evidence",
+    "taiwan_panel_complete": false,
+    "sampling_frequency_frozen": false,
+    "next_question": "establish evidence-based XTAI session-open price semantics when the first one or more one-minute Kbars are absent"
+  }
+}
