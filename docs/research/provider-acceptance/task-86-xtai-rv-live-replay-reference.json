@@ -1,5 +1,5 @@
 {
-  "artifact_version": "task-86-xtai-rv-live-replay-reference-v1",
+  "artifact_version": "task-86-xtai-rv-live-replay-reference-v2",
   "task": 86,
   "provider": "shioaji",
   "provider_version": "1.7.6",
@@ -8,19 +8,28 @@
   "simulation": false,
   "subscribe_trade": false,
   "ca_activated": false,
-  "algorithm_version": "rv-core-v1+xtai-closing-auction-v1",
+  "algorithm_version": "rv-core-v1+xtai-closing-auction-v2",
+  "research_correction": {
+    "trigger": "task-89-tick-kbar-diagnostic",
+    "diagnostic_run_id": 36466448064,
+    "finding": "historical one-minute Kbars are end-labeled and legitimately omit zero-tick minutes",
+    "no_synthetic_minute_bars": true,
+    "sampling_rule": "use observed trade-bearing minute bars inside each calendar-aligned sampling bucket; fail if an entire required bucket has no observation"
+  },
   "workflow": {
-    "run_id": 36464564115,
-    "candidate_sha": "db95d0c374684cea61d4bc3f516bdd1b3e0fa8fc",
-    "artifact_id": 10988866851,
-    "artifact_sha256": "be7e0e05598943b3cfda37deadbd572fc408091ffd437df0dc0dc5d28109f334",
-    "summary_sha256": "87a72030fef847a446a03227f99e8814547eb0104a3e3f69eb015d07a9ab6bad"
+    "static_run_id": 36467118214,
+    "live_run_id": 36467118154,
+    "candidate_sha": "66006048f4a1ebb5a2a070af54d89c1ac4546e42",
+    "artifact_id": 10990175261,
+    "artifact_sha256": "8fe2dc41d5f175d51d3da697c19227660e25579fadd9809305384e1566ef1789",
+    "summary_sha256": "4766a38f113d4f8053d5403717942d6c697cd53ac3bc96dafcd68292566f49d7"
   },
   "sampling_rule": {
     "session_open_local": "09:00",
     "continuous_matching_end_local": "13:25",
     "closing_auction_match_local": "13:30",
     "synthetic_13_26_to_13_29_minutes": false,
+    "zero_tick_one_minute_intervals_may_be_absent": true,
     "sampled_price_intervals_minutes": [5, 10, 15],
     "observation_counts": {
       "5": 54,
@@ -32,7 +41,7 @@
     "ordinary": {
       "session_date": "2024-07-02",
       "provider_bar_count": 266,
-      "canonical_regular_minute_count": 265,
+      "observed_trade_bearing_minute_count": 265,
       "closing_auction_at_utc": "2024-07-02T05:30:00+00:00",
       "closing_auction_price": 960.0,
       "measurements": {
@@ -65,7 +74,7 @@
     "parity": {
       "session_date": "2026-09-24",
       "provider_bar_count": 266,
-      "canonical_regular_minute_count": 265,
+      "observed_trade_bearing_minute_count": 265,
       "closing_auction_at_utc": "2026-09-24T05:30:00+00:00",
       "closing_auction_price": 2475.0,
       "measurements": {
@@ -101,7 +110,6 @@
     "market_data_and_realized_variance_regressions": "pass",
     "ruff_changed_production_files": "pass",
     "pyright_changed_production_files": "pass",
-    "static_workflow_run_id": 36464564019,
     "live_replay": "pass"
   },
   "limitations": {
