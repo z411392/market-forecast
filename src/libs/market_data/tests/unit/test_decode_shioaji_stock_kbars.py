@@ -41,7 +41,7 @@ def _payload() -> dict[str, object]:
             _provider_ns(12 + minute_index // 60, minute_index % 60)
             for minute_index in range(60)
         ],
-        *[_provider_ns(13, minute_index) for minute_index in range(25)],
+        *[_provider_ns(13, minute_index) for minute_index in range(26)],
         _provider_ns(13, 30),
     ]
     count = len(labels)
