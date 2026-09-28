@@ -4,6 +4,7 @@ from math import log
 from pytest import approx, mark, raises
 
 from libs.market_data.dtos.security_identity import SecurityIdentity
+from libs.market_data.dtos.session_open_price_observation import SessionOpenPriceObservation
 from libs.realized_variance.constants.xtai_realized_variance_algorithm_version import (
     XTAI_REALIZED_VARIANCE_ALGORITHM_VERSION,
 )
@@ -25,11 +26,25 @@ def _security() -> SecurityIdentity:
     }
 
 
+def _session_open(
+    source_interval_start_utc: datetime | None = None,
+    price: float = 100.0,
+) -> SessionOpenPriceObservation:
+    return {
+        "security": _security(),
+        "session_date": date(2026, 9, 24),
+        "source_interval_start_utc": source_interval_start_utc
+        or datetime(2026, 9, 24, 1, 2, tzinfo=timezone.utc),
+        "price": price,
+        "price_basis": "as_printed",
+    }
+
+
 def _sample(index: int, price: float, role: str) -> SampledIntradayPrice:
     return {
         "security": _security(),
         "session_date": date(2026, 9, 24),
-        "observed_at_utc": datetime(2026, 9, 24, 1, 0, tzinfo=timezone.utc)
+        "observed_at_utc": datetime(2026, 9, 24, 1, 5, tzinfo=timezone.utc)
         + timedelta(minutes=5 * index),
         "sampling_minutes": 5,
         "role": role,
@@ -42,13 +57,15 @@ def _sample(index: int, price: float, role: str) -> SampledIntradayPrice:
 @mark.unit
 def test_calculate_intraday_realized_measures_from_sampled_prices() -> None:
     samples = (
-        _sample(0, 100.0, "session_open"),
-        _sample(1, 110.0, "regular_interval_close"),
-        _sample(2, 99.0, "regular_interval_close"),
-        _sample(3, 108.9, "closing_auction_close"),
+        _sample(0, 110.0, "regular_interval_close"),
+        _sample(1, 99.0, "regular_interval_close"),
+        _sample(2, 108.9, "closing_auction_close"),
     )
 
-    result = calculate_intraday_realized_measures_from_sampled_prices(samples)
+    result = calculate_intraday_realized_measures_from_sampled_prices(
+        samples,
+        _session_open(),
+    )
 
     r0 = log(1.1)
     r1 = log(0.9)
@@ -67,19 +84,54 @@ def test_calculate_intraday_realized_measures_from_sampled_prices() -> None:
     assert result["algorithm_version"] == XTAI_REALIZED_VARIANCE_ALGORITHM_VERSION
 
     gapped = list(samples)
-    gapped[2] = {
-        **gapped[2],
-        "observed_at_utc": gapped[2]["observed_at_utc"] + timedelta(minutes=5),
+    gapped[1] = {
+        **gapped[1],
+        "observed_at_utc": gapped[1]["observed_at_utc"] + timedelta(minutes=5),
     }
     with raises(InvalidRealizedVarianceInputError):
-        calculate_intraday_realized_measures_from_sampled_prices(tuple(gapped))
+        calculate_intraday_realized_measures_from_sampled_prices(
+            tuple(gapped),
+            _session_open(),
+        )
 
     wrong_first_role = list(samples)
-    wrong_first_role[0] = {**wrong_first_role[0], "role": "regular_interval_close"}
+    wrong_first_role[0] = {**wrong_first_role[0], "role": "closing_auction_close"}
     with raises(InvalidRealizedVarianceInputError):
-        calculate_intraday_realized_measures_from_sampled_prices(tuple(wrong_first_role))
+        calculate_intraday_realized_measures_from_sampled_prices(
+            tuple(wrong_first_role),
+            _session_open(),
+        )
+
+    open_outside_first_bucket = _session_open(
+        source_interval_start_utc=samples[0]["observed_at_utc"],
+    )
+    with raises(InvalidRealizedVarianceInputError):
+        calculate_intraday_realized_measures_from_sampled_prices(
+            samples,
+            open_outside_first_bucket,
+        )
+
+    mismatched_open = {
+        **_session_open(),
+        "price_basis": "split_adjusted",
+    }
+    with raises(InvalidRealizedVarianceInputError):
+        calculate_intraday_realized_measures_from_sampled_prices(
+            samples,
+            mismatched_open,
+        )
+
+    non_positive_open = _session_open(price=0.0)
+    with raises(InvalidRealizedVarianceInputError):
+        calculate_intraday_realized_measures_from_sampled_prices(
+            samples,
+            non_positive_open,
+        )
 
     non_positive = list(samples)
     non_positive[1] = {**non_positive[1], "price": 0.0}
     with raises(InvalidRealizedVarianceInputError):
-        calculate_intraday_realized_measures_from_sampled_prices(tuple(non_positive))
+        calculate_intraday_realized_measures_from_sampled_prices(
+            tuple(non_positive),
+            _session_open(),
+        )
