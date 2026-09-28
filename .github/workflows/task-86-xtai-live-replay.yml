@@ -1,9 +1,6 @@
 name: task-86-xtai-live-replay
 
 on:
-  push:
-    branches:
-      - codex/86-xtai-closing-auction-rv
   workflow_dispatch:
 
 permissions:
@@ -11,7 +8,6 @@ permissions:
 
 jobs:
   live-replay:
-    if: contains(github.event.head_commit.message, '[live-replay-v3]')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
