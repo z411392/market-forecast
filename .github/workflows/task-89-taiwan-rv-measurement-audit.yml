@@ -1,0 +1,50 @@
+name: task-89-taiwan-rv-measurement-audit
+
+on:
+  push:
+    branches:
+      - codex/89-taiwan-rv-measurement-audit
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  taiwan-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      MARKET_FORECAST_SHIOAJI_API_KEY: ${{ secrets.MARKET_FORECAST_SHIOAJI_API_KEY }}
+      MARKET_FORECAST_SHIOAJI_SECRET_KEY: ${{ secrets.MARKET_FORECAST_SHIOAJI_SECRET_KEY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Verify Shioaji credentials
+        shell: bash
+        run: |
+          test -n "${MARKET_FORECAST_SHIOAJI_API_KEY:-}"
+          test -n "${MARKET_FORECAST_SHIOAJI_SECRET_KEY:-}"
+
+      - name: Compile audit runner
+        run: |
+          uv run --with "shioaji==1.7.6"             python -m py_compile             docs/research/provider-acceptance/run_task_89_taiwan_rv_measurement_audit.py
+
+      - name: Execute Taiwan 3-symbol measurement audit
+        run: |
+          uv run --with "shioaji==1.7.6"             python docs/research/provider-acceptance/run_task_89_taiwan_rv_measurement_audit.py
+
+      - name: Upload secret-free audit evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: task-89-taiwan-rv-measurement-audit
+          path: artifacts/private/provider-captures/task-89-taiwan-rv-audit/summary.json
+          if-no-files-found: ignore
+          retention-days: 14
