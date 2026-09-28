@@ -52,7 +52,15 @@ jobs:
               headers={"Authorization": f"Bearer {token}"},
               timeout=30.0,
           )
+          import json
+
           print(f"FinMind diagnostic HTTP status: {response.status_code}")
+          try:
+              payload = response.json()
+          except ValueError:
+              payload = {}
+          safe = {key: payload.get(key) for key in ("status", "msg") if key in payload}
+          print("FinMind diagnostic response:", json.dumps(safe, ensure_ascii=False))
           PY
 
       - name: Upload secret-free acceptance evidence
