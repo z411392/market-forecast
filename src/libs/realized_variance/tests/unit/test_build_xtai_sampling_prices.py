@@ -95,9 +95,43 @@ def test_build_xtai_sampling_prices() -> None:
     bars_5m = build_xtai_sampling_prices(_bars(), _closing(), 5)
     assert bars_5m[1]["price"] == _bars()[4]["close"]
 
-    missing_regular_minute = _bars()[:-1]
+    sparse = tuple(bar for index, bar in enumerate(_bars()) if index != 54)
+    sparse_5m = build_xtai_sampling_prices(sparse, _closing(), 5)
+    assert len(sparse_5m) == 55
+    assert sparse_5m[11]["observed_at_utc"] == datetime(
+        2026,
+        9,
+        24,
+        1,
+        55,
+        tzinfo=timezone.utc,
+    )
+    assert sparse_5m[11]["price"] == _bars()[53]["close"]
+
+    missing_last_regular_minute = _bars()[:-1]
+    sparse_close_5m = build_xtai_sampling_prices(
+        missing_last_regular_minute,
+        _closing(),
+        5,
+    )
+    assert sparse_close_5m[-2]["price"] == _bars()[-2]["close"]
+
+    empty_internal_bucket = tuple(
+        bar
+        for index, bar in enumerate(_bars())
+        if index not in range(50, 55)
+    )
     with raises(InvalidRealizedVarianceInputError):
-        build_xtai_sampling_prices(missing_regular_minute, _closing(), 5)
+        build_xtai_sampling_prices(empty_internal_bucket, _closing(), 5)
+
+    missing_session_open = _bars()[1:]
+    with raises(InvalidRealizedVarianceInputError):
+        build_xtai_sampling_prices(missing_session_open, _closing(), 5)
+
+    out_of_order = list(_bars())
+    out_of_order[10], out_of_order[11] = out_of_order[11], out_of_order[10]
+    with raises(InvalidRealizedVarianceInputError):
+        build_xtai_sampling_prices(tuple(out_of_order), _closing(), 5)
 
     synthetic_auction_minute = {
         **_bars()[-1],
