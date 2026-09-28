@@ -1,0 +1,68 @@
+{
+  "artifact_version": "finmind-2330-live-acceptance-reference-v1",
+  "purpose": "Spike #4 S4 predeclared FinMind 2330 live-acceptance reference",
+  "provider": "finmind",
+  "dataset": "TaiwanStockKBar",
+  "source_symbol": "2330",
+  "tradingview_reference": {
+    "file_name": "TWSE_DLY_2330, 1D(4).csv",
+    "sha256": "e26c29335402363c4a1b8aae35bb26e63bb1577bed74173f5b914f7258ca3d47",
+    "row_count": 2380,
+    "column_count": 37,
+    "latest_session_date": "2026-09-24"
+  },
+  "sessions": {
+    "ordinary": {
+      "session_date": "2024-07-02",
+      "tradingview_intrabar_count_5m": 53,
+      "tradingview_whole_day_rv_5m": 9.35460006608e-05,
+      "request": {
+        "method": "GET",
+        "path": "/api/v4/data",
+        "query": [
+          [
+            "dataset",
+            "TaiwanStockKBar"
+          ],
+          [
+            "data_id",
+            "2330"
+          ],
+          [
+            "start_date",
+            "2024-07-02"
+          ]
+        ]
+      }
+    },
+    "parity": {
+      "session_date": "2026-09-24",
+      "tradingview_intrabar_count_5m": 53,
+      "tradingview_whole_day_rv_5m": 0.0001781990171565,
+      "request": {
+        "method": "GET",
+        "path": "/api/v4/data",
+        "query": [
+          [
+            "dataset",
+            "TaiwanStockKBar"
+          ],
+          [
+            "data_id",
+            "2330"
+          ],
+          [
+            "start_date",
+            "2026-09-24"
+          ]
+        ]
+      }
+    }
+  },
+  "authorization": {
+    "live_http_authorized": false,
+    "credential_read_authorized": false,
+    "quota_or_spend_authorized": false,
+    "provider_promoted": false
+  }
+}
