@@ -22,7 +22,6 @@ from libs.realized_variance.domain.services.calculate_intraday_realized_measures
     calculate_intraday_realized_measures_from_sampled_prices,
 )
 
-
 CASES = (
     ("2454", date(2026, 5, 4), "empty_5m_bucket_blocker"),
     ("2317", date(2025, 11, 17), "delayed_open_reference"),
