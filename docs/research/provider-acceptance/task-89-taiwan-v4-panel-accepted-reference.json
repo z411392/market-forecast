@@ -1,0 +1,198 @@
+{
+  "artifact_version": "task-89-taiwan-v4-panel-accepted-reference-v1",
+  "task": 89,
+  "status": "accepted",
+  "candidate_sha": "5b9fe4cd70442f8e67653f8855fcd22629659caf",
+  "live_run_id": 36523337972,
+  "static_run_id": 36523337983,
+  "artifact_id": 11013710771,
+  "artifact_sha256": "2346f3f85954d2f8ae55af7d494de59d80d972253037318ea38d2e5b1aa5fd33",
+  "summary_sha256": "9beee43669b70121dd0835fc9ccf36f693e0b8952264c928163fa0c37aa6b294",
+  "algorithm_version": "rv-core-v1+xtai-closing-auction-v4",
+  "audit_semantics_version": "taiwan-rv-audit-v4",
+  "window": {
+    "prior_session_for_first_overnight": "2025-09-10",
+    "first_audit_session": "2025-09-11",
+    "last_audit_session": "2026-09-24",
+    "audit_session_count": 252,
+    "calendar_adjustments": [
+      {
+        "session_date": "2026-07-10",
+        "reason": "typhoon_bavi_twse_full_day_closure"
+      }
+    ]
+  },
+  "panel": {
+    "symbols": ["2330", "2317", "2454"],
+    "accepted_symbol_count": 3,
+    "accepted_audit_rows_per_symbol": 252,
+    "panel_median_metrics": {
+      "pearson_log_rv_5m_10m": 0.964760067522253,
+      "pearson_log_rv_5m_15m": 0.9427371940552034,
+      "spearman_rv_5m_10m": 0.9488033186283663,
+      "spearman_rv_5m_15m": 0.9090144222657647,
+      "geometric_bias_5m_vs_10m_pct": 14.750196538241077,
+      "geometric_bias_5m_vs_15m_pct": 25.5793713259173,
+      "mean_abs_log_gap_5m_10m": 0.2012683832032041,
+      "mean_abs_log_gap_5m_15m": 0.2984134681847272
+    }
+  },
+  "symbols": {
+    "2330": {
+      "provider_session_count": 253,
+      "audit_row_count": 252,
+      "sessions_with_missing_regular_labels": 16,
+      "missing_regular_label_count": 45,
+      "sessions_missing_closing_auction_label": 0,
+      "measurement_audit_summary": {
+        "pearson_log_rv_5m_10m": 0.964760067522253,
+        "pearson_log_rv_5m_15m": 0.9427371940552034,
+        "spearman_rv_5m_10m": 0.9387423016385428,
+        "spearman_rv_5m_15m": 0.9090144222657647,
+        "geometric_bias_5m_vs_10m_pct": 22.157116159055224,
+        "geometric_bias_5m_vs_15m_pct": 36.91875544885694,
+        "mean_abs_log_gap_5m_10m": 0.21527701354360665,
+        "mean_abs_log_gap_5m_15m": 0.33156182425170116
+      },
+      "monotonic_frequency_pct": {
+        "rv_5m_gt_10m": 86.90476190476191,
+        "rv_10m_gt_15m": 69.04761904761905,
+        "rv_5m_gt_10m_gt_15m": 58.333333333333336
+      },
+      "previous_tick_usage": {
+        "5": {
+          "sample_count": 0,
+          "session_count": 0,
+          "max_staleness_lower_bound_seconds": 0.0,
+          "max_staleness_upper_bound_seconds": 0.0
+        },
+        "10": {
+          "sample_count": 0,
+          "session_count": 0,
+          "max_staleness_lower_bound_seconds": 0.0,
+          "max_staleness_upper_bound_seconds": 0.0
+        },
+        "15": {
+          "sample_count": 0,
+          "session_count": 0,
+          "max_staleness_lower_bound_seconds": 0.0,
+          "max_staleness_upper_bound_seconds": 0.0
+        }
+      },
+      "overnight_variance_share_median": {
+        "5": 0.2817671101263698,
+        "10": 0.337456929701643,
+        "15": 0.3918458292980874
+      }
+    },
+    "2317": {
+      "provider_session_count": 253,
+      "audit_row_count": 252,
+      "sessions_with_missing_regular_labels": 4,
+      "missing_regular_label_count": 6,
+      "sessions_missing_closing_auction_label": 0,
+      "measurement_audit_summary": {
+        "pearson_log_rv_5m_10m": 0.9618337188791484,
+        "pearson_log_rv_5m_15m": 0.9325454743988566,
+        "spearman_rv_5m_10m": 0.9488033186283663,
+        "spearman_rv_5m_15m": 0.9066965715155565,
+        "geometric_bias_5m_vs_10m_pct": 14.750196538241077,
+        "geometric_bias_5m_vs_15m_pct": 25.5793713259173,
+        "mean_abs_log_gap_5m_10m": 0.1976789569290324,
+        "mean_abs_log_gap_5m_15m": 0.2984134681847272
+      },
+      "monotonic_frequency_pct": {
+        "rv_5m_gt_10m": 73.01587301587301,
+        "rv_10m_gt_15m": 61.904761904761905,
+        "rv_5m_gt_10m_gt_15m": 44.84126984126984
+      },
+      "previous_tick_usage": {
+        "5": {
+          "sample_count": 0,
+          "session_count": 0,
+          "max_staleness_lower_bound_seconds": 0.0,
+          "max_staleness_upper_bound_seconds": 0.0
+        },
+        "10": {
+          "sample_count": 0,
+          "session_count": 0,
+          "max_staleness_lower_bound_seconds": 0.0,
+          "max_staleness_upper_bound_seconds": 0.0
+        },
+        "15": {
+          "sample_count": 0,
+          "session_count": 0,
+          "max_staleness_lower_bound_seconds": 0.0,
+          "max_staleness_upper_bound_seconds": 0.0
+        }
+      },
+      "overnight_variance_share_median": {
+        "5": 0.18115719389990645,
+        "10": 0.21321681156866995,
+        "15": 0.23966020648279454
+      }
+    },
+    "2454": {
+      "provider_session_count": 253,
+      "audit_row_count": 252,
+      "sessions_with_missing_regular_labels": 164,
+      "missing_regular_label_count": 3815,
+      "sessions_missing_closing_auction_label": 0,
+      "measurement_audit_summary": {
+        "pearson_log_rv_5m_10m": 0.9742065810878949,
+        "pearson_log_rv_5m_15m": 0.9605246199284792,
+        "spearman_rv_5m_10m": 0.9657189049186278,
+        "spearman_rv_5m_15m": 0.9531803146907946,
+        "geometric_bias_5m_vs_10m_pct": 13.116135505877846,
+        "geometric_bias_5m_vs_15m_pct": 22.652970973931485,
+        "mean_abs_log_gap_5m_10m": 0.2012683832032041,
+        "mean_abs_log_gap_5m_15m": 0.2895526343436682
+      },
+      "monotonic_frequency_pct": {
+        "rv_5m_gt_10m": 67.85714285714286,
+        "rv_10m_gt_15m": 58.730158730158735,
+        "rv_5m_gt_10m_gt_15m": 38.88888888888889
+      },
+      "previous_tick_usage": {
+        "5": {
+          "sample_count": 8,
+          "session_count": 5,
+          "sample_fraction_of_5m_boundaries": 0.0005878894767783657,
+          "max_staleness_lower_bound_seconds": 480.0,
+          "max_staleness_upper_bound_seconds": 540.0
+        },
+        "10": {
+          "sample_count": 0,
+          "session_count": 0,
+          "max_staleness_lower_bound_seconds": 0.0,
+          "max_staleness_upper_bound_seconds": 0.0
+        },
+        "15": {
+          "sample_count": 0,
+          "session_count": 0,
+          "max_staleness_lower_bound_seconds": 0.0,
+          "max_staleness_upper_bound_seconds": 0.0
+        }
+      },
+      "overnight_variance_share_median": {
+        "5": 0.2011834618198156,
+        "10": 0.24481334396116095,
+        "15": 0.23967981118094242
+      }
+    }
+  },
+  "empirical_ruling": {
+    "full_taiwan_pilot_panel_accepted": true,
+    "all_symbols_show_positive_5m_vs_10m_geometric_bias": true,
+    "all_symbols_show_positive_5m_vs_15m_geometric_bias": true,
+    "cross_frequency_rank_and_log_correlation_high": true,
+    "previous_tick_cts_rare_but_required": true,
+    "overnight_variance_material": true,
+    "canonical_sampling_frequency_selected": false
+  },
+  "next_bounded_slice": {
+    "action": "analyze Taiwan 3-symbol measurement evidence and define the decision rule for canonical sampling without using forecast performance",
+    "sampling_frequency_freeze_allowed_only_in_separate_slice": true,
+    "u_s_measurement_audit_still_required_for_cross_market_freeze": true
+  }
+}
