@@ -27,9 +27,12 @@ Final accepted S1/S2/S3 contract:
 
 Calibration pins:
 
-`shioaji==1.7.6`
+`shioaji==1.7.7`
 
-Official release date: 2026-09-22.
+Environment reconciliation:
+- the first S4a static run showed that package index metadata now marks 1.7.6 as yanked and explicitly recommends 1.7.7;
+- the public Shioaji release page still showed 1.7.6 at the time of this checkpoint, so documentation/release indexing was temporarily behind the package resolver;
+- S4a therefore uses 1.7.7 for new calibration evidence while preserving earlier 1.7.6 provider evidence as historical.
 
 ## Historical tick request
 
