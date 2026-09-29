@@ -1,0 +1,71 @@
+name: task-90-rk-s4a-tick-calibration
+
+on:
+  push:
+    branches:
+      - codex/90-taiwan-rk-feasibility
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Compile calibration runner
+        run: |
+          uv run --with "shioaji==1.7.6" \
+            python -m py_compile \
+            docs/research/provider-acceptance/run_task_90_tick_traffic_calibration.py
+
+      - name: Lint calibration runner
+        run: |
+          uv run ruff check \
+            docs/research/provider-acceptance/run_task_90_tick_traffic_calibration.py
+
+  calibration:
+    if: contains(github.event.head_commit.message, '[traffic-calibration]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      MARKET_FORECAST_SHIOAJI_API_KEY: ${{ secrets.MARKET_FORECAST_SHIOAJI_API_KEY }}
+      MARKET_FORECAST_SHIOAJI_SECRET_KEY: ${{ secrets.MARKET_FORECAST_SHIOAJI_SECRET_KEY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Verify Shioaji credentials
+        shell: bash
+        run: |
+          test -n "${MARKET_FORECAST_SHIOAJI_API_KEY:-}"
+          test -n "${MARKET_FORECAST_SHIOAJI_SECRET_KEY:-}"
+
+      - name: Execute bounded 3-query traffic calibration
+        run: |
+          uv run --with "shioaji==1.7.6" \
+            python docs/research/provider-acceptance/run_task_90_tick_traffic_calibration.py
+
+      - name: Upload calibration evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: task-90-tick-traffic-calibration
+          path: artifacts/private/provider-captures/task-90-tick-traffic-calibration
+          if-no-files-found: ignore
+          retention-days: 14
