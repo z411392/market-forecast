@@ -18,6 +18,11 @@ def test_sampled_intraday_price_contract() -> None:
             "role",
             "price",
             "price_basis",
+            "source_interval_start_utc",
+            "source_interval_end_utc",
+            "observation_mode",
+            "staleness_lower_bound_seconds",
+            "staleness_upper_bound_seconds",
             "algorithm_version",
         }
     )
@@ -33,4 +38,13 @@ def test_sampled_intraday_price_contract() -> None:
     )
     assert hints["price"] is float
     assert get_args(hints["price_basis"]) == ("as_printed", "split_adjusted")
+    assert hints["source_interval_start_utc"] is datetime
+    assert hints["source_interval_end_utc"] is datetime
+    assert get_args(hints["observation_mode"]) == (
+        "observed_bucket_close",
+        "previous_tick",
+        "closing_auction",
+    )
+    assert hints["staleness_lower_bound_seconds"] is float
+    assert hints["staleness_upper_bound_seconds"] is float
     assert hints["algorithm_version"] is str
