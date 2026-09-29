@@ -1,0 +1,76 @@
+{
+  "artifact_version": "task-89-task86-v4-sync-reference-v1",
+  "task": 89,
+  "upstream": {
+    "task": 86,
+    "accepted_head_sha": "2f002589c3acb29a9f6e25f655d51d72c75c8a98",
+    "algorithm_version": "rv-core-v1+xtai-closing-auction-v4",
+    "static_reference": "docs/research/provider-acceptance/task-86-previous-tick-v4-static-reference.json",
+    "live_reference": "docs/research/provider-acceptance/task-86-previous-tick-v4-live-reference.json"
+  },
+  "sync_candidate": {
+    "head_sha": "0afa71f4516c12ca8e751237532665633101c885",
+    "static_run_id": 36523033833,
+    "static_result": "pass",
+    "live_provider_calls": 0
+  },
+  "branch_preservation": {
+    "prior_s11_checkpoint_sha": "70cd50414705ddc22a5b036f8739e076b8a09651",
+    "pre_sync_task89_head_sha": "94d1c78b59a3ba8b432d7c6f265ba870262a8bde",
+    "pre_sync_head_is_descendant_of_s11_checkpoint": true,
+    "task89_s12_s13_evidence_preserved": true
+  },
+  "upstream_blob_equality": {
+    "checked_path_count": 19,
+    "match_count": 19,
+    "mismatch_count": 0
+  },
+  "audit_contract": {
+    "audit_semantics_version": "taiwan-rv-audit-v4",
+    "fixed_grid_observation_rule": "previous_tick_with_source_interval_staleness_bounds",
+    "session_open_price_semantics": "first_matched_trade_via_first_kbar_open",
+    "sampled_price_provenance_required": true,
+    "previous_tick_diagnostics": {
+      "per_symbol_per_frequency_sample_count": true,
+      "per_symbol_per_frequency_session_count": true,
+      "max_staleness_lower_bound_seconds": true,
+      "max_staleness_upper_bound_seconds": true
+    }
+  },
+  "verification": {
+    "task_89_research_runners_compile": "pass",
+    "task_86_v4_focused_tests": "pass",
+    "market_data_and_realized_variance_regressions": "pass",
+    "ruff": "pass",
+    "pyright_v4_production": "pass",
+    "live_workflows_skipped": [
+      "task-89-taiwan-rv-measurement-audit",
+      "task-89-tick-kbar-diagnostic",
+      "task-89-session-open-diagnostic",
+      "task-89-empty-bucket-diagnostic"
+    ]
+  },
+  "sync_commits": [
+    "cef68b61eff6f4827ad22b30251c0879c3cdbb3d",
+    "f04b090e8f9ff1cbb2f751e2803082c5a0703946",
+    "6ba673da14218dc31de98a9d56c4345224988f04",
+    "bbaa44798c97090452fef44ea9e7a0dfb8320121",
+    "f8c02cbde511289cb6239bcc5322eb37301a38a1",
+    "4e5fd90659bea6e038e944ba267b3eafb1bb23c6",
+    "c6ef07e0c5538a0eeb654aca5a1647aa52fa1e89",
+    "a678ac4785e6946e4286b1b2ee5a211c6b7aa43f",
+    "95ebf318e3d7777d501e603df8c527d76bb65b93",
+    "963a26491dde2376a43d3fba359b9edc09d0a101",
+    "a9ec0c48d6f900f218be30ad14b64a5bef0e8e67"
+  ],
+  "task89_reconciliation_commits": [
+    "8b9764866c45b82908715eb2149f1ac923eca5ab",
+    "0afa71f4516c12ca8e751237532665633101c885"
+  ],
+  "next_bounded_slice": {
+    "action": "execute one 3-symbol x 252-session live audit under v4 semantics",
+    "must_use_marker": "[live-audit]",
+    "must_stop_on_first_new_empirical_blocker": true,
+    "sampling_frequency_decision_allowed": false
+  }
+}
