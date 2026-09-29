@@ -99,6 +99,7 @@ def build_xtai_sampling_prices(
     boundary = first_boundary_utc
     window_start = session_start_utc
     bar_index = 0
+    latest_observed_bar: CanonicalMinuteBar | None = None
 
     while boundary < closing_at_utc:
         if boundary > continuous_end_utc:
@@ -106,15 +107,38 @@ def build_xtai_sampling_prices(
                 "sampling_boundary_inside_closing_auction"
             )
 
-        last_observed_bar: CanonicalMinuteBar | None = None
+        bucket_observed_bar: CanonicalMinuteBar | None = None
         while bar_index < len(bars) and bars[bar_index]["bar_start_utc"] < boundary:
             current = bars[bar_index]
+            latest_observed_bar = current
             if current["bar_start_utc"] >= window_start:
-                last_observed_bar = current
+                bucket_observed_bar = current
             bar_index += 1
 
-        if last_observed_bar is None:
-            raise InvalidRealizedVarianceInputError("empty_xtai_sampling_bucket")
+        source_bar = bucket_observed_bar or latest_observed_bar
+        if source_bar is None:
+            raise InvalidRealizedVarianceInputError("missing_previous_tick_observation")
+
+        observation_mode: Literal["observed_bucket_close", "previous_tick"]
+        if bucket_observed_bar is not None:
+            observation_mode = "observed_bucket_close"
+        else:
+            observation_mode = "previous_tick"
+
+        source_start = source_bar["bar_start_utc"]
+        source_end = source_start + timedelta(minutes=1)
+        if source_end > boundary:
+            raise InvalidRealizedVarianceInputError(
+                "sample_source_after_sampling_boundary"
+            )
+        if observation_mode == "observed_bucket_close" and source_start < window_start:
+            raise InvalidRealizedVarianceInputError(
+                "observed_source_outside_sampling_bucket"
+            )
+        if observation_mode == "previous_tick" and source_end > window_start:
+            raise InvalidRealizedVarianceInputError(
+                "previous_tick_source_inside_sampling_bucket"
+            )
 
         sampled.append(
             {
@@ -123,8 +147,17 @@ def build_xtai_sampling_prices(
                 "observed_at_utc": boundary,
                 "sampling_minutes": interval_minutes,
                 "role": "regular_interval_close",
-                "price": last_observed_bar["close"],
+                "price": source_bar["close"],
                 "price_basis": price_basis,
+                "source_interval_start_utc": source_start,
+                "source_interval_end_utc": source_end,
+                "observation_mode": observation_mode,
+                "staleness_lower_bound_seconds": (
+                    boundary - source_end
+                ).total_seconds(),
+                "staleness_upper_bound_seconds": (
+                    boundary - source_start
+                ).total_seconds(),
                 "algorithm_version": XTAI_REALIZED_VARIANCE_ALGORITHM_VERSION,
             }
         )
@@ -143,6 +176,11 @@ def build_xtai_sampling_prices(
             "role": "closing_auction_close",
             "price": closing_auction["price"],
             "price_basis": price_basis,
+            "source_interval_start_utc": closing_at_utc,
+            "source_interval_end_utc": closing_at_utc,
+            "observation_mode": "closing_auction",
+            "staleness_lower_bound_seconds": 0.0,
+            "staleness_upper_bound_seconds": 0.0,
             "algorithm_version": XTAI_REALIZED_VARIANCE_ALGORITHM_VERSION,
         }
     )
