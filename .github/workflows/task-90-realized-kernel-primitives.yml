@@ -1,0 +1,38 @@
+name: task-90-realized-kernel-primitives
+
+on:
+  push:
+    branches:
+      - codex/90-taiwan-rk-feasibility
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  task-90-s3b:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Run Task 90 primitive oracles
+        run: |
+          uv run pytest -q             src/libs/realized_variance/tests/unit/test_realized_kernel_primitives.py
+
+      - name: Lint Task 90 S3b production files
+        run: |
+          uv run ruff check             src/libs/realized_variance/domain/services/parzen_kernel_weight.py             src/libs/realized_variance/domain/services/realized_autocovariance.py             src/libs/realized_variance/domain/services/jitter_log_price_endpoints.py             src/libs/realized_variance/domain/services/select_noise_subgrid_stride.py             src/libs/realized_variance/domain/services/estimate_noise_variance_from_subgrids.py
+
+      - name: Typecheck Task 90 S3b production files
+        run: |
+          uv run pyright             src/libs/realized_variance/domain/services/parzen_kernel_weight.py             src/libs/realized_variance/domain/services/realized_autocovariance.py             src/libs/realized_variance/domain/services/jitter_log_price_endpoints.py             src/libs/realized_variance/domain/services/select_noise_subgrid_stride.py             src/libs/realized_variance/domain/services/estimate_noise_variance_from_subgrids.py
