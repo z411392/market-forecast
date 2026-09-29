@@ -86,6 +86,7 @@ def test_build_xtai_sampling_prices() -> None:
 
         assert len(sampled) == expected_count
         assert sampled[0]["role"] == "regular_interval_close"
+        assert sampled[0]["observation_mode"] == "observed_bucket_close"
         assert sampled[0]["observed_at_utc"] == datetime(
             2026,
             9,
@@ -94,7 +95,15 @@ def test_build_xtai_sampling_prices() -> None:
             interval,
             tzinfo=timezone.utc,
         )
+        assert sampled[0]["source_interval_end_utc"] == sampled[0]["observed_at_utc"]
+        assert sampled[0]["source_interval_start_utc"] == (
+            sampled[0]["observed_at_utc"] - timedelta(minutes=1)
+        )
+        assert sampled[0]["staleness_lower_bound_seconds"] == 0.0
+        assert sampled[0]["staleness_upper_bound_seconds"] == 60.0
+
         assert sampled[-1]["role"] == "closing_auction_close"
+        assert sampled[-1]["observation_mode"] == "closing_auction"
         assert sampled[-1]["observed_at_utc"] == datetime(
             2026,
             9,
@@ -103,6 +112,10 @@ def test_build_xtai_sampling_prices() -> None:
             30,
             tzinfo=timezone.utc,
         )
+        assert sampled[-1]["source_interval_start_utc"] == sampled[-1]["observed_at_utc"]
+        assert sampled[-1]["source_interval_end_utc"] == sampled[-1]["observed_at_utc"]
+        assert sampled[-1]["staleness_lower_bound_seconds"] == 0.0
+        assert sampled[-1]["staleness_upper_bound_seconds"] == 0.0
         assert sampled[-1]["price"] == 103.0
         assert sampled[-1]["algorithm_version"] == XTAI_REALIZED_VARIANCE_ALGORITHM_VERSION
 
@@ -140,6 +153,7 @@ def test_build_xtai_sampling_prices() -> None:
         tzinfo=timezone.utc,
     )
     assert delayed_5m[0]["price"] == _bars()[4]["close"]
+    assert delayed_5m[0]["observation_mode"] == "observed_bucket_close"
 
     sparse = tuple(bar for index, bar in enumerate(_bars()) if index != 54)
     sparse_5m = build_xtai_sampling_prices(
@@ -158,6 +172,65 @@ def test_build_xtai_sampling_prices() -> None:
         tzinfo=timezone.utc,
     )
     assert sparse_5m[10]["price"] == _bars()[53]["close"]
+    assert sparse_5m[10]["observation_mode"] == "observed_bucket_close"
+    assert sparse_5m[10]["source_interval_start_utc"] == datetime(
+        2026,
+        9,
+        24,
+        1,
+        53,
+        tzinfo=timezone.utc,
+    )
+    assert sparse_5m[10]["source_interval_end_utc"] == datetime(
+        2026,
+        9,
+        24,
+        1,
+        54,
+        tzinfo=timezone.utc,
+    )
+    assert sparse_5m[10]["staleness_lower_bound_seconds"] == 60.0
+    assert sparse_5m[10]["staleness_upper_bound_seconds"] == 120.0
+
+    empty_internal_bucket = tuple(
+        bar
+        for index, bar in enumerate(_bars())
+        if index not in range(50, 55)
+    )
+    carried_5m = build_xtai_sampling_prices(
+        empty_internal_bucket,
+        _session_open(),
+        _closing(),
+        5,
+    )
+    assert carried_5m[10]["observed_at_utc"] == datetime(
+        2026,
+        9,
+        24,
+        1,
+        55,
+        tzinfo=timezone.utc,
+    )
+    assert carried_5m[10]["price"] == _bars()[49]["close"]
+    assert carried_5m[10]["observation_mode"] == "previous_tick"
+    assert carried_5m[10]["source_interval_start_utc"] == datetime(
+        2026,
+        9,
+        24,
+        1,
+        49,
+        tzinfo=timezone.utc,
+    )
+    assert carried_5m[10]["source_interval_end_utc"] == datetime(
+        2026,
+        9,
+        24,
+        1,
+        50,
+        tzinfo=timezone.utc,
+    )
+    assert carried_5m[10]["staleness_lower_bound_seconds"] == 300.0
+    assert carried_5m[10]["staleness_upper_bound_seconds"] == 360.0
 
     missing_last_regular_minute = _bars()[:-1]
     sparse_close_5m = build_xtai_sampling_prices(
@@ -167,19 +240,7 @@ def test_build_xtai_sampling_prices() -> None:
         5,
     )
     assert sparse_close_5m[-2]["price"] == _bars()[-2]["close"]
-
-    empty_internal_bucket = tuple(
-        bar
-        for index, bar in enumerate(_bars())
-        if index not in range(50, 55)
-    )
-    with raises(InvalidRealizedVarianceInputError):
-        build_xtai_sampling_prices(
-            empty_internal_bucket,
-            _session_open(),
-            _closing(),
-            5,
-        )
+    assert sparse_close_5m[-2]["observation_mode"] == "observed_bucket_close"
 
     no_trade_in_first_5m = _bars()[5:]
     with raises(InvalidRealizedVarianceInputError):
