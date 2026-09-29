@@ -1,0 +1,76 @@
+{
+  "artifact_version": "task-90-s3c-bandwidth-green-reference-v1",
+  "task": 90,
+  "branch": "codex/90-taiwan-rk-feasibility",
+  "pr": 92,
+  "estimator_version": "tw-rk-parzen-trades-v1",
+  "scope": "sparse_rv_and_bandwidth_only",
+  "tests_first": {
+    "red_commit": "c53e1127839e00fce110365ce3bce40838dfbb67",
+    "red_run_id": 36541114935,
+    "red_result": "expected_failure",
+    "missing_modules": [
+      "estimate_sparse_realized_variance",
+      "calculate_realized_kernel_bandwidth"
+    ]
+  },
+  "implementation": {
+    "sparse_rv_commit": "43c15e972f5baa49dde355fea24b60a85c714e6e",
+    "bandwidth_commit": "e97db543e90ba5cc7b190b056c0d27d1485c1650",
+    "adjacent_pair_fix_commit": "75071c656d160aa2afbf96abeb1eb3cfff8f6faa",
+    "focused_gate_commit": "3338dae4f1b80009f9ee9bc7372350686ae9aa97"
+  },
+  "sparse_rv_oracle": {
+    "timestamps_seconds": [0, 1, 3, 4],
+    "log_prices": [0.0, 1.0, 2.0, 4.0],
+    "interval_seconds": 2,
+    "phase_shift_seconds": 1,
+    "phase_realized_variances": [10.0, 1.0],
+    "expected_average": 5.5,
+    "synchronization": "previous_tick_for_sparse_bandwidth_proxy_only"
+  },
+  "bandwidth_oracles": {
+    "noise_1_sparse_rv_1_return_count_32": 29,
+    "zero_noise_return_count_32": 1,
+    "oversized_clamps_to_return_count_minus_1": true,
+    "formula": "ceil(3.5134 * xi_hat^(4/5) * n^(3/5))",
+    "xi_squared": "noise_variance / sparse_realized_variance"
+  },
+  "verification": {
+    "first_green_run_id": 36541505243,
+    "first_green_tests": "4 passed",
+    "final_s3c_run_id": 36541613864,
+    "final_s3c_tests": "pass",
+    "ruff": "pass",
+    "pyright": "pass",
+    "s3a_regression_run_id": 36541613914,
+    "s3a_regression": "pass",
+    "s3b_regression_run_id": 36541614035,
+    "s3b_regression": "pass",
+    "provider_calls": 0
+  },
+  "scope_boundary": {
+    "full_parzen_kernel_implemented": false,
+    "whole_day_composition_implemented": false,
+    "shioaji_acquisition_executed": false,
+    "empirical_benchmark_value_computed": false
+  },
+  "security_note": {
+    "gitguardian_failure_is_preexisting_reference_false_positive": true,
+    "flagged_commit": "2ebaaa824cdc7f11da827a21594206b717cc97a3",
+    "flagged_file": "docs/research/provider-acceptance/task-90-s3b-primitives-green-reference.json",
+    "s3c_introduced_credential": false
+  },
+  "next_bounded_slice": {
+    "name": "S3d full Parzen realized-kernel summation only",
+    "allowed": [
+      "calculate_parzen_realized_kernel",
+      "make frozen kernel oracle GREEN"
+    ],
+    "forbidden": [
+      "whole-day composition",
+      "Shioaji acquisition",
+      "empirical benchmark run"
+    ]
+  }
+}
