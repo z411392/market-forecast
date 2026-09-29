@@ -30,3 +30,15 @@ jobs:
           uv run pytest -q \
             src/libs/realized_variance/tests/unit/test_estimate_sparse_realized_variance.py \
             src/libs/realized_variance/tests/unit/test_realized_kernel_bandwidth.py
+
+      - name: Lint Task 90 S3c production files
+        run: |
+          uv run ruff check \
+            src/libs/realized_variance/domain/services/estimate_sparse_realized_variance.py \
+            src/libs/realized_variance/domain/services/calculate_realized_kernel_bandwidth.py
+
+      - name: Typecheck Task 90 S3c production files
+        run: |
+          uv run pyright \
+            src/libs/realized_variance/domain/services/estimate_sparse_realized_variance.py \
+            src/libs/realized_variance/domain/services/calculate_realized_kernel_bandwidth.py
