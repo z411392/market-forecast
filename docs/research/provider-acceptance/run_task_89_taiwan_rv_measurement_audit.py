@@ -80,9 +80,11 @@ def main() -> None:
     audit_sessions = expected_sessions[1:]
     summary: dict[str, Any] = {
         "task": 89,
-        "audit_semantics_version": "taiwan-rv-audit-v3",
+        "audit_semantics_version": "taiwan-rv-audit-v4",
         "missing_regular_minute_labels_are_diagnostic": True,
         "session_open_price_semantics": "first_matched_trade_via_first_kbar_open",
+        "fixed_grid_observation_rule": "previous_tick_with_source_interval_staleness_bounds",
+        "sampled_price_provenance_required": True,
         "provider": "shioaji",
         "provider_version": sj.__version__,
         "symbols": list(SYMBOLS),
@@ -217,6 +219,14 @@ def main() -> None:
                 10: [],
                 15: [],
             }
+            previous_tick_sample_count = {5: 0, 10: 0, 15: 0}
+            previous_tick_sessions: dict[int, set[date]] = {
+                5: set(),
+                10: set(),
+                15: set(),
+            }
+            max_previous_tick_staleness_lower = {5: 0.0, 10: 0.0, 15: 0.0}
+            max_previous_tick_staleness_upper = {5: 0.0, 10: 0.0, 15: 0.0}
             previous_closing = decoded[prior_session][2]
 
             for session_date in audit_sessions:
@@ -233,6 +243,31 @@ def main() -> None:
                         closing,
                         interval,
                     )
+                    previous_tick_samples = [
+                        sample
+                        for sample in sampled
+                        if sample["observation_mode"] == "previous_tick"
+                    ]
+                    if previous_tick_samples:
+                        previous_tick_sample_count[interval] += len(
+                            previous_tick_samples
+                        )
+                        previous_tick_sessions[interval].add(session_date)
+                        max_previous_tick_staleness_lower[interval] = max(
+                            max_previous_tick_staleness_lower[interval],
+                            max(
+                                sample["staleness_lower_bound_seconds"]
+                                for sample in previous_tick_samples
+                            ),
+                        )
+                        max_previous_tick_staleness_upper[interval] = max(
+                            max_previous_tick_staleness_upper[interval],
+                            max(
+                                sample["staleness_upper_bound_seconds"]
+                                for sample in previous_tick_samples
+                            ),
+                        )
+
                     intraday = (
                         calculate_intraday_realized_measures_from_sampled_prices(
                             sampled,
@@ -308,6 +343,19 @@ def main() -> None:
                             "max": max(values),
                         }
                         for interval, values in overnight_share_by_interval.items()
+                    },
+                    "previous_tick_usage": {
+                        str(interval): {
+                            "sample_count": previous_tick_sample_count[interval],
+                            "session_count": len(previous_tick_sessions[interval]),
+                            "max_staleness_lower_bound_seconds": (
+                                max_previous_tick_staleness_lower[interval]
+                            ),
+                            "max_staleness_upper_bound_seconds": (
+                                max_previous_tick_staleness_upper[interval]
+                            ),
+                        }
+                        for interval in (5, 10, 15)
                     },
                     "top_abs_log_gap_sessions": [
                         {
