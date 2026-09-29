@@ -1,0 +1,35 @@
+name: task-90-realized-kernel-red
+
+on:
+  push:
+    branches:
+      - codex/90-taiwan-rk-feasibility
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  task-90-red:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Run frozen Task 90 S2 RED oracles
+        run: |
+          uv run pytest -q \
+            src/libs/realized_variance/tests/contract/test_realized_kernel_parameters_contract.py \
+            src/libs/realized_variance/tests/contract/test_noise_robust_daily_variance_contract.py \
+            src/libs/realized_variance/tests/unit/test_realized_kernel_primitives.py \
+            src/libs/realized_variance/tests/unit/test_calculate_parzen_realized_kernel.py \
+            src/libs/realized_variance/tests/unit/test_compose_noise_robust_daily_variance.py
