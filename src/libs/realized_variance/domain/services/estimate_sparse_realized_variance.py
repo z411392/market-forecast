@@ -28,7 +28,7 @@ def estimate_sparse_realized_variance(
 
     gaps = tuple(
         (current - previous).total_seconds()
-        for previous, current in zip(timestamps, timestamps[1:], strict=True)
+        for previous, current in zip(timestamps, timestamps[1:])
     )
     if any(not isfinite(gap) or gap <= 0.0 for gap in gaps):
         raise InvalidRealizedVarianceInputError("non_increasing_sparse_rv_timestamps")
@@ -55,7 +55,6 @@ def estimate_sparse_realized_variance(
             for previous, current in zip(
                 synchronized_prices,
                 synchronized_prices[1:],
-                strict=True,
             )
         )
         phase_estimates.append(fsum(value * value for value in returns))
