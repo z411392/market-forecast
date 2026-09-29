@@ -1,0 +1,66 @@
+{
+  "artifact_version": "task-90-s3e-composition-green-reference-v1",
+  "task": 90,
+  "slice": "S3e",
+  "estimator_version": "tw-rk-parzen-trades-v1",
+  "tests_first": {
+    "red_candidate_sha": "67b132a804c16f0a6ac8d99aa9ab603b6ac68fb6",
+    "red_workflow_run_id": 36549337581,
+    "red_result": "expected_module_not_found",
+    "production_candidate_sha": "b03c712c135ecdee62b48a6c5ce179fdcc98b885",
+    "green_workflow_run_id": 36549501517,
+    "green_result": "pass"
+  },
+  "composition_contract": {
+    "whole_day_variance": "intraday_realized_kernel + overnight_return^2",
+    "overnight_return": "log(current_opening_price / previous_closing_price)",
+    "metadata_preserved": [
+      "security",
+      "session_date",
+      "price_basis",
+      "tick_count",
+      "return_count",
+      "bandwidth",
+      "noise_variance",
+      "sparse_realized_variance",
+      "estimator_version"
+    ],
+    "validation": {
+      "previous_closing_price": "finite and > 0",
+      "current_opening_price": "finite and > 0",
+      "intraday_realized_kernel": "finite and >= 0",
+      "tick_count": ">= 2",
+      "return_count": "> 0 and < tick_count",
+      "bandwidth": "> 0 and <= max(1, return_count - 1)",
+      "noise_variance": "finite and >= 0",
+      "sparse_realized_variance": "finite and > 0"
+    }
+  },
+  "hand_oracle": {
+    "previous_closing_price": 100.0,
+    "current_opening_price": 110.0,
+    "intraday_realized_kernel": 0.02,
+    "overnight_return": "log(1.1)",
+    "overnight_variance": "log(1.1)^2",
+    "whole_day_variance": "0.02 + log(1.1)^2"
+  },
+  "same_head_regressions": {
+    "s3a_identity_run_id": 36549501339,
+    "s3b_primitives_run_id": 36549501288,
+    "s3c_bandwidth_run_id": 36549501145,
+    "s3d_kernel_run_id": 36549501231,
+    "s3e_composition_run_id": 36549501517,
+    "all_pass": true
+  },
+  "provider_calls": 0,
+  "not_in_scope": [
+    "Shioaji acquisition",
+    "traffic calibration",
+    "empirical realized-kernel benchmark values",
+    "benchmark-vs-fixed-grid comparison"
+  ],
+  "next_bounded_slice": {
+    "action": "design and implement provider tick acquisition/cleaning only after a separate source/traffic slice",
+    "empirical_panel_run_allowed_in_same_slice": false
+  }
+}
