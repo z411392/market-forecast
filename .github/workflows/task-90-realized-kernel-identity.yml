@@ -1,0 +1,38 @@
+name: task-90-realized-kernel-identity
+
+on:
+  push:
+    branches:
+      - codex/90-taiwan-rk-feasibility
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  task-90-s3a:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Run Task 90 identity contracts
+        run: |
+          uv run pytest -q             src/libs/realized_variance/tests/contract/test_realized_kernel_parameters_contract.py             src/libs/realized_variance/tests/contract/test_noise_robust_daily_variance_contract.py
+
+      - name: Lint Task 90 S3a production files
+        run: |
+          uv run ruff check             src/libs/realized_variance/constants/taiwan_realized_kernel_estimator_version.py             src/libs/realized_variance/dtos/realized_kernel_parameters.py             src/libs/realized_variance/dtos/noise_robust_daily_variance.py             src/libs/realized_variance/domain/services/build_default_realized_kernel_parameters.py
+
+      - name: Typecheck Task 90 S3a production files
+        run: |
+          uv run pyright             src/libs/realized_variance/constants/taiwan_realized_kernel_estimator_version.py             src/libs/realized_variance/dtos/realized_kernel_parameters.py             src/libs/realized_variance/dtos/noise_robust_daily_variance.py             src/libs/realized_variance/domain/services/build_default_realized_kernel_parameters.py
