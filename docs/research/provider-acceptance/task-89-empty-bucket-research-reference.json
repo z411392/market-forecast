@@ -1,0 +1,77 @@
+{
+  "artifact_version": "task-89-empty-bucket-research-reference-v1",
+  "task": 89,
+  "symbol": "2454",
+  "session_date": "2026-05-04",
+  "blocked_sampling_bucket_local": "11:25-11:30",
+  "diagnostic": {
+    "candidate_sha": "5bb52838b8ac3482151cc20e7fa7b01f2c4d0c19",
+    "workflow_run_id": 36513255864,
+    "static_run_id": 36513255658,
+    "artifact_id": 11009517158,
+    "artifact_sha256": "215304c6baa509e88a7f324b6332080ff4558bbb1ce019397727321853b38416",
+    "summary_sha256": "d2cd468ebcc03f2096436049119b84c1fb409c626dd7c3802b03f99f30b5e68c"
+  },
+  "tick_evidence": {
+    "ticks_inside_11_25_to_11_30_half_open": 0,
+    "ticks_exactly_at_11_30": 0,
+    "last_tick_at_or_before_boundary": {
+      "local": "2026-05-04T11:23:56",
+      "price": 2870.0,
+      "volume": 1,
+      "tick_type": 1
+    },
+    "first_tick_after_boundary": {
+      "local": "2026-05-04T11:30:15",
+      "price": 2870.0,
+      "volume": 1,
+      "tick_type": 1
+    },
+    "previous_tick_price_at_11_30": 2870.0,
+    "staleness_seconds_at_11_30": 364.0
+  },
+  "kbar_evidence": {
+    "missing_end_labels_local": [
+      "11:26",
+      "11:27",
+      "11:28",
+      "11:29",
+      "11:30"
+    ],
+    "all_missing_labels_confirmed": true,
+    "first_kbar_after_gap": {
+      "label_local": "2026-05-04T11:31:00",
+      "open": 2870.0,
+      "high": 2870.0,
+      "low": 2870.0,
+      "close": 2870.0,
+      "volume": 1.0
+    }
+  },
+  "literature": {
+    "calendar_time_previous_tick_rule": "at a fixed sampling boundary, use the most recent observed transaction price at or before that boundary",
+    "sources": [
+      "https://doi.org/10.1111/1468-0262.00418",
+      "https://doi.org/10.1198/073500106000000071",
+      "https://academic.oup.com/ajae/article/101/2/563/5060863",
+      "https://econbase.org/papers/text/2212.11833.html"
+    ],
+    "caveat": "previous-tick sampling can create stale calendar-time observations and may be less efficient than transaction-time sampling when trade arrivals are highly irregular"
+  },
+  "project_ruling": {
+    "true_no_trade_bucket": true,
+    "provider_kbar_loss_for_blocker_bucket": false,
+    "previous_tick_calendar_sampling_evidence_backed": true,
+    "synthetic_minute_bar_allowed": false,
+    "synthetic_transaction_at_boundary_allowed": false,
+    "sampled_boundary_price_may_reference_prior_real_observation": true,
+    "provenance_and_staleness_must_be_explicit": true,
+    "kbar_only_production_must_not_fabricate_exact_last_trade_second": true
+  },
+  "next_bounded_slice": {
+    "task": 86,
+    "action": "tests-first v4 sampled-price provenance contract",
+    "requires_new_algorithm_identity": true,
+    "task_89_panel_rerun_allowed_before_v4_live_acceptance": false
+  }
+}
