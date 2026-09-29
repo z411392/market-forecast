@@ -1,12 +1,11 @@
 import json
 import math
 import os
-from datetime import date, datetime, time, timedelta, timezone
+from datetime import date, datetime, time, timezone
 from pathlib import Path
 from typing import Any
 
 import shioaji as sj
-
 
 SYMBOL = "2454"
 SESSION_DATE = date(2026, 5, 4)
