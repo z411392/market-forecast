@@ -1,0 +1,44 @@
+name: task-90-rk-s3e-composition
+
+on:
+  push:
+    branches:
+      - codex/90-taiwan-rk-feasibility
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  composition:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Run S3e composition oracle
+        run: |
+          uv run pytest -q             src/libs/realized_variance/tests/unit/test_compose_noise_robust_daily_variance.py
+
+      - name: Lint S3e production service
+        if: always()
+        run: |
+          if test -f src/libs/realized_variance/domain/services/compose_noise_robust_daily_variance.py; then
+            uv run ruff check               src/libs/realized_variance/domain/services/compose_noise_robust_daily_variance.py
+          fi
+
+      - name: Typecheck S3e production service
+        if: always()
+        run: |
+          if test -f src/libs/realized_variance/domain/services/compose_noise_robust_daily_variance.py; then
+            uv run pyright               src/libs/realized_variance/domain/services/compose_noise_robust_daily_variance.py
+          fi
