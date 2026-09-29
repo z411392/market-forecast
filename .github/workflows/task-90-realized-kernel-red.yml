@@ -1,9 +1,6 @@
 name: task-90-realized-kernel-red
 
 on:
-  push:
-    branches:
-      - codex/90-taiwan-rk-feasibility
   workflow_dispatch:
 
 permissions:
