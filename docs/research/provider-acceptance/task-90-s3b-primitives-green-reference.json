@@ -1,0 +1,80 @@
+{
+  "artifact_version": "task-90-s3b-primitives-green-reference-v1",
+  "task": 90,
+  "branch": "codex/90-taiwan-rk-feasibility",
+  "pr": 92,
+  "estimator_version": "tw-rk-parzen-trades-v1",
+  "branch_reconciliation": {
+    "authoritative_pr_head_before_s3b": "ea37c7fa10196ae8f52579579febbebd18db96ca",
+    "older_sibling_branch": "codex/90-taiwan-noise-robust-benchmark",
+    "older_sibling_head_with_scratch_primitives": "d857ccd35a9d7dab5e231c5b0f342121c2f1e147",
+    "reconciled_by_exact_file_copy": true,
+    "sibling_branch_not_merged_or_reset": true
+  },
+  "primitives": {
+    "parzen_kernel_weight": {
+      "commit": "391a8b74c285490a20df186a29fa5e17d6f01a65"
+    },
+    "realized_autocovariance": {
+      "commit": "5ebaf9278b801bffe05ebb96491a89589d865835"
+    },
+    "jitter_log_price_endpoints": {
+      "commit": "fc1f2e5c06d5a506bb64c1f17b7ad1b8c67f568d",
+      "endpoint_jitter_m": 2
+    },
+    "select_noise_subgrid_stride": {
+      "commit": "da7e9a89eb9b8503b482b264f5103f36410f0677",
+      "rounding": "half_up",
+      "target_spacing_seconds_default_contract": 120
+    },
+    "estimate_noise_variance_from_subgrids": {
+      "commit": "dfcc6c869d07330d825ac10ce018370d82609d83"
+    }
+  },
+  "frozen_hand_oracles": {
+    "parzen_weights": {
+      "0": 1.0,
+      "0.25": 0.71875,
+      "0.5": 0.25,
+      "0.75": 0.03125,
+      "1": 0.0
+    },
+    "autocovariance_for_returns_1_2_3": {
+      "gamma0": 14.0,
+      "gamma1": 8.0,
+      "gamma2": 3.0
+    },
+    "jitter_input_0_2_4_6_8_10": [1.0, 4.0, 6.0, 9.0],
+    "stride_10_second_ticks_target_120_seconds": 12,
+    "stride_48_second_ticks_target_120_seconds": 3,
+    "noise_variance_log_prices_0_1_2_4_6_9_q2": 6.75
+  },
+  "workflow": {
+    "focused_workflow_commit": "67dffa4763fc945263261807c7c44a1c77c03787",
+    "primitive_run_id": 36533593501,
+    "primitive_result": "pass",
+    "identity_regression_run_id": 36533593348,
+    "identity_regression_result": "pass",
+    "ruff": "pass",
+    "pyright": "pass"
+  },
+  "scope_boundary": {
+    "bandwidth_selection_implemented": false,
+    "full_realized_kernel_implemented": false,
+    "whole_day_composition_implemented": false,
+    "provider_calls": 0
+  },
+  "next_bounded_slice": {
+    "name": "S3c bandwidth selection only",
+    "allowed": [
+      "estimate preliminary sparse RV",
+      "calculate Parzen plug-in bandwidth",
+      "make frozen bandwidth test GREEN"
+    ],
+    "forbidden": [
+      "full realized-kernel calculation",
+      "whole-day composition",
+      "Shioaji acquisition"
+    ]
+  }
+}
