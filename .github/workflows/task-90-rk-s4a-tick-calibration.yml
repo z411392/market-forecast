@@ -24,7 +24,7 @@ jobs:
 
       - name: Compile calibration runner
         run: |
-          uv run --with "shioaji==1.7.6" \
+          uv run --with "shioaji==1.7.7" \
             python -m py_compile \
             docs/research/provider-acceptance/run_task_90_tick_traffic_calibration.py
 
@@ -58,7 +58,7 @@ jobs:
 
       - name: Execute bounded 3-query traffic calibration
         run: |
-          uv run --with "shioaji==1.7.6" \
+          uv run --with "shioaji==1.7.7" \
             python docs/research/provider-acceptance/run_task_90_tick_traffic_calibration.py
 
       - name: Upload calibration evidence
