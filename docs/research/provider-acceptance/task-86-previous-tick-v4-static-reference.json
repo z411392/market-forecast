@@ -1,0 +1,87 @@
+{
+  "artifact_version": "task-86-previous-tick-v4-static-reference-v1",
+  "task": 86,
+  "algorithm_version": "rv-core-v1+xtai-closing-auction-v4",
+  "upstream_research": {
+    "task": 89,
+    "reference": "docs/research/provider-acceptance/task-89-empty-bucket-research-reference.json",
+    "diagnostic_run_id": 36513255864,
+    "diagnostic_artifact_id": 11009517158,
+    "diagnostic_artifact_sha256": "215304c6baa509e88a7f324b6332080ff4558bbb1ce019397727321853b38416",
+    "diagnostic_summary_sha256": "d2cd468ebcc03f2096436049119b84c1fb409c626dd7c3802b03f99f30b5e68c",
+    "blocker_example": {
+      "symbol": "2454",
+      "session_date": "2026-05-04",
+      "sampling_boundary_local": "11:30",
+      "true_ticks_inside_11_25_to_11_30": 0,
+      "exact_last_tick_local": "11:23:56",
+      "exact_last_tick_price": 2870.0,
+      "exact_tick_staleness_seconds": 364.0,
+      "kbar_safe_source_interval_local": "11:23-11:24",
+      "kbar_safe_staleness_bounds_seconds": [360.0, 420.0]
+    }
+  },
+  "sampled_price_contract": {
+    "required_provenance": [
+      "source_interval_start_utc",
+      "source_interval_end_utc",
+      "observation_mode",
+      "staleness_lower_bound_seconds",
+      "staleness_upper_bound_seconds"
+    ],
+    "observation_modes": [
+      "observed_bucket_close",
+      "previous_tick",
+      "closing_auction"
+    ],
+    "canonical_minute_bars_remain_sparse": true,
+    "synthetic_minute_bars_created": false,
+    "synthetic_transactions_at_grid_boundaries_created": false
+  },
+  "sampling_state_machine": {
+    "observed_bucket_close": "latest factual trade-bearing minute bar inside the current calendar bucket",
+    "previous_tick": "latest prior factual trade-bearing minute bar when the current bucket contains no bar",
+    "closing_auction": "exact 13:30 closing auction observation",
+    "first_bucket_must_contain_official_open_observation": true,
+    "fixed_grid_remains_calendar_aligned": true
+  },
+  "staleness_semantics": {
+    "regular_source_interval_length_seconds": 60,
+    "lower_bound": "sampling boundary minus source interval end",
+    "upper_bound": "sampling boundary minus source interval start",
+    "exact_tick_second_fabricated": false,
+    "closing_auction_bounds_seconds": [0.0, 0.0]
+  },
+  "validation": {
+    "previous_tick_source_must_end_at_or_before_prior_grid_boundary": true,
+    "previous_tick_must_preserve_previous_sample_source_and_price": true,
+    "observed_bucket_source_must_belong_to_current_bucket": true,
+    "staleness_bounds_recomputed_and_verified": true,
+    "source_times_must_be_aware_utc": true
+  },
+  "tests_first": {
+    "red_candidate_sha": "13933d61b426ff6cc97a2e10bb62c4fa821460c0",
+    "red_workflow_run_id": 36514970962,
+    "red_failures": [
+      "sampled DTO missing provenance fields",
+      "sampler missing observation_mode",
+      "calculator missing provenance validation"
+    ],
+    "green_candidate_sha": "af2df51c6ebd06ebf80c697f94a0d9832641e879",
+    "green_workflow_run_id": 36515207316,
+    "focused_oracles": "pass",
+    "market_data_and_realized_variance_regressions": "pass",
+    "ruff": "pass",
+    "pyright": "pass"
+  },
+  "live_verification": {
+    "v4_provider_replay_executed": false,
+    "next_bounded_slice": [
+      "update bounded replay evidence to expose v4 sampled-price provenance",
+      "replay 2454 on 2026-05-04",
+      "verify 11:30 previous-tick sample source interval and staleness bounds",
+      "replay existing 2317 and 2330 references for numeric-drift checks",
+      "persist v4 live evidence before Task 89 resumes"
+    ]
+  }
+}
