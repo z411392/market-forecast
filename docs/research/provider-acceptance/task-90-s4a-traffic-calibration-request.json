@@ -1,0 +1,40 @@
+{
+  "artifact_version": "task-90-s4a-traffic-calibration-request-v1",
+  "task": 90,
+  "estimator_version": "tw-rk-parzen-trades-v1",
+  "provider": "shioaji",
+  "provider_version": "1.7.7",
+  "query": {
+    "method": "ticks",
+    "query_type": "RangeTime",
+    "time_start_local": "09:00:00",
+    "time_end_local": "13:30:59"
+  },
+  "cases": [
+    {
+      "symbol": "2330",
+      "session_date": "2026-09-24",
+      "role": "active_normal_reference"
+    },
+    {
+      "symbol": "2317",
+      "session_date": "2026-09-24",
+      "role": "normal_reference"
+    },
+    {
+      "symbol": "2454",
+      "session_date": "2026-05-04",
+      "role": "locked_limit_low_activity"
+    }
+  ],
+  "traffic_guard": {
+    "min_remaining_bytes_before_query": 262144000,
+    "max_current_run_delta_bytes": 262144000,
+    "automatic_retry": false
+  },
+  "execution_boundary": {
+    "historical_tick_query_count": 3,
+    "full_panel_collection_allowed": false,
+    "empirical_rk_comparison_allowed": false
+  }
+}
