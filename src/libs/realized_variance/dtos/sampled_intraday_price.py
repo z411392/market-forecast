@@ -15,4 +15,13 @@ class SampledIntradayPrice(TypedDict):
     ]
     price: float
     price_basis: Literal["as_printed", "split_adjusted"]
+    source_interval_start_utc: datetime
+    source_interval_end_utc: datetime
+    observation_mode: Literal[
+        "observed_bucket_close",
+        "previous_tick",
+        "closing_auction",
+    ]
+    staleness_lower_bound_seconds: float
+    staleness_upper_bound_seconds: float
     algorithm_version: str
