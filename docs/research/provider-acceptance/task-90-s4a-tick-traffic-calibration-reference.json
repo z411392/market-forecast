@@ -1,0 +1,117 @@
+{
+  "artifact_version": "task-90-s4a-tick-traffic-calibration-reference-v1",
+  "task": 90,
+  "status": "accepted",
+  "estimator_version": "tw-rk-parzen-trades-v1",
+  "provider": {
+    "name": "shioaji",
+    "version": "1.7.7",
+    "environment": "production",
+    "simulation": false,
+    "subscribe_trade": false,
+    "ca_activated": false,
+    "account_query": false,
+    "order_api": false
+  },
+  "workflow": {
+    "candidate_sha": "f7deaeb399dc9281ff46af9e3d1ae670d52487df",
+    "run_id": 36604509063,
+    "artifact_id": 11050323416,
+    "artifact_sha256": "9698ca7e73bcb31e041336c30cb04970011f364d5c3860d0f838ed0c9409565d",
+    "summary_sha256": "fa75f9e60c695b9b291dc9e9662fbbff026d9174285703deb5b0ee8638e8ba52"
+  },
+  "request": {
+    "method": "ticks",
+    "query_type": "RangeTime",
+    "time_start_local": "09:00:00",
+    "time_end_local": "13:30:59",
+    "one_symbol_one_session_per_request": true
+  },
+  "usage": {
+    "initial_bytes": 22287469,
+    "initial_remaining_bytes": 502000531,
+    "limit_bytes": 524288000,
+    "final_bytes": 22879669,
+    "final_remaining_bytes": 501408331,
+    "batch_delta_bytes": 592200,
+    "batch_delta_mib": 0.5647659301757812,
+    "immediate_per_query_attribution_reliable": false
+  },
+  "cases": {
+    "2330_2026_09_24": {
+      "role": "active_normal_reference",
+      "tick_count": 4102,
+      "duplicate_timestamp_adjacency_count": 1,
+      "first_trade_local": "2026-09-24T09:00:07.647278",
+      "first_trade_price": 2480.0,
+      "closing_trade_local": "2026-09-24T13:30:00",
+      "closing_trade_price": 2475.0,
+      "sdk_payload_sha256": "b5e9daad6256f2d870c8f18641a9dc61f22ff194f089c117ec4aba6208f5ee71",
+      "transaction_sequence_sha256": "88216b071d245d837cdd4283f9f4b8e98f9e703bfb76059e6fe4102e3271010e",
+      "immediate_usage_delta_bytes": 0
+    },
+    "2317_2026_09_24": {
+      "role": "normal_reference",
+      "tick_count": 8295,
+      "duplicate_timestamp_adjacency_count": 3,
+      "first_trade_local": "2026-09-24T09:00:03.634165",
+      "first_trade_price": 253.0,
+      "closing_trade_local": "2026-09-24T13:30:00",
+      "closing_trade_price": 250.5,
+      "sdk_payload_sha256": "e77062a17e01538a8a4749bd22412376534b17ccba963aa1f9e8a061a9a55bc1",
+      "transaction_sequence_sha256": "eb7f9b618513274cd0ae938ab56a32648847b3df224bb466f53b746bd51c582b",
+      "immediate_usage_delta_bytes": 0
+    },
+    "2454_2026_05_04": {
+      "role": "locked_limit_low_activity",
+      "tick_count": 489,
+      "duplicate_timestamp_adjacency_count": 0,
+      "first_trade_local": "2026-05-04T09:00:04.757613",
+      "first_trade_price": 2870.0,
+      "closing_trade_local": "2026-05-04T13:30:00",
+      "closing_trade_price": 2870.0,
+      "sdk_payload_sha256": "446de6a416b4470ce62dc1024b0449de051114ed0e8c0dcf702d64dd0c976a5d",
+      "transaction_sequence_sha256": "619282b67cf69d2932a0fa51f31204faa8a05904c3df4e84c20e4b0394d4409e",
+      "immediate_usage_delta_bytes": 592200
+    }
+  },
+  "aggregate": {
+    "tick_count": 12886,
+    "provider_bytes_per_tick": 45.956852397951266,
+    "average_observed_symbol_day_bytes": 197400.0,
+    "panel_query_count": 759,
+    "naive_panel_projection_average_bytes": 149826600.0,
+    "naive_panel_projection_average_mib": 142.88578033447266,
+    "conservative_envelope_query_bytes": 592200,
+    "naive_panel_projection_envelope_bytes": 449479800,
+    "naive_panel_projection_envelope_mib": 428.65734100341797
+  },
+  "traffic_policy": {
+    "min_remaining_bytes_before_query": 262144000,
+    "max_current_run_delta_bytes": 262144000,
+    "recommended_initial_batch_query_limit": 100,
+    "recommended_batch_envelope_bytes": 59220000,
+    "recommended_batch_envelope_mib": 56.476593017578125,
+    "immediate_per_query_delta_is_diagnostic_only": true,
+    "cumulative_usage_is_authoritative_guard": true,
+    "cache_each_symbol_day": true,
+    "automatic_retry": false
+  },
+  "source_shape_finding": {
+    "range_time_regular_session_is_not_identical_to_all_day": true,
+    "2330_range_time_tick_count": 4102,
+    "2330_prior_all_day_tick_count": 4103
+  },
+  "ruling": {
+    "s4a_calibration_accepted": true,
+    "full_panel_single_run_allowed": false,
+    "batched_resumable_collection_required": true,
+    "provider_acquisition_shape_feasible": true,
+    "full_panel_empirical_benchmark_started": false
+  },
+  "next_bounded_slice": {
+    "action": "implement resumable symbol-day tick acquisition/evidence adapter and deterministic validation contract",
+    "full_panel_collection_allowed_in_same_slice": false,
+    "provider_calls_required": false
+  }
+}
