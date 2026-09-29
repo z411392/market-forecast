@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from math import isfinite, log
+from math import isclose, isfinite, log
 
 from libs.market_data.dtos.session_open_price_observation import SessionOpenPriceObservation
 from libs.realized_variance.constants.xtai_realized_variance_algorithm_version import (
@@ -56,7 +56,7 @@ def calculate_intraday_realized_measures_from_sampled_prices(
 
     returns: list[float] = []
     previous_price = session_open["price"]
-    previous_sample_at: datetime | None = None
+    previous_sample: SampledIntradayPrice | None = None
 
     for index, sample in enumerate(samples):
         if sample["security"] != security:
@@ -76,13 +76,27 @@ def calculate_intraday_realized_measures_from_sampled_prices(
 
         if index < len(samples) - 1 and sample["role"] != "regular_interval_close":
             raise InvalidRealizedVarianceInputError("invalid_regular_sample_role")
-        if previous_sample_at is not None:
-            if sample["observed_at_utc"] - previous_sample_at != expected_step:
+        if previous_sample is not None:
+            if (
+                sample["observed_at_utc"] - previous_sample["observed_at_utc"]
+                != expected_step
+            ):
                 raise InvalidRealizedVarianceInputError("non_uniform_sampling_grid")
+
+        bucket_start = (
+            sample["observed_at_utc"] - expected_step
+            if previous_sample is None
+            else previous_sample["observed_at_utc"]
+        )
+        _validate_sample_provenance(
+            sample,
+            bucket_start,
+            previous_sample,
+        )
 
         returns.append(log(sample["price"] / previous_price))
         previous_price = sample["price"]
-        previous_sample_at = sample["observed_at_utc"]
+        previous_sample = sample
 
     squared = tuple(value * value for value in returns)
     realized_variance = sum(squared)
@@ -110,6 +124,79 @@ def calculate_intraday_realized_measures_from_sampled_prices(
         "negative_semivariance": negative_semivariance,
         "algorithm_version": algorithm_version,
     }
+
+
+def _validate_sample_provenance(
+    sample: SampledIntradayPrice,
+    bucket_start: datetime,
+    previous_sample: SampledIntradayPrice | None,
+) -> None:
+    source_start = sample["source_interval_start_utc"]
+    source_end = sample["source_interval_end_utc"]
+    observed_at = sample["observed_at_utc"]
+
+    if not _is_utc_datetime(source_start) or not _is_utc_datetime(source_end):
+        raise InvalidRealizedVarianceInputError("sample_source_time_not_utc")
+
+    lower = sample["staleness_lower_bound_seconds"]
+    upper = sample["staleness_upper_bound_seconds"]
+    if (
+        not isfinite(lower)
+        or not isfinite(upper)
+        or lower < 0.0
+        or upper < lower
+    ):
+        raise InvalidRealizedVarianceInputError("invalid_sample_staleness_bounds")
+
+    if sample["role"] == "closing_auction_close":
+        if sample["observation_mode"] != "closing_auction":
+            raise InvalidRealizedVarianceInputError("invalid_closing_auction_provenance")
+        if source_start != observed_at or source_end != observed_at:
+            raise InvalidRealizedVarianceInputError("invalid_closing_auction_source_time")
+        if lower != 0.0 or upper != 0.0:
+            raise InvalidRealizedVarianceInputError("invalid_closing_auction_staleness")
+        return
+
+    if sample["observation_mode"] == "closing_auction":
+        raise InvalidRealizedVarianceInputError("closing_auction_mode_on_regular_sample")
+    if source_end - source_start != timedelta(minutes=1):
+        raise InvalidRealizedVarianceInputError("invalid_regular_source_interval")
+    if source_end > observed_at:
+        raise InvalidRealizedVarianceInputError("sample_source_after_sampling_boundary")
+
+    expected_lower = (observed_at - source_end).total_seconds()
+    expected_upper = (observed_at - source_start).total_seconds()
+    if not isclose(lower, expected_lower, rel_tol=0.0, abs_tol=1e-9):
+        raise InvalidRealizedVarianceInputError("incorrect_staleness_lower_bound")
+    if not isclose(upper, expected_upper, rel_tol=0.0, abs_tol=1e-9):
+        raise InvalidRealizedVarianceInputError("incorrect_staleness_upper_bound")
+
+    if sample["observation_mode"] == "observed_bucket_close":
+        if source_start < bucket_start or source_start >= observed_at:
+            raise InvalidRealizedVarianceInputError(
+                "observed_source_outside_sampling_bucket"
+            )
+        return
+
+    if sample["observation_mode"] != "previous_tick":
+        raise InvalidRealizedVarianceInputError("unsupported_sample_observation_mode")
+    if previous_sample is None:
+        raise InvalidRealizedVarianceInputError("previous_tick_on_first_sample")
+    if source_end > bucket_start:
+        raise InvalidRealizedVarianceInputError(
+            "previous_tick_source_inside_sampling_bucket"
+        )
+    if (
+        source_start != previous_sample["source_interval_start_utc"]
+        or source_end != previous_sample["source_interval_end_utc"]
+        or not isclose(
+            sample["price"],
+            previous_sample["price"],
+            rel_tol=1e-12,
+            abs_tol=1e-15,
+        )
+    ):
+        raise InvalidRealizedVarianceInputError("previous_tick_source_discontinuity")
 
 
 def _is_utc_datetime(value: datetime) -> bool:
