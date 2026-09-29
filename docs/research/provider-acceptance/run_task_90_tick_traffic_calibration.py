@@ -10,7 +10,6 @@ from typing import Any
 
 import shioaji as sj
 
-
 CASES = (
     ("2330", date(2026, 9, 24), "active_normal_reference"),
     ("2317", date(2026, 9, 24), "normal_reference"),
