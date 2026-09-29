@@ -1,0 +1,103 @@
+{
+  "artifact_version": "task-90-taiwan-noise-robust-feasibility-v1",
+  "task": 90,
+  "status": "s1_estimator_source_frozen",
+  "benchmark": {
+    "identity": "tw-rk-parzen-trades-v1",
+    "family": "realized_kernel",
+    "kernel": "parzen",
+    "input": "shioaji_regular_session_trade_ticks",
+    "non_negative_target": true,
+    "forecast_score_used_for_selection": false
+  },
+  "provider_query": {
+    "provider": "shioaji",
+    "method": "ticks",
+    "query_type": "RangeTime",
+    "time_start_local": "09:00:00",
+    "time_end_local": "13:30:59",
+    "one_symbol_one_session_per_request": true,
+    "all_day_input_for_estimator": false
+  },
+  "tick_validation": {
+    "price_must_be_finite_positive": true,
+    "volume_must_be_positive": true,
+    "timestamps_non_decreasing": true,
+    "provider_order_preserved_for_ties": true,
+    "deduplicate_same_price_trades": false,
+    "smooth_prices": false,
+    "synthetic_transactions_allowed": false,
+    "opening_trade_required": true,
+    "closing_auction_trade_required": true
+  },
+  "whole_day": {
+    "intraday_component": "parzen_realized_kernel",
+    "overnight_component": "squared_log_return_previous_13_30_close_to_current_first_trade"
+  },
+  "kernel_formula": {
+    "realized_autocovariance": "gamma_h = sum_{j=h+1..n} x_j * x_{j-h}",
+    "estimator": "gamma_0 + 2 * sum_{h=1..H} k(h/(H+1)) * gamma_h",
+    "parzen_piece_1": "1 - 6*x^2 + 6*x^3 for 0 <= x <= 0.5",
+    "parzen_piece_2": "2*(1-x)^3 for 0.5 < x <= 1",
+    "parzen_outside": "0"
+  },
+  "end_effects": {
+    "jitter_m": 2,
+    "average_log_prices": true,
+    "factual_open_close_evidence_unchanged": true
+  },
+  "bandwidth": {
+    "formula": "ceil(3.5134 * xi_hat^(4/5) * n^(3/5))",
+    "clamp_to_valid_lag_range": true,
+    "rv_sparse_interval_minutes": 20,
+    "rv_sparse_phase_shift_seconds": 1,
+    "rv_sparse_previous_tick_synchronization": true,
+    "noise_subgrid_target_spacing_seconds": 120,
+    "noise_variance_formula": "mean_i(RV_dense_i / (2 * nonzero_return_count_i))",
+    "xi_squared_formula": "omega2_hat / RV_sparse"
+  },
+  "previous_tick_scope": {
+    "primary_realized_kernel_return_sequence": false,
+    "bandwidth_sparse_rv_only": true,
+    "fixed_grid_comparator_measurements": true
+  },
+  "alternatives": {
+    "tsrv_msrv": {
+      "source_feasible": true,
+      "selected_primary": false,
+      "role": "possible_sensitivity_estimator"
+    },
+    "mse_optimal_classical_rv_sampling": {
+      "source_feasible": true,
+      "selected_primary": false,
+      "role": "possible_sparse_grid_diagnostic"
+    }
+  },
+  "traffic": {
+    "minimum_documented_stock_daily_limit_mb": 500,
+    "panel_symbol_count": 3,
+    "panel_session_count": 252,
+    "panel_symbol_session_queries": 756,
+    "full_panel_must_not_run_before_calibration": true,
+    "cache_every_response": true
+  },
+  "runtime": {
+    "new_statistical_dependency_required": false,
+    "available": ["numpy", "scipy"]
+  },
+  "evidence": {
+    "sdk_output_must_not_be_called_raw_http_bytes": true,
+    "deterministic_provider_order_serialization": true,
+    "sha256_required": true,
+    "provider_version_required": true,
+    "request_spec_required": true,
+    "tick_count_required": true,
+    "opening_trade_required": true,
+    "closing_trade_required": true
+  },
+  "next_bounded_slice": {
+    "name": "S2 tests-first realized-kernel core contracts",
+    "provider_calls_allowed": false,
+    "production_implementation_allowed_before_red": false
+  }
+}
