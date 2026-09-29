@@ -1,7 +1,7 @@
 import json
 import math
 import os
-from datetime import date
+from datetime import date, datetime, timezone
 from hashlib import sha256
 from pathlib import Path
 from typing import Any
@@ -23,13 +23,33 @@ from libs.realized_variance.domain.services.calculate_intraday_realized_measures
 )
 
 CASES = (
-    ("2317", date(2025, 11, 17), "delayed_open_blocker"),
+    ("2454", date(2026, 5, 4), "empty_5m_bucket_blocker"),
+    ("2317", date(2025, 11, 17), "delayed_open_reference"),
     ("2317", date(2026, 9, 24), "normal_open_reference"),
     ("2330", date(2024, 7, 2), "frozen_ordinary_reference"),
     ("2330", date(2026, 9, 24), "frozen_parity_reference"),
 )
 OUTPUT = Path("artifacts/private/provider-captures/task-86-xtai-rv/summary.json")
 FIELDS = ("ts", "Open", "High", "Low", "Close", "Volume", "Amount")
+
+EXPECTED_V3_RV = {
+    ("2317", "2025-11-17", 5): 0.0005654172179537024,
+    ("2317", "2025-11-17", 10): 0.00032639986742110836,
+    ("2317", "2025-11-17", 15): 0.0004428205189068247,
+    ("2317", "2026-09-24", 5): 0.00013091528840799728,
+    ("2317", "2026-09-24", 10): 0.00013074199229837273,
+    ("2317", "2026-09-24", 15): 0.0001147259495782424,
+    ("2330", "2024-07-02", 5): 0.00010221288319299749,
+    ("2330", "2024-07-02", 10): 8.706959301028129e-05,
+    ("2330", "2024-07-02", 15): 0.00013856332496125267,
+    ("2330", "2026-09-24", 5): 0.00010964302898558377,
+    ("2330", "2026-09-24", 10): 5.283407680026145e-05,
+    ("2330", "2026-09-24", 15): 3.659131792395245e-05,
+}
+
+BLOCKER_BOUNDARY_UTC = datetime(2026, 5, 4, 3, 30, tzinfo=timezone.utc)
+BLOCKER_SOURCE_START_UTC = datetime(2026, 5, 4, 3, 23, tzinfo=timezone.utc)
+BLOCKER_SOURCE_END_UTC = datetime(2026, 5, 4, 3, 24, tzinfo=timezone.utc)
 
 
 def main() -> None:
@@ -42,7 +62,7 @@ def main() -> None:
 
     summary: dict[str, Any] = {
         "task": 86,
-        "replay_version": "xtai-session-open-v3-live-replay-v1",
+        "replay_version": "xtai-previous-tick-v4-live-replay-v1",
         "provider": "shioaji",
         "provider_version": sj.__version__,
         "simulation": False,
@@ -120,12 +140,12 @@ def main() -> None:
                 expected_observation_count = 270 // interval
                 if measures["observation_count"] != expected_observation_count:
                     raise RuntimeError(
-                        f"unexpected_observation_count:"
+                        "unexpected_observation_count:"
                         f"{symbol}:{session_date}:{interval}"
                     )
                 if len(sampled) != expected_observation_count:
                     raise RuntimeError(
-                        f"unexpected_sampled_price_count:"
+                        "unexpected_sampled_price_count:"
                         f"{symbol}:{session_date}:{interval}"
                     )
                 if (
@@ -133,9 +153,37 @@ def main() -> None:
                     != XTAI_REALIZED_VARIANCE_ALGORITHM_VERSION
                 ):
                     raise RuntimeError(
-                        f"unexpected_algorithm_version:"
+                        "unexpected_algorithm_version:"
                         f"{symbol}:{session_date}:{interval}"
                     )
+
+                expected_v3 = EXPECTED_V3_RV.get(
+                    (symbol, session_date.isoformat(), interval)
+                )
+                if expected_v3 is not None and not math.isclose(
+                    measures["realized_variance"],
+                    expected_v3,
+                    rel_tol=1e-12,
+                    abs_tol=1e-15,
+                ):
+                    raise RuntimeError(
+                        "reference_numeric_drift:"
+                        f"{symbol}:{session_date}:{interval}:"
+                        f"{measures['realized_variance']}:{expected_v3}"
+                    )
+
+                previous_tick_samples = [
+                    _sample_provenance(sample)
+                    for sample in sampled
+                    if sample["observation_mode"] == "previous_tick"
+                ]
+
+                if (
+                    symbol == "2454"
+                    and session_date == date(2026, 5, 4)
+                    and interval == 5
+                ):
+                    _assert_2454_blocker_sample(sampled)
 
                 interval_results.append(
                     {
@@ -148,6 +196,8 @@ def main() -> None:
                         "realized_quarticity": measures["realized_quarticity"],
                         "positive_semivariance": measures["positive_semivariance"],
                         "negative_semivariance": measures["negative_semivariance"],
+                        "previous_tick_sample_count": len(previous_tick_samples),
+                        "previous_tick_samples": previous_tick_samples,
                         "algorithm_version": measures["algorithm_version"],
                     }
                 )
@@ -181,6 +231,43 @@ def main() -> None:
 
     summary["status"] = "accepted"
     _write_summary(summary)
+
+
+def _assert_2454_blocker_sample(samples: tuple[dict[str, Any], ...]) -> None:
+    blocker = next(
+        (
+            sample
+            for sample in samples
+            if sample["observed_at_utc"] == BLOCKER_BOUNDARY_UTC
+        ),
+        None,
+    )
+    if blocker is None:
+        raise RuntimeError("missing_2454_1130_sample")
+    if blocker["observation_mode"] != "previous_tick":
+        raise RuntimeError("2454_1130_not_previous_tick")
+    if blocker["price"] != 2870.0:
+        raise RuntimeError("unexpected_2454_1130_price")
+    if blocker["source_interval_start_utc"] != BLOCKER_SOURCE_START_UTC:
+        raise RuntimeError("unexpected_2454_1130_source_start")
+    if blocker["source_interval_end_utc"] != BLOCKER_SOURCE_END_UTC:
+        raise RuntimeError("unexpected_2454_1130_source_end")
+    if blocker["staleness_lower_bound_seconds"] != 360.0:
+        raise RuntimeError("unexpected_2454_1130_staleness_lower")
+    if blocker["staleness_upper_bound_seconds"] != 420.0:
+        raise RuntimeError("unexpected_2454_1130_staleness_upper")
+
+
+def _sample_provenance(sample: dict[str, Any]) -> dict[str, object]:
+    return {
+        "observed_at_utc": sample["observed_at_utc"].isoformat(),
+        "price": sample["price"],
+        "source_interval_start_utc": sample["source_interval_start_utc"].isoformat(),
+        "source_interval_end_utc": sample["source_interval_end_utc"].isoformat(),
+        "observation_mode": sample["observation_mode"],
+        "staleness_lower_bound_seconds": sample["staleness_lower_bound_seconds"],
+        "staleness_upper_bound_seconds": sample["staleness_upper_bound_seconds"],
+    }
 
 
 def _normalize_payload(payload: dict[str, Any]) -> dict[str, list[int | float]]:
