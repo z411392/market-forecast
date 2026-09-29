@@ -1,0 +1,33 @@
+{
+  "artifact_version": "task-89-live-audit-request-v3",
+  "task": 89,
+  "requested_upstream_task86_head": "935a44880ae03f5a957db4c7692877a5aac979e1",
+  "task89_sync_checkpoint_head": "70cd50414705ddc22a5b036f8739e076b8a09651",
+  "algorithm_version": "rv-core-v1+xtai-closing-auction-v3",
+  "audit_semantics_version": "taiwan-rv-audit-v3",
+  "symbols": ["2330", "2317", "2454"],
+  "audit_session_count": 252,
+  "anchor_end_session": "2026-09-24",
+  "prior_session_count": 1,
+  "calendar": "XTAI",
+  "ad_hoc_full_day_closures": [
+    {
+      "session_date": "2026-07-10",
+      "reason": "typhoon_bavi_twse_full_day_closure"
+    }
+  ],
+  "provider": {
+    "name": "shioaji",
+    "environment": "production",
+    "subscribe_trade": false,
+    "ca_activated": false,
+    "account_query": false,
+    "order_api": false
+  },
+  "execution_boundary": {
+    "single_live_audit_run": true,
+    "stop_on_first_new_empirical_blocker": true,
+    "sampling_frequency_freeze_allowed": false,
+    "broad_30_plus_30_expansion_allowed": false
+  }
+}
