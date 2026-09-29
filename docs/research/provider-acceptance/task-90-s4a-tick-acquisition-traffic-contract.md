@@ -190,3 +190,122 @@ After the three-query calibration:
 - do not start the full tick panel;
 - do not compute benchmark-vs-fixed-grid comparison;
 - stop and make the next bounded collection-plan decision from measured traffic.
+
+
+## Calibration result
+
+Bounded live calibration:
+
+- candidate: `f7deaeb399dc9281ff46af9e3d1ae670d52487df`;
+- workflow run: `36604509063`;
+- artifact: `11050323416`;
+- artifact SHA-256:
+  `9698ca7e73bcb31e041336c30cb04970011f364d5c3860d0f838ed0c9409565d`;
+- summary SHA-256:
+  `fa75f9e60c695b9b291dc9e9662fbbff026d9174285703deb5b0ee8638e8ba52`;
+- Shioaji version: `1.7.7`.
+
+Provider usage:
+
+- initial used bytes: `22,287,469`;
+- initial remaining: `502,000,531`;
+- daily limit: `524,288,000` = 500 MiB;
+- final used bytes: `22,879,669`;
+- final remaining: `501,408,331`;
+- three-query batch delta: `592,200 bytes` ≈ 0.565 MiB.
+
+Returned regular-session ticks:
+
+- 2330 / 2026-09-24: `4,102`;
+- 2317 / 2026-09-24: `8,295`;
+- 2454 / 2026-05-04: `489`;
+- total: `12,886`.
+
+Observed batch traffic per returned tick:
+approximately `45.96 bytes/tick`.
+
+### Usage-accounting finding
+
+Immediate per-query `api.usage()` attribution is not reliable.
+
+Observed immediate deltas:
+
+- 2330 query: 0;
+- 2317 query: 0;
+- 2454 query: 592,200 bytes.
+
+The full batch delta is valid, but the timing indicates usage accounting may become visible only after a later query.
+
+Therefore:
+
+- use `api.usage()` as a cumulative guard;
+- do not label immediate before/after differences as exact symbol-day traffic;
+- traffic projection is batch-level planning evidence only.
+
+### Planning projections
+
+Average observed batch cost per queried symbol-day:
+
+`592,200 / 3 = 197,400 bytes`.
+
+Naïve 759-query projection using that average:
+
+`149,826,600 bytes` ≈ 142.9 MiB.
+
+Conservative envelope treating every future symbol-day as costly as the complete three-query calibration batch:
+
+`449,479,800 bytes` ≈ 428.7 MiB.
+
+The conservative envelope exceeds the Task #90 250 MiB current-run guard, so a single full-panel run remains prohibited.
+
+Initial collector batch cap:
+
+`100 symbol-days`.
+
+At the calibration envelope:
+
+`100 × 592,200 = 59,220,000 bytes` ≈ 56.5 MiB.
+
+This is a scheduling guard, not a traffic guarantee. Cumulative provider usage remains authoritative.
+
+### Query-shape validation
+
+The RangeTime contract returned:
+
+- factual first matched transaction;
+- one 13:30 closing transaction in all three calibration cases;
+- non-decreasing timestamps;
+- positive finite prices/volumes.
+
+Equal-timestamp adjacency counts were:
+
+- 2330: 1;
+- 2317: 3;
+- 2454: 0.
+
+Provider order was retained.
+
+For 2330 / 2026-09-24, RangeTime returned 4,102 ticks, while earlier AllDay diagnostic evidence contained 4,103 ticks. This confirms that unrestricted AllDay and the regular-session benchmark request are not identical evidence sets.
+
+## Collector contract after calibration
+
+A future resumable collector must:
+
+1. process at most 100 uncached symbol-days in an initial batch;
+2. check cumulative `api.usage()` before every query;
+3. require remaining traffic >= 250 MiB before querying;
+4. stop if current Task #90 run delta reaches 250 MiB;
+5. persist each symbol-day before requesting the next;
+6. skip already accepted cached symbol-days;
+7. never infer per-day traffic cost from immediate usage deltas;
+8. stop without automatic retry on provider empty/error response.
+
+## S4a final ruling
+
+`S4A_CALIBRATION_ACCEPTED`
+
+`FULL_PANEL_SINGLE_RUN_PROHIBITED`
+
+`BATCHED_RESUMABLE_COLLECTION_REQUIRED`
+
+The next slice may design/implement the resumable symbol-day acquisition adapter, but must not launch the full 759-query panel in the same slice.
