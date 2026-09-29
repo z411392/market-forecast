@@ -20,6 +20,7 @@ TIME_END = time(13, 30, 59)
 MIN_REMAINING_BYTES = 250 * 1024 * 1024
 MAX_RUN_DELTA_BYTES = 250 * 1024 * 1024
 PANEL_QUERY_COUNT = 3 * 253
+RECOMMENDED_INITIAL_BATCH_QUERY_LIMIT = 100
 OUTPUT_ROOT = Path(
     "artifacts/private/provider-captures/task-90-tick-traffic-calibration"
 )
@@ -119,12 +120,8 @@ def main() -> None:
                 raise RuntimeError("provider_usage_bytes_decreased")
             evidence["usage_before"] = before
             evidence["usage_after"] = after
-            evidence["traffic_delta_bytes"] = delta
-            evidence["bytes_per_tick"] = (
-                delta / evidence["tick_count"]
-                if evidence["tick_count"] > 0
-                else None
-            )
+            evidence["immediate_usage_delta_bytes"] = delta
+            evidence["immediate_usage_delta_attribution_reliable"] = False
             summary["cases"].append(evidence)
             _write_summary(summary)
 
@@ -143,22 +140,46 @@ def main() -> None:
             final_usage["bytes"] - run_start_bytes
         )
 
-        deltas = [
-            int(case["traffic_delta_bytes"])
+        batch_delta = final_usage["bytes"] - run_start_bytes
+        total_ticks = sum(int(case["tick_count"]) for case in summary["cases"])
+        immediate_deltas = [
+            int(case["immediate_usage_delta_bytes"])
             for case in summary["cases"]
         ]
-        summary["traffic_calibration"] = {
-            "query_count": len(deltas),
-            "min_tick_day_delta_bytes": min(deltas),
-            "median_tick_day_delta_bytes": statistics.median(deltas),
-            "max_tick_day_delta_bytes": max(deltas),
-            "naive_panel_projection_median_bytes": (
-                statistics.median(deltas) * PANEL_QUERY_COUNT
+        average_symbol_day_bytes = batch_delta / len(summary["cases"])
+        summary["usage_accounting"] = {
+            "immediate_per_query_attribution_reliable": False,
+            "immediate_deltas_observed": immediate_deltas,
+            "authoritative_unit": "cumulative_batch_delta",
+            "reason": (
+                "provider usage accounting may become visible after a later query; "
+                "use api.usage() as cumulative guard, not exact per-query meter"
             ),
-            "naive_panel_projection_max_bytes": max(deltas) * PANEL_QUERY_COUNT,
+        }
+        summary["traffic_calibration"] = {
+            "query_count": len(summary["cases"]),
+            "batch_delta_bytes": batch_delta,
+            "batch_tick_count": total_ticks,
+            "aggregate_bytes_per_tick": (
+                batch_delta / total_ticks if total_ticks > 0 else None
+            ),
+            "average_observed_symbol_day_bytes": average_symbol_day_bytes,
+            "naive_panel_projection_average_bytes": (
+                average_symbol_day_bytes * PANEL_QUERY_COUNT
+            ),
+            "conservative_envelope_query_bytes": batch_delta,
+            "naive_panel_projection_envelope_bytes": (
+                batch_delta * PANEL_QUERY_COUNT
+            ),
+            "recommended_initial_batch_query_limit": (
+                RECOMMENDED_INITIAL_BATCH_QUERY_LIMIT
+            ),
+            "recommended_batch_envelope_bytes": (
+                batch_delta * RECOMMENDED_INITIAL_BATCH_QUERY_LIMIT
+            ),
             "projection_note": (
                 "planning diagnostic only; full collector must shard/cache and "
-                "re-check api.usage() before every query"
+                "re-check cumulative api.usage() before every query"
             ),
         }
         summary["status"] = "accepted"
