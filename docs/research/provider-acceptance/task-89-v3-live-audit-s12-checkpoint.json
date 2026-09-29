@@ -1,0 +1,122 @@
+{
+  "artifact_version": "task-89-v3-live-audit-s12-checkpoint-v1",
+  "task": 89,
+  "candidate_sha": "16edd84f4e8d5e675faf7417447e32244e34b3fd",
+  "live_run_id": 36509824280,
+  "static_run_id": 36509824291,
+  "artifact_id": 11008173032,
+  "artifact_sha256": "52f04cf992b15c754722d7a2fa3ce84854692f0c118fbf2df89ae287f9451cde",
+  "summary_sha256": "0ae4387f48800c890427c8cca25bef38f86676d3608dbc6360f41fce3a803e1f",
+  "algorithm_version": "rv-core-v1+xtai-closing-auction-v3",
+  "audit_semantics_version": "taiwan-rv-audit-v3",
+  "window": {
+    "prior_session_for_first_overnight": "2025-09-10",
+    "first_audit_session": "2025-09-11",
+    "last_audit_session": "2026-09-24",
+    "audit_session_count": 252,
+    "calendar_adjustments": [
+      {
+        "session_date": "2026-07-10",
+        "reason": "typhoon_bavi_twse_full_day_closure"
+      }
+    ]
+  },
+  "symbols": {
+    "2330": {
+      "status": "accepted",
+      "provider_session_count": 253,
+      "audit_row_count": 252,
+      "sessions_with_missing_regular_labels": 16,
+      "missing_regular_label_count": 45,
+      "sessions_missing_closing_auction_label": 0,
+      "measurement_audit_summary": {
+        "pearson_log_rv_5m_10m": 0.964760067522253,
+        "pearson_log_rv_5m_15m": 0.9427371940552034,
+        "spearman_rv_5m_10m": 0.9387423016385428,
+        "spearman_rv_5m_15m": 0.9090144222657647,
+        "geometric_bias_5m_vs_10m_pct": 22.157116159055224,
+        "geometric_bias_5m_vs_15m_pct": 36.91875544885694,
+        "mean_abs_log_gap_5m_10m": 0.21527701354360665,
+        "mean_abs_log_gap_5m_15m": 0.33156182425170116
+      },
+      "monotonic_frequency_pct": {
+        "rv_5m_gt_10m": 86.90476190476191,
+        "rv_10m_gt_15m": 69.04761904761905,
+        "rv_5m_gt_10m_gt_15m": 58.333333333333336
+      }
+    },
+    "2317": {
+      "status": "accepted",
+      "provider_session_count": 253,
+      "audit_row_count": 252,
+      "sessions_with_missing_regular_labels": 4,
+      "missing_regular_label_count": 6,
+      "sessions_missing_closing_auction_label": 0,
+      "measurement_audit_summary": {
+        "pearson_log_rv_5m_10m": 0.9618337188791484,
+        "pearson_log_rv_5m_15m": 0.9325454743988566,
+        "spearman_rv_5m_10m": 0.9488033186283663,
+        "spearman_rv_5m_15m": 0.9066965715155565,
+        "geometric_bias_5m_vs_10m_pct": 14.750196538241077,
+        "geometric_bias_5m_vs_15m_pct": 25.5793713259173,
+        "mean_abs_log_gap_5m_10m": 0.1976789569290324,
+        "mean_abs_log_gap_5m_15m": 0.2984134681847272
+      },
+      "monotonic_frequency_pct": {
+        "rv_5m_gt_10m": 73.01587301587301,
+        "rv_10m_gt_15m": 61.904761904761905,
+        "rv_5m_gt_10m_gt_15m": 44.84126984126984
+      }
+    },
+    "2454": {
+      "status": "blocked",
+      "provider_session_coverage": "complete_before_measurement_failure",
+      "sessions_with_missing_regular_labels": 164,
+      "missing_regular_label_count": 3815,
+      "sessions_missing_closing_auction_label": 0,
+      "blocker": "empty_xtai_sampling_bucket",
+      "first_blocker": {
+        "session_date": "2026-05-04",
+        "sampling_minutes": 5,
+        "bucket_local": "11:25-11:30",
+        "missing_kbar_end_labels_local": [
+          "11:26",
+          "11:27",
+          "11:28",
+          "11:29",
+          "11:30"
+        ]
+      },
+      "complete_empty_5m_buckets": [
+        {"session_date": "2026-05-04", "bucket_local": "11:25-11:30"},
+        {"session_date": "2026-05-05", "bucket_local": "12:55-13:00"},
+        {"session_date": "2026-05-21", "bucket_local": "11:40-11:45"},
+        {"session_date": "2026-05-21", "bucket_local": "12:10-12:15"},
+        {"session_date": "2026-07-31", "bucket_local": "11:25-11:30"},
+        {"session_date": "2026-07-31", "bucket_local": "12:25-12:30"},
+        {"session_date": "2026-07-31", "bucket_local": "13:10-13:15"},
+        {"session_date": "2026-08-03", "bucket_local": "12:00-12:05"}
+      ],
+      "complete_empty_10m_buckets": 0,
+      "complete_empty_15m_buckets": 0
+    }
+  },
+  "external_context": {
+    "2454_2026_05_04": {
+      "contemporaneous_reports": "opened at daily upper price limit and remained locked limit-up through the close",
+      "sources": [
+        "https://money.udn.com/money/story/5607/9480544",
+        "https://udn.com/news/story/7251/9480544",
+        "https://m.cnyes.com/news/id/6440730"
+      ],
+      "interpretation_limit": "context supports economic plausibility of no-trade intervals but does not by itself prove the exact empty bucket had zero trades"
+    }
+  },
+  "ruling": {
+    "status": "partial_acceptance",
+    "accepted_symbols": ["2330", "2317"],
+    "blocked_symbol": "2454",
+    "sampling_frequency_frozen": false,
+    "next_question": "fixed-grid price observation semantics when an entire sampling bucket has no trade"
+  }
+}
