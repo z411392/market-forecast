@@ -27,7 +27,8 @@ jobs:
 
       - name: Compile Task 89 research runners
         run: |
-          uv run python -m py_compile             docs/research/provider-acceptance/run_task_89_taiwan_rv_measurement_audit.py             docs/research/provider-acceptance/run_task_89_tick_kbar_diagnostic.py             docs/research/provider-acceptance/run_task_89_session_open_diagnostic.py
+          uv run python -m py_compile             docs/research/provider-acceptance/run_task_89_taiwan_rv_measurement_audit.py             docs/research/provider-acceptance/run_task_89_tick_kbar_diagnostic.py             docs/research/provider-acceptance/run_task_89_session_open_diagnostic.py \
+            docs/research/provider-acceptance/run_task_89_empty_bucket_diagnostic.py
 
       - name: Verify Task 86 v3 upstream
         run: |
@@ -38,7 +39,8 @@ jobs:
 
       - name: Lint synced v3 production and Task 89 runners
         run: |
-          uv run ruff check             src/libs/market_data/dtos/session_open_price_observation.py             src/libs/market_data/services/decode_shioaji_stock_kbars.py             src/libs/realized_variance/constants/xtai_realized_variance_algorithm_version.py             src/libs/realized_variance/dtos/sampled_intraday_price.py             src/libs/realized_variance/domain/services/build_xtai_sampling_prices.py             src/libs/realized_variance/domain/services/calculate_intraday_realized_measures_from_sampled_prices.py             docs/research/provider-acceptance/run_task_89_taiwan_rv_measurement_audit.py             docs/research/provider-acceptance/run_task_89_tick_kbar_diagnostic.py             docs/research/provider-acceptance/run_task_89_session_open_diagnostic.py
+          uv run ruff check             src/libs/market_data/dtos/session_open_price_observation.py             src/libs/market_data/services/decode_shioaji_stock_kbars.py             src/libs/realized_variance/constants/xtai_realized_variance_algorithm_version.py             src/libs/realized_variance/dtos/sampled_intraday_price.py             src/libs/realized_variance/domain/services/build_xtai_sampling_prices.py             src/libs/realized_variance/domain/services/calculate_intraday_realized_measures_from_sampled_prices.py             docs/research/provider-acceptance/run_task_89_taiwan_rv_measurement_audit.py             docs/research/provider-acceptance/run_task_89_tick_kbar_diagnostic.py             docs/research/provider-acceptance/run_task_89_session_open_diagnostic.py \
+            docs/research/provider-acceptance/run_task_89_empty_bucket_diagnostic.py
 
       - name: Typecheck synced v3 production
         run: |
