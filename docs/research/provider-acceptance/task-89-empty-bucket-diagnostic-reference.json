@@ -1,0 +1,77 @@
+{
+  "artifact_version": "task-89-empty-bucket-diagnostic-reference-v1",
+  "task": 89,
+  "candidate_sha": "5bb52838b8ac3482151cc20e7fa7b01f2c4d0c19",
+  "workflow_run_id": 36513255864,
+  "static_run_id": 36513255658,
+  "artifact_id": 11009517158,
+  "artifact_sha256": "215304c6baa509e88a7f324b6332080ff4558bbb1ce019397727321853b38416",
+  "summary_sha256": "d2cd468ebcc03f2096436049119b84c1fb409c626dd7c3802b03f99f30b5e68c",
+  "provider": "shioaji",
+  "provider_version": "1.7.6",
+  "symbol": "2454",
+  "session_date": "2026-05-04",
+  "bucket": {
+    "start_local": "11:25:00",
+    "end_local": "11:30:00",
+    "tick_count_inside_half_open_bucket": 0,
+    "tick_count_exactly_at_boundary": 0,
+    "missing_kbar_end_labels": [
+      "11:26",
+      "11:27",
+      "11:28",
+      "11:29",
+      "11:30"
+    ],
+    "all_expected_kbar_labels_absent": true
+  },
+  "nearest_real_transactions": {
+    "last_tick_at_or_before_bucket_start": {
+      "local": "11:23:56",
+      "price": 2870.0,
+      "volume": 1
+    },
+    "previous_tick_at_11_30_boundary": {
+      "source_local": "11:23:56",
+      "price": 2870.0,
+      "staleness_seconds": 364.0
+    },
+    "first_tick_after_boundary": {
+      "local": "11:30:15",
+      "price": 2870.0,
+      "volume": 1
+    }
+  },
+  "surrounding_kbars": {
+    "last_emitted_before_gap": {
+      "label_local": "11:24",
+      "open": 2870.0,
+      "high": 2870.0,
+      "low": 2870.0,
+      "close": 2870.0,
+      "volume": 1.0
+    },
+    "first_emitted_after_gap": {
+      "label_local": "11:31",
+      "open": 2870.0,
+      "high": 2870.0,
+      "low": 2870.0,
+      "close": 2870.0,
+      "volume": 1.0
+    }
+  },
+  "literature": {
+    "hansen_lunde": "https://w4.stern.nyu.edu/salomon/docs/Hansen-Lunde.pdf",
+    "calendar_time_previous_tick_application": "https://academic.oup.com/ajae/article/101/2/563/5060863",
+    "sampling_review_previous_tick": "https://econbase.org/papers/text/2212.11833.html"
+  },
+  "ruling": {
+    "provider_kbar_loss_supported": false,
+    "genuine_zero_trade_interval": true,
+    "previous_tick_cts_research_supported": true,
+    "synthetic_minute_bar_allowed": false,
+    "fabricated_boundary_trade_allowed": false,
+    "sampled_price_provenance_required": true,
+    "next_required_change": "design a v4 sampled-price provenance contract for previous-tick calendar-time sampling before production behavior changes"
+  }
+}
