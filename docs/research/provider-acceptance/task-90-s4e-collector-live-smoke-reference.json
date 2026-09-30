@@ -1,0 +1,108 @@
+{
+  "artifact_version": "task-90-s4e-collector-live-smoke-reference-v1",
+  "task": 90,
+  "slice": "S4e",
+  "status": "accepted",
+  "branch": "codex/90-taiwan-rk-feasibility",
+  "candidate_sha": "f566661ddfddf4ae42cae85f34f13052742b8ec2",
+  "provider": {
+    "name": "shioaji",
+    "version": "1.7.7",
+    "environment": "production",
+    "subscribe_trade": false,
+    "ca_activated": false,
+    "account_query": false,
+    "order_api": false
+  },
+  "workflow": {
+    "run_id": 36685744758,
+    "artifact_id": 11083682810,
+    "artifact_sha256": "ed110a9d8fa32d7c08ee4b315f20fd5f6fee1d7c730d4a52015b4023eda603c2",
+    "summary_sha256": "c5205cf9ae1dd6881699288dfaa5f7d3514edfceaac3e63fb3c4c8180ec61ce1",
+    "static_result": "pass",
+    "live_smoke_result": "pass"
+  },
+  "cases": {
+    "2330_2026_09_24": {
+      "tick_count": 4102,
+      "request_sha256": "33be1f1fbc4365b08aef22a3738c2ff07b38e22f99dd12dc3239b7676da6e697",
+      "sdk_observation_sha256": "4db7a2188f7a3922a24c98aa79d8102fec6f506dcf73183935e9dde284c37373",
+      "transaction_sequence_sha256": "ad6ba7a39571e743366f1015f5af5fb1252f120eb46dec3659c0a20cfee3264a",
+      "opening_price": 2480.0,
+      "closing_auction_price": 2475.0
+    },
+    "2317_2026_09_24": {
+      "tick_count": 8295,
+      "request_sha256": "67e9e53b9205a329af5277b06ca6328abe501d7c5e5a6ae442a4493281c9bc63",
+      "sdk_observation_sha256": "f44b431a73237524caecb97a3016f2d56a903962c33e1f84150cb9780b79a498",
+      "transaction_sequence_sha256": "188a25ac1dc1ab5da10ea53b072d1952e00a3e4f9fc1864de928005a36261417",
+      "opening_price": 253.0,
+      "closing_auction_price": 250.5
+    },
+    "2454_2026_05_04": {
+      "tick_count": 489,
+      "request_sha256": "bded485bae77b70321e72d6e44299b68050d0c74deab713b08aa643ad18487a8",
+      "sdk_observation_sha256": "5332e1036599a29b7de98a8e64b8f01886ff0ac0db9086e2bc12ac39b0f215e3",
+      "transaction_sequence_sha256": "1280cb2687f71a8ce91b20bd6a72a9cbf63030db409cd02fa8b9f10063e3de57",
+      "opening_price": 2870.0,
+      "closing_auction_price": 2870.0
+    }
+  },
+  "first_pass": {
+    "requested_count": 3,
+    "cache_hit_count": 0,
+    "acquired_count": 3,
+    "deferred_count": 0,
+    "fetch_calls": 3,
+    "usage_calls": 9,
+    "stop_reason": "completed",
+    "initial_used_bytes": 0,
+    "final_used_bytes": 230388,
+    "current_run_delta_bytes": 230388,
+    "final_remaining_bytes": 524057612,
+    "daily_limit_bytes": 524288000
+  },
+  "second_pass": {
+    "requested_count": 3,
+    "cache_hit_count": 3,
+    "acquired_count": 0,
+    "deferred_count": 0,
+    "fetch_calls": 0,
+    "usage_calls": 0,
+    "initial_usage": null,
+    "final_usage": null,
+    "stop_reason": "completed",
+    "receipts_equal_first_pass": true
+  },
+  "findings": {
+    "cache_first_live_boundary_proven": true,
+    "cache_resume_zero_provider_fetch_proven": true,
+    "cache_resume_zero_provider_usage_call_proven": true,
+    "per_item_evidence_persisted_before_resume": true,
+    "provider_usage_delta_varies_across_executions": true,
+    "s4a_three_query_delta_bytes": 592200,
+    "s4e_three_query_delta_bytes": 230388,
+    "traffic_policy_should_not_be_relaxed_from_lower_s4e_delta": true
+  },
+  "traffic_policy_retained": {
+    "max_uncached_acquisitions_per_batch": 100,
+    "minimum_provider_remaining_bytes": 262144000,
+    "maximum_current_run_delta_bytes": 262144000
+  },
+  "commits": {
+    "runner": "2fdbf6e0befced690eaba9e3a0894a4939e91eac",
+    "workflow": "9f96e1cad7589dad8ed9588562bb1fea1e057cc0",
+    "live_request": "f566661ddfddf4ae42cae85f34f13052742b8ec2"
+  },
+  "boundaries": {
+    "full_759_symbol_day_collection_allowed": false,
+    "realized_kernel_empirical_panel_allowed": false,
+    "benchmark_comparison_allowed": false
+  },
+  "next_bounded_slice": {
+    "name": "S4f",
+    "scope": "freeze deterministic ordering and the first <=100 symbol-day acquisition batch using the accepted 3-symbol x 253-session window; no provider call in the planning slice",
+    "full_panel_allowed": false,
+    "empirical_benchmark_comparison_allowed": false
+  }
+}
