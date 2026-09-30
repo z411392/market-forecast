@@ -15,6 +15,9 @@ from libs.market_data.exceptions.provider_capture_evidence_conflict_error import
 from libs.market_data.exceptions.provider_capture_evidence_integrity_error import (
     ProviderCaptureEvidenceIntegrityError,
 )
+from libs.market_data.services.build_historical_tick_request_sha256 import (
+    build_historical_tick_request_sha256,
+)
 
 
 def _security() -> SecurityIdentity:
@@ -94,7 +97,7 @@ def test_filesystem_tick_day_evidence_adapter_is_resumable_and_immutable(
 ) -> None:
     sdk_observation = b'{"provider":"shioaji","rows":2}\n'
     transaction_sequence = b'{"transactions":[1,2]}\n'
-    request_sha = "a" * 64
+    request_sha = build_historical_tick_request_sha256(_request())
     receipt = _receipt(
         request_sha256=request_sha,
         sdk_sha256=sha256(sdk_observation).hexdigest(),
@@ -119,11 +122,16 @@ def test_filesystem_tick_day_evidence_adapter_is_resumable_and_immutable(
     adapter(sdk_observation, transaction_sequence, receipt)
     assert adapter.load_receipt(request_sha) == receipt
 
+    conflicting_sdk = b'{"provider":"shioaji","rows":3}\n'
+    conflicting_receipt = {
+        **receipt,
+        "sdk_observation_sha256": sha256(conflicting_sdk).hexdigest(),
+    }
     with raises(ProviderCaptureEvidenceConflictError):
         adapter(
-            b'{"provider":"shioaji","rows":3}\n',
+            conflicting_sdk,
             transaction_sequence,
-            receipt,
+            conflicting_receipt,
         )
 
 
@@ -133,7 +141,7 @@ def test_filesystem_tick_day_evidence_adapter_rejects_integrity_errors(
 ) -> None:
     sdk_observation = b'{"provider":"shioaji","rows":2}\n'
     transaction_sequence = b'{"transactions":[1,2]}\n'
-    request_sha = "b" * 64
+    request_sha = build_historical_tick_request_sha256(_request())
     receipt = _receipt(
         request_sha256=request_sha,
         sdk_sha256="0" * 64,
