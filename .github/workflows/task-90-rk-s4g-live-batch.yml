@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   static:
@@ -40,6 +41,7 @@ jobs:
     env:
       MARKET_FORECAST_SHIOAJI_API_KEY: ${{ secrets.MARKET_FORECAST_SHIOAJI_API_KEY }}
       MARKET_FORECAST_SHIOAJI_SECRET_KEY: ${{ secrets.MARKET_FORECAST_SHIOAJI_SECRET_KEY }}
+      GH_TOKEN: ${{ github.token }}
 
     steps:
       - name: Checkout
@@ -55,6 +57,27 @@ jobs:
         run: |
           test -n "${MARKET_FORECAST_SHIOAJI_API_KEY:-}"
           test -n "${MARKET_FORECAST_SHIOAJI_SECRET_KEY:-}"
+
+      - name: Restore prior partial batch cache when requested
+        shell: bash
+        run: |
+          resume_id="$(python - <<'PY'
+          import json
+          from pathlib import Path
+          request = json.loads(
+              Path("docs/research/provider-acceptance/task-90-s4g-live-batch-request.json")
+              .read_text(encoding="utf-8")
+          )
+          print(request.get("resume_artifact_id") or "")
+          PY
+          )"
+          if [[ -n "$resume_id" ]]; then
+            rm -rf artifacts/private/provider-captures/task-90-s4g-live-batch
+            mkdir -p artifacts/private/provider-captures/task-90-s4g-live-batch
+            gh api               "repos/${GITHUB_REPOSITORY}/actions/artifacts/${resume_id}/zip"               > /tmp/task90-resume.zip
+            unzip -q /tmp/task90-resume.zip               -d artifacts/private/provider-captures/task-90-s4g-live-batch
+            test -d artifacts/private/provider-captures/task-90-s4g-live-batch/cache
+          fi
 
       - name: Execute authorized S4g batch
         run: |
