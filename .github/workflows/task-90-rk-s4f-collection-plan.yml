@@ -32,41 +32,33 @@ jobs:
             src/libs/market_data/tests/unit/test_partition_tick_day_collection_plan.py
 
       - name: Run S4d regressions
-        if: always()
         run: |
           uv run pytest -q \
             src/libs/market_data/tests/contract/test_tick_batch_collection_contract.py \
             src/libs/market_data/tests/unit/test_shioaji_tick_adapters.py \
             src/libs/market_data/tests/unit/test_collect_tick_day_evidence_batch.py
 
-      - name: Lint S4f production when present
-        if: always()
-        shell: bash
+      - name: Generate deterministic S4f plan artifact
         run: |
-          files=(
-            src/libs/market_data/services/build_tick_day_collection_plan.py
-            src/libs/market_data/services/partition_tick_day_collection_plan.py
-          )
-          existing=()
-          for file in "${files[@]}"; do
-            test -f "$file" && existing+=("$file")
-          done
-          if (("${#existing[@]}" > 0)); then
-            uv run ruff check "${existing[@]}"
-          fi
+          uv run python \
+            docs/research/provider-acceptance/run_task_90_s4f_collection_plan.py
 
-      - name: Typecheck S4f production when present
-        if: always()
-        shell: bash
+      - name: Lint S4f production and runner
         run: |
-          files=(
-            src/libs/market_data/services/build_tick_day_collection_plan.py
+          uv run ruff check \
+            src/libs/market_data/services/build_tick_day_collection_plan.py \
+            src/libs/market_data/services/partition_tick_day_collection_plan.py \
+            docs/research/provider-acceptance/run_task_90_s4f_collection_plan.py
+
+      - name: Typecheck S4f production
+        run: |
+          uv run pyright \
+            src/libs/market_data/services/build_tick_day_collection_plan.py \
             src/libs/market_data/services/partition_tick_day_collection_plan.py
-          )
-          existing=()
-          for file in "${files[@]}"; do
-            test -f "$file" && existing+=("$file")
-          done
-          if (("${#existing[@]}" > 0)); then
-            uv run pyright "${existing[@]}"
-          fi
+
+      - name: Upload S4f plan artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: task-90-s4f-collection-plan
+          path: artifacts/private/provider-captures/task-90-s4f-collection-plan/plan.json
+          retention-days: 14
