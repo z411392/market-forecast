@@ -1,11 +1,15 @@
 import json
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from hashlib import sha256
 from math import isfinite
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from libs.market_data.dtos.canonical_transaction_tick import CanonicalTransactionTick
-from libs.market_data.dtos.historical_tick_request_spec import HistoricalTickRequestSpec
+from libs.market_data.dtos.canonical_transaction_tick import (
+    CanonicalTransactionTick,
+)
+from libs.market_data.dtos.historical_tick_request_spec import (
+    HistoricalTickRequestSpec,
+)
 from libs.market_data.dtos.security_identity import SecurityIdentity
 from libs.market_data.dtos.tick_day_evidence_receipt import TickDayEvidenceReceipt
 from libs.market_data.exceptions.invalid_provider_capture_input_error import (
