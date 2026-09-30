@@ -27,7 +27,7 @@ from libs.market_data.services.decode_shioaji_historical_ticks import (
     decode_shioaji_historical_ticks,
 )
 
-_MIN_REMAINING_BYTES = 250 * 1024 * 1024
+_MIN_REMAINING_BYTES = 100 * 1024 * 1024
 
 
 def acquire_and_persist_tick_day_evidence(
