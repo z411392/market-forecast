@@ -106,6 +106,20 @@ def test_noise_subgrid_stride_and_variance() -> None:
         == 1
     )
 
+    duplicate_timestamp_ticks = (
+        start,
+        start,
+        start + timedelta(seconds=10),
+        start + timedelta(seconds=20),
+    )
+    assert (
+        select_noise_subgrid_stride(
+            duplicate_timestamp_ticks,
+            target_spacing_seconds=10,
+        )
+        == 2
+    )
+
     with raises(InvalidRealizedVarianceInputError):
         select_noise_subgrid_stride((start,), target_spacing_seconds=120)
     with raises(InvalidRealizedVarianceInputError):
