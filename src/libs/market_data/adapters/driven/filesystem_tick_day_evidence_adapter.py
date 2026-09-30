@@ -3,9 +3,9 @@ import re
 from datetime import date, datetime, time
 from hashlib import sha256
 from pathlib import Path
-from typing import Any
-
-from libs.market_data.dtos.historical_tick_request_spec import HistoricalTickRequestSpec
+from libs.market_data.dtos.historical_tick_request_spec import (
+    HistoricalTickRequestSpec,
+)
 from libs.market_data.dtos.security_identity import SecurityIdentity
 from libs.market_data.dtos.tick_day_evidence_receipt import TickDayEvidenceReceipt
 from libs.market_data.exceptions.provider_capture_evidence_conflict_error import (
