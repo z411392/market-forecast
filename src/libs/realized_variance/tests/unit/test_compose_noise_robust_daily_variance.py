@@ -57,6 +57,23 @@ def test_compose_noise_robust_daily_variance() -> None:
     assert result["sparse_realized_variance"] == approx(0.015)
     assert result["estimator_version"] == TAIWAN_REALIZED_KERNEL_ESTIMATOR_VERSION
 
+    zero_intraday = compose_noise_robust_daily_variance(
+        security=_security(),
+        session_date=date(2026, 9, 24),
+        price_basis="as_printed",
+        previous_closing_price=100.0,
+        current_opening_price=110.0,
+        intraday_realized_kernel=0.0,
+        tick_count=1000,
+        return_count=997,
+        bandwidth=1,
+        noise_variance=0.0,
+        sparse_realized_variance=0.0,
+    )
+    assert zero_intraday["intraday_realized_kernel"] == approx(0.0)
+    assert zero_intraday["sparse_realized_variance"] == approx(0.0)
+    assert zero_intraday["whole_day_variance"] == approx(overnight_variance)
+
     with raises(InvalidRealizedVarianceInputError):
         compose_noise_robust_daily_variance(
             security=_security(),
