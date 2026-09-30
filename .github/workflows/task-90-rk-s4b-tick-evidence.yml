@@ -1,0 +1,38 @@
+name: task-90-rk-s4b-tick-evidence
+
+on:
+  push:
+    branches:
+      - codex/90-taiwan-rk-feasibility
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  s4b:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Run S4b frozen tests
+        run: |
+          uv run pytest -q             src/libs/market_data/tests/contract/test_tick_day_evidence_contract.py             src/libs/market_data/tests/unit/test_build_tick_day_evidence.py             src/libs/market_data/tests/unit/test_filesystem_tick_day_evidence_adapter.py
+
+      - name: Lint S4b production
+        run: |
+          uv run ruff check             src/libs/market_data/dtos/historical_tick_request_spec.py             src/libs/market_data/dtos/canonical_transaction_tick.py             src/libs/market_data/dtos/tick_day_evidence_receipt.py             src/libs/market_data/services/build_historical_tick_request_sha256.py             src/libs/market_data/services/build_tick_day_evidence.py             src/libs/market_data/adapters/driven/filesystem_tick_day_evidence_adapter.py
+
+      - name: Typecheck S4b production
+        run: |
+          uv run pyright             src/libs/market_data/dtos/historical_tick_request_spec.py             src/libs/market_data/dtos/canonical_transaction_tick.py             src/libs/market_data/dtos/tick_day_evidence_receipt.py             src/libs/market_data/services/build_historical_tick_request_sha256.py             src/libs/market_data/services/build_tick_day_evidence.py             src/libs/market_data/adapters/driven/filesystem_tick_day_evidence_adapter.py
