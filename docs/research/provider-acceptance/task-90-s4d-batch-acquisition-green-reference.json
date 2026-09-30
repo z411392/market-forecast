@@ -1,0 +1,99 @@
+{
+  "artifact_version": "task-90-s4d-batch-acquisition-green-reference-v1",
+  "task": 90,
+  "slice": "S4d",
+  "status": "green",
+  "provider_calls": 0,
+  "branch": "codex/90-taiwan-rk-feasibility",
+  "estimator_version": "tw-rk-parzen-trades-v1",
+  "provider_version_target": "1.7.7",
+  "contracts": {
+    "max_uncached_acquisitions": 100,
+    "minimum_provider_remaining_bytes": 262144000,
+    "maximum_current_run_delta_bytes": 262144000,
+    "graceful_stop_reasons": [
+      "completed",
+      "max_uncached_reached",
+      "remaining_traffic_guard",
+      "current_run_traffic_guard"
+    ],
+    "cache_first": true,
+    "cached_items_after_provider_stop_allowed": true,
+    "provider_failure_propagates": true,
+    "decreasing_usage_counter_fails_closed": true
+  },
+  "concrete_adapters": {
+    "fetch_adapter": "ShioajiHistoricalTickPayloadAdapter",
+    "usage_adapter": "ShioajiProviderTrafficUsageAdapter",
+    "request_shape": {
+      "query_type": "RangeTime",
+      "time_start_local": "09:00:00",
+      "time_end_local": "13:30:59"
+    },
+    "contract_cache_by_source_symbol": true,
+    "sdk_enum_resolution": "runtime importlib unless injected by tests",
+    "automatic_retry": false,
+    "usage_equality_used_plus_remaining_equals_limit_required": false
+  },
+  "collector": {
+    "service": "collect_tick_day_evidence_batch",
+    "reuses_single_day_service": "acquire_and_persist_tick_day_evidence",
+    "persists_each_miss_before_next_provider_request": true,
+    "all_cached_batch_provider_access": 0,
+    "duplicate_request_plan_rejected": true,
+    "request_security_symbol_mismatch_rejected": true
+  },
+  "tests_first": {
+    "red_candidate_sha": "bf3c4ce98811487a27c0f2715084f4bd6af68d1b",
+    "red_run_id": 36679789707,
+    "red_result": "expected_missing_s4d_modules",
+    "first_green_attempt_sha": "82f48ea042fcefa741b5b20b14fd31612549b843",
+    "first_green_attempt_run_id": 36680059035,
+    "first_green_attempt_result": "13_passed_1_failed_fixture_defect",
+    "fixture_correction_sha": "46967a8d1cd936331560ae58e5d732e28eca0534",
+    "typing_correction_sha": "a1e85268d684cb8f2518a9d7c91f722d8beee540",
+    "green_run_id": 36680278382,
+    "green_result": "pass"
+  },
+  "commits": {
+    "contract_test": "a3f6abbe6dfdb8c02a03e86354d42849071564e0",
+    "adapter_tests": "875f6ba554e99d3fbf02a4067ed1ad954951220a",
+    "collector_tests": "c053571c7280870f04da02a998cd378df2ac13ce",
+    "workflow": "bf3c4ce98811487a27c0f2715084f4bd6af68d1b",
+    "item_dto": "ea68df91584ba9dd78295aa1b55e32d2b69a5674",
+    "summary_dto": "6989a2cd966ddf440ad48fcf9ed28dbc9a937927",
+    "fetch_adapter": "ff16c5ec5f6631b0af653b2e5ba6f195abd0450a",
+    "usage_adapter": "81c3edaf3524f1bd79caa454b9fa0486fdec43b7",
+    "batch_collector": "82f48ea042fcefa741b5b20b14fd31612549b843",
+    "fixture_correction": "46967a8d1cd936331560ae58e5d732e28eca0534",
+    "optional_sdk_typing_correction": "a1e85268d684cb8f2518a9d7c91f722d8beee540"
+  },
+  "same_head_regressions": {
+    "s3a_identity": 36680278226,
+    "s3b_primitives": 36680278283,
+    "s3c_bandwidth": 36680278271,
+    "s3d_kernel": 36680278278,
+    "s3e_composition": 36680278237,
+    "s4a_static": 36680278224,
+    "s4a_calibration_job": "skipped",
+    "s4b_evidence": 36680278239,
+    "s4c_single_day": 36680278267,
+    "s4d_batch": 36680278382
+  },
+  "findings": {
+    "missing_contract_test_fixture_defect": "explicit empty contract mapping was accidentally replaced by a default contract through truthiness",
+    "optional_sdk_typing_finding": "direct lazy import is still visible to Pyright; runtime importlib keeps Shioaji optional in provider-free static environments"
+  },
+  "not_implemented": [
+    "live execution through the new S4d collector",
+    "full 759 symbol-day tick acquisition",
+    "realized-kernel empirical panel calculation",
+    "benchmark-versus-fixed-grid comparison"
+  ],
+  "next_bounded_slice": {
+    "name": "S4e",
+    "scope": "live smoke of the S4d collector on the three already-authorized calibration symbol-days, then immediate cache-resume replay",
+    "full_panel_allowed": false,
+    "empirical_benchmark_comparison_allowed": false
+  }
+}
