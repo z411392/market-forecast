@@ -3,6 +3,7 @@ import re
 from datetime import date, datetime, time
 from hashlib import sha256
 from pathlib import Path
+
 from libs.market_data.dtos.historical_tick_request_spec import (
     HistoricalTickRequestSpec,
 )
@@ -17,7 +18,6 @@ from libs.market_data.exceptions.provider_capture_evidence_integrity_error impor
 from libs.market_data.services.build_historical_tick_request_sha256 import (
     build_historical_tick_request_sha256,
 )
-
 
 _DIGEST_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 
