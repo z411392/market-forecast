@@ -72,7 +72,9 @@ class _Api:
         tick_error: Exception | None = None,
         usage_error: Exception | None = None,
     ) -> None:
-        self.contracts = _Contracts(contracts or {"2330": object()})
+        self.contracts = _Contracts(
+            {"2330": object()} if contracts is None else contracts
+        )
         self.payload = payload or {"ts": [1], "close": [1.0]}
         self.usage_value = usage or _Usage(
             used_bytes=10,
