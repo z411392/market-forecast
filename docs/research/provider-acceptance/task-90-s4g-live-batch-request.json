@@ -2,7 +2,8 @@
   "task": 90,
   "slice": "S4g",
   "authorized": true,
-  "batch_number": 7,
-  "expected_batch_sha256": "e0bc6d780cf10de4f056e3419c72287aada55e5af3057c729734fc86bcaa7efc",
-  "execution_sequence": 7
+  "batch_number": 3,
+  "expected_batch_sha256": "3067d2d0e8f445805daf386ae191c813cbabad80081730a218de26bcf5501c98",
+  "execution_sequence": 4,
+  "resume_artifact_id": 11088738846
 }
