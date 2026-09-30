@@ -1,0 +1,56 @@
+{
+  "artifact_version": "task-90-s4e-live-smoke-request-v1",
+  "task": 90,
+  "slice": "S4e",
+  "branch": "codex/90-taiwan-rk-feasibility",
+  "upstream_s4d_head": "73f233af196aaa3751b4d5f86b5d81e84c5912b6",
+  "provider": {
+    "name": "shioaji",
+    "version": "1.7.7",
+    "environment": "production",
+    "subscribe_trade": false,
+    "ca_activated": false,
+    "account_query": false,
+    "order_api": false
+  },
+  "cases": [
+    {
+      "symbol": "2330",
+      "session_date": "2026-09-24",
+      "role": "active_normal_reference"
+    },
+    {
+      "symbol": "2317",
+      "session_date": "2026-09-24",
+      "role": "normal_reference"
+    },
+    {
+      "symbol": "2454",
+      "session_date": "2026-05-04",
+      "role": "locked_limit_low_activity"
+    }
+  ],
+  "request": {
+    "query_type": "RangeTime",
+    "time_start_local": "09:00:00",
+    "time_end_local": "13:30:59"
+  },
+  "acceptance": {
+    "first_pass_requested_count": 3,
+    "first_pass_cache_hit_count": 0,
+    "first_pass_acquired_count": 3,
+    "first_pass_deferred_count": 0,
+    "second_pass_requested_count": 3,
+    "second_pass_cache_hit_count": 3,
+    "second_pass_acquired_count": 0,
+    "second_pass_deferred_count": 0,
+    "second_pass_provider_fetch_calls": 0,
+    "second_pass_provider_usage_calls": 0,
+    "receipts_must_match": true
+  },
+  "boundaries": {
+    "full_panel_allowed": false,
+    "realized_kernel_panel_calculation_allowed": false,
+    "benchmark_comparison_allowed": false
+  }
+}
