@@ -96,7 +96,6 @@ def _validate_usage(usage: ProviderTrafficUsage) -> None:
         or remaining < 0
         or used > limit
         or remaining > limit
-        or used + remaining != limit
     ):
         raise ProviderTransportError(
             "tick_day_acquisition_invalid_provider_usage"
