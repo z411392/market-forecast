@@ -1,0 +1,94 @@
+{
+  "artifact_version": "task-90-s4b-tick-evidence-green-reference-v1",
+  "task": 90,
+  "status": "green",
+  "estimator_version": "tw-rk-parzen-trades-v1",
+  "scope": "provider-neutral resumable symbol-day tick validation/evidence core",
+  "tests_first": {
+    "red_candidate_sha": "4635a5458f594de75058ec5439504e5674486214",
+    "red_run_id": 36671993466,
+    "red_result": "expected_collection_failure_on_absent_s4b_modules",
+    "oracle_corrections_before_production": [
+      "decreasing timestamp fixture originally swapped equal-timestamp ticks and was corrected",
+      "filesystem cache-key fixture now derives request SHA from the canonical request spec"
+    ],
+    "green_candidate_sha": "0b343dca736dec32f925f16bb2546a38f8a38850",
+    "green_run_id": 36672745291,
+    "frozen_tests": "pass",
+    "ruff": "pass",
+    "pyright": "pass"
+  },
+  "contracts": {
+    "historical_tick_request_spec": {
+      "provider": "shioaji",
+      "query_type": "RangeTime",
+      "time_start_local": "09:00:00",
+      "time_end_local": "13:30:59"
+    },
+    "canonical_transaction_tick": {
+      "provider_order_preserved_for_equal_timestamps": true,
+      "synthetic_transactions_allowed": false
+    },
+    "tick_day_evidence_receipt": {
+      "request_sha256": true,
+      "sdk_observation_sha256": true,
+      "transaction_sequence_sha256": true,
+      "opening_and_closing_diagnostics": true,
+      "duplicate_timestamp_adjacency_count": true
+    }
+  },
+  "cache_semantics": {
+    "cache_key": "sha256_of_canonical_request_spec",
+    "query_can_be_skipped_before_provider_call": true,
+    "identical_repersist_is_idempotent": true,
+    "same_request_with_changed_evidence_conflicts": true,
+    "sdk_artifact_is_normalized_sdk_observation_not_raw_http_response": true
+  },
+  "validation": {
+    "non_empty_transactions": true,
+    "one_security_and_session": true,
+    "aware_utc_timestamps": true,
+    "requested_local_session_window": true,
+    "non_decreasing_timestamps": true,
+    "equal_timestamps_allowed": true,
+    "positive_finite_price_volume": true,
+    "terminal_1330_transaction_required": true,
+    "same_timestamp_collapse": false,
+    "outlier_deletion": false,
+    "calendar_time_interpolation": false
+  },
+  "production_commits": [
+    "a04ca11c310861d279a77056252059222e4be5fb",
+    "0ed8dc26b4b92e3d5102300afebdae99d4edf48d",
+    "f929a8643cbc95350679b2ed1d0c43d0c8a0f3d3",
+    "7264191875e573bd886025ab4a179772efdcf545",
+    "6a1825979dc09643950ecc88f0f942ea84a6785a",
+    "e00f226f16191ea4133760000c6b068df9d4999a",
+    "cc83d2fa62f3c87e03e403b03d793a26d1ae725d",
+    "4b81ee923ffa7afadbe43c9ce88f80a772271e1e",
+    "5f09d9320b35c043d961ff801f1073af5aa4457f",
+    "0b343dca736dec32f925f16bb2546a38f8a38850"
+  ],
+  "same_head_regressions": {
+    "s3a_identity_run": 36672745238,
+    "s3b_primitives_run": 36672745278,
+    "s3c_bandwidth_run": 36672745271,
+    "s3d_kernel_run": 36672745353,
+    "s3e_composition_run": 36672745292,
+    "s4a_calibration_static_run": 36672745287,
+    "s4b_tick_evidence_run": 36672745291
+  },
+  "provider_calls": 0,
+  "not_implemented": [
+    "Shioaji SDK payload to canonical tick decoder",
+    "live fetch port or collector",
+    "traffic-guard orchestration",
+    "100-symbol-day acquisition batch",
+    "empirical realized-kernel panel comparison"
+  ],
+  "next_bounded_slice": {
+    "action": "S4c implement Shioaji tick payload decoder plus provider-neutral cache-first single-symbol-day acquisition orchestration",
+    "provider_calls_required_for_implementation": false,
+    "full_panel_collection_allowed": false
+  }
+}
