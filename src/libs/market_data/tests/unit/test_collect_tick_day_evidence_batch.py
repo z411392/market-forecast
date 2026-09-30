@@ -318,7 +318,7 @@ def test_collect_batch_stops_before_fetch_when_remaining_traffic_is_low() -> Non
     items = (_item(0), _item(1))
     store = _FakeStore()
     fetch = _FakeFetch()
-    low = _usage(remaining_mib=249)
+    low = _usage(remaining_mib=99)
     usage = _SequenceUsage([low])
 
     result = collect_tick_day_evidence_batch(
