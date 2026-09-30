@@ -23,10 +23,14 @@ def select_noise_subgrid_stride(
         (current - previous).total_seconds()
         for previous, current in zip(timestamps, timestamps[1:])
     )
-    if any(not isfinite(gap) or gap <= 0.0 for gap in gaps):
-        raise InvalidRealizedVarianceInputError("non_increasing_noise_stride_timestamps")
+    if any(not isfinite(gap) or gap < 0.0 for gap in gaps):
+        raise InvalidRealizedVarianceInputError("decreasing_noise_stride_timestamps")
 
-    average_gap_seconds = sum(gaps) / len(gaps)
+    elapsed_seconds = (timestamps[-1] - timestamps[0]).total_seconds()
+    if not isfinite(elapsed_seconds) or elapsed_seconds <= 0.0:
+        raise InvalidRealizedVarianceInputError("zero_elapsed_noise_stride_timestamps")
+
+    average_gap_seconds = elapsed_seconds / (len(timestamps) - 1)
     raw_stride = target_spacing_seconds / average_gap_seconds
     half_up_stride = floor(raw_stride + 0.5)
     return max(1, min(half_up_stride, len(timestamps) - 1))
