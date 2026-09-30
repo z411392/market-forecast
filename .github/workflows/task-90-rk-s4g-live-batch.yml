@@ -1,0 +1,71 @@
+name: task-90-rk-s4g-live-batch
+
+on:
+  push:
+    branches:
+      - codex/90-taiwan-rk-feasibility
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Compile S4g runner
+        run: |
+          uv run --with "shioaji==1.7.7" \
+            python -m py_compile \
+            docs/research/provider-acceptance/run_task_90_s4g_live_batch.py
+
+      - name: Lint S4g runner
+        run: |
+          uv run ruff check \
+            docs/research/provider-acceptance/run_task_90_s4g_live_batch.py
+
+  live-batch:
+    if: contains(github.event.head_commit.message, '[s4g-live-batch]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      MARKET_FORECAST_SHIOAJI_API_KEY: ${{ secrets.MARKET_FORECAST_SHIOAJI_API_KEY }}
+      MARKET_FORECAST_SHIOAJI_SECRET_KEY: ${{ secrets.MARKET_FORECAST_SHIOAJI_SECRET_KEY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Verify Shioaji credentials
+        shell: bash
+        run: |
+          test -n "${MARKET_FORECAST_SHIOAJI_API_KEY:-}"
+          test -n "${MARKET_FORECAST_SHIOAJI_SECRET_KEY:-}"
+
+      - name: Execute authorized S4g batch
+        run: |
+          uv run --with "shioaji==1.7.7" \
+            python docs/research/provider-acceptance/run_task_90_s4g_live_batch.py
+
+      - name: Upload S4g batch evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: task-90-s4g-live-batch
+          path: artifacts/private/provider-captures/task-90-s4g-live-batch
+          if-no-files-found: ignore
+          retention-days: 30
