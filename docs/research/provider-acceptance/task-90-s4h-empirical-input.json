@@ -41,5 +41,6 @@
   ],
   "reference_summary": "docs/research/provider-acceptance/task-90-s4g-interim-164-rk-comparison.json",
   "formula_cross_check_session": "2026-04-20",
-  "output_version": "task-90-s4h-empirical-rk-comparison-v1"
+  "output_version": "task-90-s4h-empirical-rk-comparison-v1",
+  "execution_sequence": 1
 }
