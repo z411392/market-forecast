@@ -54,6 +54,10 @@ def main() -> None:
     request = _load_json(REQUEST_PATH)
     reference = _load_json(REFERENCE_PATH)
     batch_number = _require_batch_number(request)
+    resume_artifact_id = _optional_positive_int(
+        request.get("resume_artifact_id"),
+        "s4g_invalid_resume_artifact_id",
+    )
 
     sessions = _actual_sessions()
     securities = tuple(_security(symbol) for symbol in SYMBOL_ORDER)
@@ -92,9 +96,13 @@ def main() -> None:
     api_key = _required_secret("MARKET_FORECAST_SHIOAJI_API_KEY")
     secret_key = _required_secret("MARKET_FORECAST_SHIOAJI_SECRET_KEY")
 
-    if OUTPUT_ROOT.exists():
-        shutil.rmtree(OUTPUT_ROOT)
-    OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
+    if resume_artifact_id is None:
+        if OUTPUT_ROOT.exists():
+            shutil.rmtree(OUTPUT_ROOT)
+        OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
+    else:
+        if not CACHE_ROOT.is_dir():
+            raise RuntimeError("s4g_resume_cache_missing")
 
     summary: dict[str, Any] = {
         "task": 90,
@@ -110,6 +118,7 @@ def main() -> None:
         "item_count": len(batch),
         "first_session_date": batch[0]["request"]["session_date"].isoformat(),
         "last_session_date": batch[-1]["request"]["session_date"].isoformat(),
+        "resume_artifact_id": resume_artifact_id,
     }
     _write_summary(summary)
 
@@ -225,6 +234,14 @@ def _require_batch_number(request: dict[str, Any]) -> int:
     value = request.get("batch_number")
     if type(value) is not int or value < 1 or value > 8:
         raise RuntimeError("s4g_invalid_batch_number")
+    return value
+
+
+def _optional_positive_int(value: Any, error_code: str) -> int | None:
+    if value is None:
+        return None
+    if type(value) is not int or value <= 0:
+        raise RuntimeError(error_code)
     return value
 
 
