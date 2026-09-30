@@ -13,7 +13,7 @@ def calculate_realized_kernel_bandwidth(
 ) -> int:
     if not isfinite(noise_variance) or noise_variance < 0.0:
         raise InvalidRealizedVarianceInputError("invalid_realized_kernel_noise_variance")
-    if not isfinite(sparse_realized_variance) or sparse_realized_variance <= 0.0:
+    if not isfinite(sparse_realized_variance) or sparse_realized_variance < 0.0:
         raise InvalidRealizedVarianceInputError("invalid_sparse_realized_variance")
     if return_count < 2:
         raise InvalidRealizedVarianceInputError("insufficient_realized_kernel_returns")
@@ -22,6 +22,8 @@ def calculate_realized_kernel_bandwidth(
 
     if noise_variance == 0.0:
         return 1
+    if sparse_realized_variance == 0.0:
+        raise InvalidRealizedVarianceInputError("zero_sparse_realized_variance_with_noise")
 
     xi_hat = sqrt(noise_variance / sparse_realized_variance)
     raw_bandwidth = (
