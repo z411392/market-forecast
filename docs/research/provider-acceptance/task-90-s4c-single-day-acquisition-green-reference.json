@@ -1,0 +1,93 @@
+{
+  "artifact_version": "task-90-s4c-single-day-acquisition-green-reference-v1",
+  "task": 90,
+  "scope": "shioaji_decoder_and_cache_first_single_symbol_day_acquisition",
+  "provider_calls": 0,
+  "branch": "codex/90-taiwan-rk-feasibility",
+  "tests_first": {
+    "red_candidate_sha": "9607432f39f1da21bc92001830285b5b4c8d658c",
+    "red_workflow_run_id": 36675456124,
+    "red_result": "expected_missing_s4c_modules",
+    "green_attempt_sha": "287debf021c282cada6e4b18a1c08edfaa26a906",
+    "green_attempt_run_id": 36675664217,
+    "green_attempt_result": "usage_validation_overconstraint",
+    "green_candidate_sha": "c9bc13d41c65f5745a9366c9796cdcda3f146775",
+    "green_workflow_run_id": 36675741891,
+    "green_result": "pass"
+  },
+  "contracts": {
+    "usage_dto": "ProviderTrafficUsage",
+    "fetch_port": "FetchHistoricalTickPayloadPort",
+    "usage_port": "ReadProviderTrafficUsagePort",
+    "store_port": "TickDayEvidenceStorePort",
+    "decoder": "decode_shioaji_historical_ticks",
+    "orchestration": "acquire_and_persist_tick_day_evidence"
+  },
+  "decoder_contract": {
+    "required_sdk_fields": [
+      "ts",
+      "close",
+      "volume",
+      "bid_price",
+      "bid_volume",
+      "ask_price",
+      "ask_volume",
+      "tick_type"
+    ],
+    "timestamp_semantics": "shioaji_provider_local_wall_clock_ns_to_security_timezone_then_utc",
+    "provider_order_preserved": true,
+    "equal_timestamps_preserved": true,
+    "microsecond_representable_timestamp_required": true,
+    "normalized_sdk_observation_deterministic": true,
+    "deduplication": false,
+    "sorting": false,
+    "synthetic_transactions": false
+  },
+  "single_day_orchestration": {
+    "request_hash_before_provider_access": true,
+    "cache_checked_before_usage": true,
+    "cache_checked_before_fetch": true,
+    "cache_hit_usage_calls": 0,
+    "cache_hit_fetch_calls": 0,
+    "minimum_remaining_bytes_before_fetch": 262144000,
+    "fetches_per_uncached_call": 1,
+    "uses_s4b_evidence_builder": true,
+    "uses_s4b_immutable_store": true,
+    "persists_on_failed_fetch": false,
+    "persists_on_failed_decode": false,
+    "persists_on_failed_evidence_validation": false,
+    "current_run_delta_guard_owned_by_future_collector": true
+  },
+  "implementation_finding": {
+    "removed_unfrozen_rule": "used_bytes + remaining_bytes == limit_bytes",
+    "reason": "S4c only requires normalized cumulative usage fields and a conservative remaining-traffic guard; S4a observed delayed/batched usage visibility",
+    "behavior_changed": false
+  },
+  "commits": {
+    "traffic_usage_dto": "7a9da1a18c6c3cbeb338f3c25fde79c9db115e45",
+    "fetch_port": "f9cf87d373d60f30900fc99d1df356b207458bb4",
+    "usage_port": "0a4e5536a916f263839b3c6e8d1660925432f600",
+    "store_port": "c507398e67702e730569784fe6d803d3193b5980",
+    "decoder": "77075e77aff5cf5b4570df0c87b1faba3974c68c",
+    "orchestration": "864a0caa0727530f316e2c646615938919850edd",
+    "filesystem_store_binding": "287debf021c282cada6e4b18a1c08edfaa26a906",
+    "usage_overconstraint_fix": "c9bc13d41c65f5745a9366c9796cdcda3f146775"
+  },
+  "same_head_regressions": {
+    "s3a_identity_run": 36675741815,
+    "s3b_primitives_run": 36675741845,
+    "s3c_bandwidth_run": 36675741902,
+    "s3d_kernel_run": 36675741870,
+    "s3e_composition_run": 36675741837,
+    "s4a_static_run": 36675741926,
+    "s4a_calibration_job": "skipped",
+    "s4b_evidence_run": 36675741759,
+    "s4c_run": 36675741891
+  },
+  "next_bounded_slice": {
+    "name": "S4d",
+    "scope": "concrete_shioaji_fetch_usage_adapters_and_max_100_cache_first_collector",
+    "full_759_query_run_allowed": false,
+    "empirical_rk_comparison_allowed": false
+  }
+}
