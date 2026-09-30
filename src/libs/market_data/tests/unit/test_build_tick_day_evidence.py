@@ -238,7 +238,7 @@ def test_build_tick_day_evidence_rejects_invalid_inputs() -> None:
             transactions=(outside_session_tick, *transactions[1:]),
         )
 
-    decreasing = (transactions[1], transactions[0], *transactions[2:])
+    decreasing = (transactions[2], transactions[0], transactions[1], transactions[3])
     with raises(InvalidProviderCaptureInputError):
         build_tick_day_evidence(
             request=request,
