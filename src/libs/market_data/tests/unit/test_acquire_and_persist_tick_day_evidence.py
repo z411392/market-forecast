@@ -34,7 +34,7 @@ from libs.market_data.services.build_historical_tick_request_sha256 import (
 )
 
 
-_MIN_REMAINING_BYTES = 250 * 1024 * 1024
+_MIN_REMAINING_BYTES = 100 * 1024 * 1024
 
 
 def _request() -> HistoricalTickRequestSpec:
