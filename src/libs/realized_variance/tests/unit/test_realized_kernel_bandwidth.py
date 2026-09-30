@@ -34,6 +34,16 @@ def test_calculate_realized_kernel_bandwidth() -> None:
 
     assert (
         calculate_realized_kernel_bandwidth(
+            noise_variance=0.0,
+            sparse_realized_variance=0.0,
+            return_count=32,
+            bandwidth_constant=3.5134,
+        )
+        == 1
+    )
+
+    assert (
+        calculate_realized_kernel_bandwidth(
             noise_variance=1e12,
             sparse_realized_variance=1.0,
             return_count=8,
