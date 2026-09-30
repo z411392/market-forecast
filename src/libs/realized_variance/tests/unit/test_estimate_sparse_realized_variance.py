@@ -36,6 +36,19 @@ def test_estimate_sparse_realized_variance() -> None:
         phase_shift_seconds=1,
     ) == approx(0.0)
 
+    duplicate_timestamps = (
+        start,
+        start,
+        start + timedelta(seconds=2),
+        start + timedelta(seconds=4),
+    )
+    assert estimate_sparse_realized_variance(
+        timestamps=duplicate_timestamps,
+        log_prices=(0.0, 0.5, 1.0, 2.0),
+        interval_seconds=2,
+        phase_shift_seconds=1,
+    ) == approx(0.75)
+
 
 @mark.unit
 def test_estimate_sparse_realized_variance_rejects_invalid_inputs() -> None:
