@@ -15,6 +15,9 @@ from libs.market_data.exceptions.provider_capture_evidence_conflict_error import
 from libs.market_data.exceptions.provider_capture_evidence_integrity_error import (
     ProviderCaptureEvidenceIntegrityError,
 )
+from libs.market_data.ports.tick_day_evidence_store_port import (
+    TickDayEvidenceStorePort,
+)
 from libs.market_data.services.build_historical_tick_request_sha256 import (
     build_historical_tick_request_sha256,
 )
@@ -22,7 +25,7 @@ from libs.market_data.services.build_historical_tick_request_sha256 import (
 _DIGEST_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 
 
-class FilesystemTickDayEvidenceAdapter:
+class FilesystemTickDayEvidenceAdapter(TickDayEvidenceStorePort):
     def __init__(self, root: Path) -> None:
         self._root = root
 
