@@ -1,0 +1,174 @@
+{
+  "artifact_version": "task-90-s4f-collection-plan-reference-v1",
+  "task": 90,
+  "slice": "S4f",
+  "status": "accepted",
+  "branch": "codex/90-taiwan-rk-feasibility",
+  "plan_version": "task-90-rk-tick-collection-plan-v1",
+  "provider_calls": 0,
+  "window": {
+    "calendar": "XTAI",
+    "first_session_date": "2025-09-10",
+    "last_session_date": "2026-09-24",
+    "session_count": 253,
+    "ad_hoc_full_day_closures": [
+      "2026-07-10"
+    ]
+  },
+  "ordering": {
+    "primary": "session_date_ascending",
+    "secondary": "fixed_symbol_order",
+    "symbol_order": [
+      "2330",
+      "2317",
+      "2454"
+    ],
+    "item_count": 759
+  },
+  "batch_policy": {
+    "collector_hard_max_uncached_acquisitions": 100,
+    "planned_max_items_per_batch": 99,
+    "symbols_per_session": 3,
+    "planned_sessions_per_full_batch": 33,
+    "reason": "keep every planned batch boundary on a complete three-symbol session block"
+  },
+  "identity": {
+    "plan_sha256": "3afdd98a5442ecc56c5e5d8fc003e5d27746f133ac858b2be68fc535853733ce",
+    "artifact_id": 11085095570,
+    "artifact_sha256": "ec99a81bdb49142d47f4c5b83568cca28858a8ae9dcbcc127d4be9de7695f5dd",
+    "plan_json_sha256": "7f608779c45e58b74b46dadb441045e1d5e8e2c0bf556f3735262f5583bca29a"
+  },
+  "first_session_request_sha256": {
+    "2330": "debdd0a75f7dcb6cb10db9e0393cc631dd718f35e89782e997b9f3f2345324ed",
+    "2317": "5206981d4fc6d18c7e2c0425af7e0cf79ff3c95f96981dccb405ffccf7c36c0d",
+    "2454": "8bb19bb8bb9530a938dc1b41234f57f5e6b54dc5807dc14950accdccd986f859"
+  },
+  "last_session_request_sha256": {
+    "2330": "33be1f1fbc4365b08aef22a3738c2ff07b38e22f99dd12dc3239b7676da6e697",
+    "2317": "67e9e53b9205a329af5277b06ca6328abe501d7c5e5a6ae442a4493281c9bc63",
+    "2454": "3fd97202a9c883d79ce92ed4abe41bf4713b73dfe293ebdc07c143714d7edaae"
+  },
+  "batches": [
+    {
+      "batch_number": 1,
+      "global_start_item_index": 0,
+      "global_end_item_index_exclusive": 99,
+      "session_count": 33,
+      "item_count": 99,
+      "first_session_date": "2025-09-10",
+      "last_session_date": "2025-10-30",
+      "batch_sha256": "57467202be44409b4a41a73d2cca98f7d0143673604a92964818646895612059"
+    },
+    {
+      "batch_number": 2,
+      "global_start_item_index": 99,
+      "global_end_item_index_exclusive": 198,
+      "session_count": 33,
+      "item_count": 99,
+      "first_session_date": "2025-10-31",
+      "last_session_date": "2025-12-16",
+      "batch_sha256": "941a6fcdc0d78c64ee2eafd941199111682d59bd07005808421b8ce3055bfaf3"
+    },
+    {
+      "batch_number": 3,
+      "global_start_item_index": 198,
+      "global_end_item_index_exclusive": 297,
+      "session_count": 33,
+      "item_count": 99,
+      "first_session_date": "2025-12-17",
+      "last_session_date": "2026-02-03",
+      "batch_sha256": "3067d2d0e8f445805daf386ae191c813cbabad80081730a218de26bcf5501c98"
+    },
+    {
+      "batch_number": 4,
+      "global_start_item_index": 297,
+      "global_end_item_index_exclusive": 396,
+      "session_count": 33,
+      "item_count": 99,
+      "first_session_date": "2026-02-04",
+      "last_session_date": "2026-04-01",
+      "batch_sha256": "d7b48d56c63a7c4b7675a8bc5506158993668a358da5ba1c850ce73f874278e0"
+    },
+    {
+      "batch_number": 5,
+      "global_start_item_index": 396,
+      "global_end_item_index_exclusive": 495,
+      "session_count": 33,
+      "item_count": 99,
+      "first_session_date": "2026-04-02",
+      "last_session_date": "2026-05-21",
+      "batch_sha256": "b01c94ed69c5f7290ac79eb636dd357d701ec00040581722d59743c0ef6aeecc"
+    },
+    {
+      "batch_number": 6,
+      "global_start_item_index": 495,
+      "global_end_item_index_exclusive": 594,
+      "session_count": 33,
+      "item_count": 99,
+      "first_session_date": "2026-05-22",
+      "last_session_date": "2026-07-08",
+      "batch_sha256": "6c7c73585d786cdfacbc45fe5ad07913af1e78399be7739cb44abbbd62dc4bfd"
+    },
+    {
+      "batch_number": 7,
+      "global_start_item_index": 594,
+      "global_end_item_index_exclusive": 693,
+      "session_count": 33,
+      "item_count": 99,
+      "first_session_date": "2026-07-09",
+      "last_session_date": "2026-08-25",
+      "batch_sha256": "e0bc6d780cf10de4f056e3419c72287aada55e5af3057c729734fc86bcaa7efc"
+    },
+    {
+      "batch_number": 8,
+      "global_start_item_index": 693,
+      "global_end_item_index_exclusive": 759,
+      "session_count": 22,
+      "item_count": 66,
+      "first_session_date": "2026-08-26",
+      "last_session_date": "2026-09-24",
+      "batch_sha256": "5c4844e508ab69e7ea60c2507503647c6d2ced0dbb10dccacbb9beac57e3d349"
+    }
+  ],
+  "resume_rule": {
+    "method": "identical_batch_request_identity",
+    "cache_key": "historical_tick_request_sha256",
+    "instruction": "resubmit the identical ordered batch; cache-first evidence store skips accepted request hashes and collector continues remaining misses in original order",
+    "date_pointer_resume_forbidden": true
+  },
+  "traffic_policy_retained": {
+    "minimum_provider_remaining_bytes": 262144000,
+    "maximum_current_run_delta_bytes": 262144000,
+    "full_759_item_collection_authorized": false
+  },
+  "tests_first": {
+    "red_candidate_sha": "4cd90ead133167c49f2d7bc0253c0ca7eec89ddf",
+    "red_workflow_run_id": 36687312256,
+    "green_candidate_sha": "cdcd4ca4a15a9f6e1769b6aa9ce01800c7b1517d",
+    "green_workflow_run_id": 36688312353,
+    "s4f_frozen_tests": "pass",
+    "s4d_regressions": "pass",
+    "ruff": "pass",
+    "pyright": "pass"
+  },
+  "commits": {
+    "plan_order_tests": "079c8e9218b312d0240abfd0f1c0e2ff0622b261",
+    "partition_tests": "05ae3fbb6855cf30d8b8ecc5108d781d8a0a0582",
+    "red_workflow": "4cd90ead133167c49f2d7bc0253c0ca7eec89ddf",
+    "plan_builder": "966af5341268082dbf1db22e934f2646fa335296",
+    "partitioner": "da47864bbbb839ee0ed83e12ccf4922c446638f8",
+    "manifest_runner": "576fbcd9d9af5d5c83dba472c0e5d3e7e896c45b",
+    "manifest_workflow": "047fe14ed4a8285f4f77908cf35c57319c37ed12",
+    "ruff_import_fix": "e727711feed0639d7e21dac0636d60e1a1884e92",
+    "clean_workflow": "cdcd4ca4a15a9f6e1769b6aa9ce01800c7b1517d"
+  },
+  "next_bounded_slice": {
+    "name": "S4g",
+    "scope": "make a separate execution decision for batch 1 only; if authorized, execute/cache-resume batch 1 without computing realized-kernel panel values",
+    "batch_number": 1,
+    "batch_sha256": "57467202be44409b4a41a73d2cca98f7d0143673604a92964818646895612059",
+    "item_count": 99,
+    "full_panel_allowed": false,
+    "empirical_benchmark_comparison_allowed": false
+  }
+}
