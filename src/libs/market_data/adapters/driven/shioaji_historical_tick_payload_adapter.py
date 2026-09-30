@@ -1,3 +1,4 @@
+import importlib
 from collections.abc import Mapping
 from typing import Any
 
@@ -52,12 +53,16 @@ class ShioajiHistoricalTickPayloadAdapter(FetchHistoricalTickPayloadPort):
         query_type = self._range_time_query_type
         if query_type is None:
             try:
-                from shioaji.constant import TicksQueryType
-            except ImportError as error:
+                constant_module = importlib.import_module("shioaji.constant")
+                ticks_query_type = getattr(
+                    constant_module,
+                    "TicksQueryType",
+                )
+                query_type = ticks_query_type.RangeTime
+            except (ImportError, AttributeError) as error:
                 raise ProviderTransportError(
                     "shioaji_sdk_unavailable"
                 ) from error
-            query_type = TicksQueryType.RangeTime
 
         try:
             result = self._api.ticks(
