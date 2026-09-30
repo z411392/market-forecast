@@ -50,15 +50,7 @@ jobs:
             src/libs/market_data/services/partition_tick_day_collection_plan.py \
             docs/research/provider-acceptance/run_task_90_s4f_collection_plan.py
 
-      - name: Preview Ruff import fix after lint failure
-        if: failure()
-        run: |
-          uv run ruff check --fix \
-            docs/research/provider-acceptance/run_task_90_s4f_collection_plan.py || true
-          git diff -- docs/research/provider-acceptance/run_task_90_s4f_collection_plan.py
-
       - name: Typecheck S4f production
-        if: always()
         run: |
           uv run pyright \
             src/libs/market_data/services/build_tick_day_collection_plan.py \
