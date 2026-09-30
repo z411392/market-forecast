@@ -2,7 +2,7 @@
   "task": 90,
   "slice": "S4g",
   "authorized": true,
-  "batch_number": 1,
-  "expected_batch_sha256": "57467202be44409b4a41a73d2cca98f7d0143673604a92964818646895612059",
-  "execution_sequence": 1
+  "batch_number": 2,
+  "expected_batch_sha256": "941a6fcdc0d78c64ee2eafd941199111682d59bd07005808421b8ce3055bfaf3",
+  "execution_sequence": 2
 }
