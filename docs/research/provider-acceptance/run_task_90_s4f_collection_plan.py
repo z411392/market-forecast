@@ -13,7 +13,6 @@ from libs.market_data.services.build_historical_tick_request_sha256 import (
 from libs.market_data.services.build_tick_day_collection_plan import build_tick_day_collection_plan
 from libs.market_data.services.partition_tick_day_collection_plan import partition_tick_day_collection_plan
 
-
 PLAN_VERSION = "task-90-rk-tick-collection-plan-v1"
 SYMBOL_ORDER = ("2330", "2317", "2454")
 END_SESSION = date(2026, 9, 24)
