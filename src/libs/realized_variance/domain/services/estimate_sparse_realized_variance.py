@@ -30,8 +30,8 @@ def estimate_sparse_realized_variance(
         (current - previous).total_seconds()
         for previous, current in zip(timestamps, timestamps[1:])
     )
-    if any(not isfinite(gap) or gap <= 0.0 for gap in gaps):
-        raise InvalidRealizedVarianceInputError("non_increasing_sparse_rv_timestamps")
+    if any(not isfinite(gap) or gap < 0.0 for gap in gaps):
+        raise InvalidRealizedVarianceInputError("decreasing_sparse_rv_timestamps")
 
     start = timestamps[0]
     end = timestamps[-1]
