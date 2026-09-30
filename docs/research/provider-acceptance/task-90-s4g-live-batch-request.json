@@ -4,6 +4,6 @@
   "authorized": true,
   "batch_number": 4,
   "expected_batch_sha256": "d7b48d56c63a7c4b7675a8bc5506158993668a358da5ba1c850ce73f874278e0",
-  "execution_sequence": 6,
+  "execution_sequence": 7,
   "reserve_mib": 100
 }
