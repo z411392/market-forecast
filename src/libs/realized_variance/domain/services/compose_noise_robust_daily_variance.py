@@ -44,10 +44,14 @@ def compose_noise_robust_daily_variance(
         noise_variance,
         "invalid_noise_variance",
     )
-    _require_positive_finite(
+    _require_nonnegative_finite(
         sparse_realized_variance,
         "invalid_sparse_realized_variance",
     )
+    if sparse_realized_variance == 0.0 and noise_variance > 0.0:
+        raise InvalidRealizedVarianceInputError(
+            "zero_sparse_realized_variance_with_noise"
+        )
 
     if tick_count < 2:
         raise InvalidRealizedVarianceInputError("invalid_tick_count")
