@@ -7,7 +7,6 @@ from libs.market_data.exceptions.invalid_provider_capture_input_error import (
     InvalidProviderCaptureInputError,
 )
 
-
 _EXPECTED_START = time(9, 0)
 _EXPECTED_END = time(13, 30, 59)
 
