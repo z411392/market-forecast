@@ -1,0 +1,73 @@
+name: task-106-us-bandi-russell-optimal-sampling
+
+on:
+  push:
+    branches:
+      - codex/106-us-bandi-russell-optimal-sampling
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Compile confirmatory runner
+        run: |
+          uv run python -m py_compile             docs/research/provider-acceptance/run_task_106_us_bandi_russell_optimal_sampling.py
+
+      - name: Lint confirmatory runner
+        run: |
+          uv run ruff check             docs/research/provider-acceptance/run_task_106_us_bandi_russell_optimal_sampling.py
+
+  live-confirmatory:
+    if: contains(github.event.head_commit.message, '[br-optimal-live]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      MARKET_FORECAST_ALPACA_API_KEY_ID: ${{ secrets.MARKET_FORECAST_ALPACA_API_KEY_ID }}
+      MARKET_FORECAST_ALPACA_SECRET_KEY: ${{ secrets.MARKET_FORECAST_ALPACA_SECRET_KEY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Verify Alpaca credentials
+        shell: bash
+        run: |
+          test -n "${MARKET_FORECAST_ALPACA_API_KEY_ID:-}"
+          test -n "${MARKET_FORECAST_ALPACA_SECRET_KEY:-}"
+
+      - name: Execute non-overlapping Bandi-Russell panel
+        run: |
+          uv run python             docs/research/provider-acceptance/run_task_106_us_bandi_russell_optimal_sampling.py
+
+      - name: Upload confirmatory evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: task-106-us-bandi-russell-optimal-sampling
+          path: artifacts/private/provider-captures/task-106-us-bandi-russell-optimal-sampling
+          if-no-files-found: ignore
+          retention-days: 30
