@@ -35,6 +35,18 @@ jobs:
         run: |
           uv run pytest -q src/libs/market_data/tests
 
+      - name: Compile Task 93 live runner
+        run: |
+          uv run python -m py_compile \
+            docs/research/provider-acceptance/run_task_93_massive_us_live_acceptance.py
+
+      - name: Lint Task 93 changed files
+        run: |
+          uv run ruff check \
+            src/libs/market_data/services/build_massive_regular_session_minute_request.py \
+            src/libs/market_data/services/build_provider_capture_acceptance_receipt.py \
+            docs/research/provider-acceptance/run_task_93_massive_us_live_acceptance.py
+
   credential-presence:
     if: contains(github.event.head_commit.message, '[massive-secret-check]')
     runs-on: ubuntu-latest
@@ -46,3 +58,58 @@ jobs:
         shell: bash
         run: |
           test -n "${MARKET_FORECAST_MASSIVE_API_KEY:-}"
+
+  live-acceptance:
+    if: contains(github.event.head_commit.message, '[massive-live-acceptance]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      MARKET_FORECAST_MASSIVE_API_KEY: ${{ secrets.MARKET_FORECAST_MASSIVE_API_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Verify explicit live authorization
+        run: |
+          uv run python - <<'PY'
+          import json
+          from pathlib import Path
+
+          request = json.loads(
+              Path(
+                  "docs/research/provider-acceptance/"
+                  "task-93-massive-live-acceptance-request.json"
+              ).read_text(encoding="utf-8")
+          )
+          if request.get("provider_request_allowed") is not True:
+              raise SystemExit("provider_request_not_authorized")
+          if request.get("quota_or_spend_allowed") is not True:
+              raise SystemExit("quota_or_spend_not_authorized")
+          PY
+
+      - name: Verify Massive credential presence
+        shell: bash
+        run: |
+          test -n "${MARKET_FORECAST_MASSIVE_API_KEY:-}"
+
+      - name: Execute narrow Massive live acceptance
+        run: |
+          uv run python \
+            docs/research/provider-acceptance/run_task_93_massive_us_live_acceptance.py
+
+      - name: Upload Task 93 live evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: task-93-massive-us-live-acceptance
+          path: artifacts/private/provider-captures/task-93-massive-us-live-acceptance
+          if-no-files-found: ignore
+          retention-days: 30
