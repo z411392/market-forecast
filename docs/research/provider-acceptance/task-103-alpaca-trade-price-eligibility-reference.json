@@ -1,0 +1,80 @@
+{
+  "artifact_version": "task-103-alpaca-trade-price-eligibility-reference-v1",
+  "task": 103,
+  "status": "accepted",
+  "workflow": {
+    "run_id": 36827499222,
+    "artifact_id": 11145463492,
+    "artifact_sha256": "78ea597e5c364db51c9d9f8293ebbff5d60317803dc9f0a08777251249be54df"
+  },
+  "inputs": {
+    "task97_artifact_id": 11144780888,
+    "task97_sha256": "39a419d8aa070c2f3b641c5f93dde638189164bb933a7780615a24c6b7e6c812",
+    "task102_artifact_id": 11145730777,
+    "task102_sha256": "a34d32b443d82df4de548a2eca834b438cff4aa2dba03c0107a63c8a76981d3f"
+  },
+  "price_rule": {
+    "tape": "C",
+    "bar_type": "minute",
+    "strictest_condition_rule": true,
+    "eligible_conditions": [
+      "@",
+      "A",
+      "B",
+      "D",
+      "F",
+      "K",
+      "L",
+      "O",
+      "T",
+      "X",
+      "Y",
+      "5",
+      "6"
+    ],
+    "ineligible_conditions": [
+      "C",
+      "G",
+      "H",
+      "I",
+      "M",
+      "N",
+      "P",
+      "Q",
+      "R",
+      "U",
+      "V",
+      "W",
+      "Z",
+      "4",
+      "7",
+      "9"
+    ],
+    "unknown_condition_policy": "fail_closed"
+  },
+  "symbols": {
+    "AAPL": {
+      "raw_trade_count": 506108,
+      "eligible_trade_count": 131127,
+      "eligible_trade_fraction": 0.25908896915282903,
+      "reconstructed_minute_count": 390,
+      "accepted_bar_count": 390,
+      "ohlc_mismatch_count": 0,
+      "max_abs_ohlc_difference": 0
+    },
+    "NVDA": {
+      "raw_trade_count": 2087331,
+      "eligible_trade_count": 193239,
+      "eligible_trade_fraction": 0.09257707570097891,
+      "reconstructed_minute_count": 390,
+      "accepted_bar_count": 390,
+      "ohlc_mismatch_count": 0,
+      "max_abs_ohlc_difference": 0
+    }
+  },
+  "ruling": {
+    "transaction_price_eligibility_frozen": true,
+    "provider_calls": 0,
+    "rk_values_computed": false
+  }
+}
