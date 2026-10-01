@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const web = resolve(root, '../market-forecast-web');
+const hasWebSibling = existsSync(web) && existsSync(join(web, 'CLAUDE.md'));
 const core = ['docs/README.md', 'docs/delivery/mvp-phases.md', 'docs/delivery/requirements-specification.md', 'docs/delivery/work-breakdown.md', 'docs/architecture/event-storming.md', 'docs/architecture/context-map.md'];
 const failures = [];
 let checks = 0;
@@ -34,8 +35,10 @@ const canonicalDocs = [
 check(JSON.stringify(humanDocs) === JSON.stringify(canonicalDocs), 'Product document set differs from canonical documents per DOC-NAV-01/02');
 for (const path of core) check(existsSync(join(root,path)), 'Missing current document: '+path);
 check(walk(join(root,'src')).filter(p=>p.includes('/docs/')).length===0, 'Source-owned docs remain');
-check(existsSync(join(web,'docs')) && realpathSync(join(web,'docs'))===realpathSync(join(root,'docs')), 'Frontend docs must use the central library');
-for (const repo of [root,web]) {
+if (hasWebSibling) {
+  check(existsSync(join(web,'docs')) && realpathSync(join(web,'docs'))===realpathSync(join(root,'docs')), 'Frontend docs must use the central library');
+}
+for (const repo of hasWebSibling ? [root, web] : [root]) {
   for (const name of ['AGENTS.md','GEMINI.md']) check(sha(join(repo,name))===sha(join(repo,'CLAUDE.md')), 'Agent entry differs: '+join(repo,name));
   if (existsSync(join(repo,'.agents'))) {
     check(realpathSync(join(repo,'.agents/rules'))===realpathSync(join(repo,'.claude/rules')), 'Rule loader differs: '+repo);
@@ -43,7 +46,19 @@ for (const repo of [root,web]) {
   check(read(join(repo,'CLAUDE.md')).includes('docs/README.md') && read(join(repo,'CLAUDE.md')).includes('.claude/rules/00-index.md'), 'Entry misses required reading: '+repo);
 }
 
-const markdown = [...core.map(p=>join(root,p)),join(root,'README.md'),join(root,'CLAUDE.md'),join(web,'README.md'),join(web,'CLAUDE.md'),...walk(join(root,'.claude/rules')).filter(p=>p.endsWith('.md')),...walk(join(web,'.claude/rules')).filter(p=>p.endsWith('.md'))];
+const markdown = [
+  ...core.map(p => join(root, p)),
+  join(root, 'README.md'),
+  join(root, 'CLAUDE.md'),
+  ...walk(join(root, '.claude/rules')).filter(p => p.endsWith('.md')),
+  ...(hasWebSibling
+    ? [
+        join(web, 'README.md'),
+        join(web, 'CLAUDE.md'),
+        ...walk(join(web, '.claude/rules')).filter(p => p.endsWith('.md')),
+      ]
+    : []),
+];
 let links=0;
 for (const path of markdown) {
   const text=read(path);
