@@ -10,6 +10,9 @@ from libs.market_data.dtos.security_identity import SecurityIdentity
 from libs.market_data.exceptions.invalid_provider_capture_input_error import (
     InvalidProviderCaptureInputError,
 )
+from libs.market_data.services.decode_alpaca_stock_bars import (
+    decode_alpaca_stock_bars,
+)
 from libs.market_data.services.decode_finmind_stock_kbar import decode_finmind_stock_kbar
 from libs.market_data.services.decode_massive_minute_aggregates import (
     decode_massive_minute_aggregates,
@@ -20,7 +23,7 @@ from libs.market_data.services.validate_provider_capture_sample import (
 
 
 def assemble_provider_capture_sample(
-    provider: Literal["massive", "finmind"],
+    provider: Literal["massive", "finmind", "alpaca"],
     raw_response: bytes,
     source_symbol: str,
     retrieval_date: date,
@@ -60,6 +63,13 @@ def assemble_provider_capture_sample(
             payload=payload,
             expected_source_symbol=source_symbol,
             security=security,
+        )
+    elif provider == "alpaca":
+        bars = decode_alpaca_stock_bars(
+            payload=payload,
+            expected_source_symbol=source_symbol,
+            security=security,
+            price_basis=price_basis,
         )
     else:
         raise InvalidProviderCaptureInputError("unsupported_provider")

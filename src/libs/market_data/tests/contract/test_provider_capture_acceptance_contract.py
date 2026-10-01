@@ -27,7 +27,7 @@ def test_provider_capture_acceptance_contract() -> None:
         }
     )
     hints = get_type_hints(ProviderCaptureManifest)
-    assert get_args(hints["provider"]) == ("massive", "finmind")
+    assert get_args(hints["provider"]) == ("massive", "finmind", "alpaca")
     assert hints["source_symbol"] is str
     assert hints["retrieval_date"] is date
     assert hints["security"] is SecurityIdentity

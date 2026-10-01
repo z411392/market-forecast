@@ -16,6 +16,9 @@ from libs.market_data.exceptions.provider_capture_evidence_integrity_error impor
 from libs.market_data.ports.persist_provider_capture_evidence_port import (
     PersistProviderCaptureEvidencePort,
 )
+from libs.market_data.services.build_provider_request_sha256 import (
+    build_provider_request_sha256,
+)
 
 
 class FilesystemProviderCaptureEvidenceAdapter(PersistProviderCaptureEvidencePort):
@@ -39,10 +42,22 @@ class FilesystemProviderCaptureEvidenceAdapter(PersistProviderCaptureEvidencePor
         )
 
         digest = sha256(raw_response).hexdigest()
+        request_digest = build_provider_request_sha256(
+            receipt["request"]
+        )
         if receipt["raw_artifact_sha256"] != digest:
-            raise ProviderCaptureEvidenceIntegrityError("provider_capture_evidence_hash_mismatch")
+            raise ProviderCaptureEvidenceIntegrityError(
+                "provider_capture_evidence_hash_mismatch"
+            )
 
-        evidence_dir = self._root / provider / retrieval_date.isoformat() / session_date.isoformat() / digest
+        evidence_dir = (
+            self._root
+            / provider
+            / retrieval_date.isoformat()
+            / session_date.isoformat()
+            / request_digest
+            / digest
+        )
         evidence_dir.mkdir(parents=True, exist_ok=True)
 
         _write_immutable(
@@ -57,17 +72,23 @@ class FilesystemProviderCaptureEvidenceAdapter(PersistProviderCaptureEvidencePor
 
 def _validate_raw_response(raw_response: bytes) -> None:
     if type(raw_response) is not bytes or not raw_response:
-        raise ProviderCaptureEvidenceIntegrityError("provider_capture_evidence_invalid_raw_response")
+        raise ProviderCaptureEvidenceIntegrityError(
+            "provider_capture_evidence_invalid_raw_response"
+        )
 
 
 def _validate_provider(
     provider: str,
-) -> Literal["massive", "finmind"]:
+) -> Literal["massive", "finmind", "alpaca"]:
     if provider == "massive":
         return "massive"
     if provider == "finmind":
         return "finmind"
-    raise ProviderCaptureEvidenceIntegrityError("provider_capture_evidence_invalid_provider")
+    if provider == "alpaca":
+        return "alpaca"
+    raise ProviderCaptureEvidenceIntegrityError(
+        "provider_capture_evidence_invalid_provider"
+    )
 
 
 def _validate_plain_date(value: object, error_type: str) -> date:
@@ -98,6 +119,8 @@ def _json_default(value: object) -> str:
 def _write_immutable(path: Path, payload: bytes) -> None:
     if path.exists():
         if path.read_bytes() != payload:
-            raise ProviderCaptureEvidenceConflictError("provider_capture_evidence_conflict")
+            raise ProviderCaptureEvidenceConflictError(
+                "provider_capture_evidence_conflict"
+            )
         return
     path.write_bytes(payload)
