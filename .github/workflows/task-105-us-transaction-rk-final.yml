@@ -1,0 +1,182 @@
+name: task-105-us-transaction-rk-final
+
+on:
+  push:
+    branches:
+      - codex/105-us-transaction-rk-panel
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Compile final analyzer
+        run: |
+          uv run python -m py_compile \
+            docs/research/provider-acceptance/run_task_105_transaction_rk_final.py
+
+      - name: Lint final analyzer
+        run: |
+          uv run ruff check \
+            docs/research/provider-acceptance/run_task_105_transaction_rk_final.py
+
+  final-rk:
+    if: contains(github.event.head_commit.message, '[task105-final-rk]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Restore compact immutable inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="artifacts/private/provider-captures/task-105-final-input"
+          rm -rf "$root"
+          mkdir -p "$root/task97"
+
+          task97_zip="/tmp/task97.zip"
+          gh api \
+            "repos/${GITHUB_REPOSITORY}/actions/artifacts/11144780888/zip" \
+            > "$task97_zip"
+          test "$(sha256sum "$task97_zip" | cut -d' ' -f1)" = \
+            "39a419d8aa070c2f3b641c5f93dde638189164bb933a7780615a24c6b7e6c812"
+
+          python - <<'PY'
+          import zipfile
+          from pathlib import Path
+
+          source = Path("/tmp/task97.zip")
+          target = Path(
+              "artifacts/private/provider-captures/"
+              "task-105-final-input/task97"
+          )
+          with zipfile.ZipFile(source) as archive:
+              matches = [
+                  name
+                  for name in archive.namelist()
+                  if name.endswith("daily-values.json")
+              ]
+              if len(matches) != 1:
+                  raise SystemExit(
+                      f"task97_daily_values_identity:{len(matches)}"
+                  )
+              output = target / "daily-values.json"
+              output.write_bytes(archive.read(matches[0]))
+          PY
+
+          python - <<'PY' > /tmp/task105-batches.tsv
+          import json
+          from pathlib import Path
+
+          payload = json.loads(
+              Path(
+                  "docs/research/provider-acceptance/"
+                  "task-105-trade-batch-artifacts.json"
+              ).read_text(encoding="utf-8")
+          )
+          batches = payload.get("batches")
+          if not isinstance(batches, list) or len(batches) != 6:
+              raise SystemExit(
+                  f"task105_final_requires_6_batches:"
+                  f"{0 if not isinstance(batches, list) else len(batches)}"
+              )
+          numbers = [item["batch"] for item in batches]
+          if numbers != [1, 2, 3, 4, 5, 6]:
+              raise SystemExit(f"task105_batch_order:{numbers}")
+          for item in batches:
+              if item.get("status") != "accepted":
+                  raise SystemExit(
+                      f"task105_batch_not_accepted:{item['batch']}"
+                  )
+              print(
+                  item["batch"],
+                  item["artifact_id"],
+                  item["artifact_sha256"],
+                  sep="\t",
+              )
+          PY
+
+          while IFS=$'\t' read -r batch artifact_id expected_sha; do
+            zip_path="/tmp/task105-batch-${batch}.zip"
+            gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}/zip" \
+              > "$zip_path"
+            actual_sha="$(sha256sum "$zip_path" | cut -d' ' -f1)"
+            test "$actual_sha" = "$expected_sha"
+            mkdir -p "$root/batch-${batch}"
+
+            BATCH="$batch" ZIP_PATH="$zip_path" python - <<'PY'
+          import os
+          import zipfile
+          from pathlib import Path, PurePosixPath
+
+          batch = os.environ["BATCH"]
+          source = Path(os.environ["ZIP_PATH"])
+          target = Path(
+              "artifacts/private/provider-captures/"
+              f"task-105-final-input/batch-{batch}"
+          )
+          wanted_suffixes = (
+              "eligible-trades.jsonl.gz",
+              "session-summary.json",
+          )
+          count = 0
+          with zipfile.ZipFile(source) as archive:
+              for name in archive.namelist():
+                  pure = PurePosixPath(name)
+                  if (
+                      len(pure.parts) >= 4
+                      and pure.parts[0] == "sessions"
+                      and name.endswith(wanted_suffixes)
+                  ):
+                      output = target.joinpath(*pure.parts)
+                      output.parent.mkdir(parents=True, exist_ok=True)
+                      output.write_bytes(archive.read(name))
+                      count += 1
+          if count != 16:
+              raise SystemExit(
+                  f"task105_compact_file_count:{batch}:{count}"
+              )
+          PY
+          done < /tmp/task105-batches.tsv
+
+      - name: Run provider-free transaction RK
+        run: |
+          uv run python \
+            docs/research/provider-acceptance/run_task_105_transaction_rk_final.py
+
+      - name: Upload final transaction RK result
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: task-105-us-transaction-rk-final
+          path: artifacts/private/provider-captures/task-105-us-transaction-rk-final
+          retention-days: 30
