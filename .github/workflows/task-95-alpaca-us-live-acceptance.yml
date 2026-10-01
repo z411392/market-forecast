@@ -1,0 +1,25 @@
+name: task-95-alpaca-us-live-acceptance
+
+on:
+  push:
+    branches:
+      - codex/95-alpaca-us-live-acceptance
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  credential-presence:
+    if: contains(github.event.head_commit.message, '[alpaca-secret-check]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      MARKET_FORECAST_ALPACA_API_KEY_ID: ${{ secrets.MARKET_FORECAST_ALPACA_API_KEY_ID }}
+      MARKET_FORECAST_ALPACA_SECRET_KEY: ${{ secrets.MARKET_FORECAST_ALPACA_SECRET_KEY }}
+    steps:
+      - name: Verify Alpaca credential presence only
+        shell: bash
+        run: |
+          test -n "${MARKET_FORECAST_ALPACA_API_KEY_ID:-}"
+          test -n "${MARKET_FORECAST_ALPACA_SECRET_KEY:-}"
