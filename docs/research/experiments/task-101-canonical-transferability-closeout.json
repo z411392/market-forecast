@@ -1,0 +1,119 @@
+{
+  "artifact_version": "task-101-canonical-transferability-closeout-v1",
+  "task": 101,
+  "parent_story": 6,
+  "status": "research_complete",
+  "measurement_manifest": "cross-market-rv-measurement-target-manifest-v2",
+  "canonical_panel": {
+    "reference": "docs/research/experiments/task-101-canonical-panel-reference.json",
+    "artifact_id": 11154198322,
+    "artifact_sha256": "4bd4cf2c5056205e80c321d963b083b67f14ff4cfa6e0e1554c7e1c61789a1ea",
+    "panel_sha256": "439968db10da894d3024ca5cbe38e74259328c28307f65477d3ddfa482183a4e",
+    "explicit_missing_measurements": {
+      "2317": 1,
+      "TSM": 2
+    },
+    "target_horizon_compression": false
+  },
+  "transferability": {
+    "reference": "docs/research/experiments/task-101-canonical-transferability-reference.json",
+    "artifact_id": 11154299669,
+    "artifact_sha256": "7d97355a56f73dbbbbce2cf5c21be34a34cddc613d1f95a0e5f5ce2d0d77633a",
+    "h5": {
+      "overall_market_minus_global": 0.001509201194193814,
+      "overall_ci": [
+        0.00006281469284329115,
+        0.0030610069344573876
+      ],
+      "us_market_minus_global": 0.002114376782652905,
+      "us_ci": [
+        0.0002845001963227502,
+        0.004517150581270698
+      ],
+      "taiwan_market_minus_global": 0.0002893640559180883,
+      "taiwan_ci": [
+        -0.0033866082304236348,
+        0.0037663539065791412
+      ]
+    },
+    "h20": {
+      "overall_market_minus_global": 0.001869421917166392,
+      "overall_ci": [
+        0.00016470458953679102,
+        0.0028344492769633352
+      ],
+      "us_market_minus_global": 0.002685026359381739,
+      "us_ci": [
+        0.0013039853567787807,
+        0.005900296111824431
+      ],
+      "taiwan_market_minus_global": 0.0005121417068574643,
+      "taiwan_ci": [
+        -0.004892786909019694,
+        0.0021588036902896322
+      ]
+    },
+    "expanding_oos_overall": {
+      "F1": {
+        "mean": 0.005797854454753255,
+        "ci": [
+          -0.005414188563244325,
+          0.01998562423472114
+        ]
+      },
+      "F2": {
+        "mean": -0.004345918402563687,
+        "ci": [
+          -0.0090137561224768,
+          0.004995210083563738
+        ]
+      },
+      "F3": {
+        "mean": 0.0028329900911677653,
+        "ci": [
+          0.001755634020763112,
+          0.005086084250595662
+        ]
+      },
+      "F4": {
+        "mean": 0.0015489792812398684,
+        "ci": [
+          0.0001142973466002965,
+          0.0031167343592345196
+        ]
+      }
+    },
+    "ruling": {
+      "market_specific_ridge_har_promoted": false,
+      "fixed_alpha_partial_pooling_promoted": false,
+      "historical_transferability_ruling_changed": false,
+      "interpretation": "shared/global dynamics remain preferred overall and in U.S.; Taiwan-specific transfer remains unstable/inconclusive"
+    }
+  },
+  "mandatory_baselines": {
+    "reference": "docs/research/experiments/task-101-canonical-baselines-reference.json",
+    "artifact_id": 11156380209,
+    "artifact_sha256": "31c09450baacd2fa9c3e2dee892a1509666e2b7c73e521619a7fa87eceaab12c",
+    "garch_status": "failed_closed",
+    "garch_failure_reference": "docs/research/experiments/task-101-canonical-garch-failure-reference.json",
+    "garch_rescue_authorized": false,
+    "non_garch_subset_status": "accepted",
+    "ruling": {
+      "ewma_promoted": false,
+      "naive_promoted": false,
+      "log_har_promoted_over_level_har": false,
+      "garch_promoted": false
+    }
+  },
+  "final_story_ruling": {
+    "market_identity_adds_stable_incremental_forecast_information": false,
+    "market_specific_parameters_promoted": false,
+    "ticker_specific_winner_switch_authorized": false,
+    "new_model_search_required": false,
+    "story_6_research_question_resolved": true
+  },
+  "integration": {
+    "branch": "codex/101-canonical-transferability-v2",
+    "pull_request_status": "to_open_draft"
+  }
+}
