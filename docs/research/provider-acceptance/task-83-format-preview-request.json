@@ -2,7 +2,7 @@
   "task": 83,
   "slice": "formatter-preview-regeneration",
   "tool": "ruff 0.8.x pinned by branch pyproject",
-  "action": "apply exact Ruff 0.8.x formatter output after manifest equality check",
+  "action": "apply deterministic Ruff I001 import ordering after exact expected-file-set check",
   "branch_write_by_workflow": true,
-  "execution_sequence": 2
+  "execution_sequence": 3
 }
