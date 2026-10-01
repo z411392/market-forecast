@@ -15,5 +15,6 @@
   "decision_rule": "issue-106-frozen-bandi-russell-mse",
   "provider_calls_authorized": true,
   "trading_calls_authorized": false,
-  "forecast_scores_allowed": false
+  "forecast_scores_allowed": false,
+  "execution_sequence": 2
 }
