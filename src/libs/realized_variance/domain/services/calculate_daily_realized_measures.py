@@ -32,9 +32,7 @@ def calculate_daily_realized_measures(
     _require_nonnegative_finite(intraday["positive_semivariance"])
     _require_nonnegative_finite(intraday["negative_semivariance"])
 
-    semivariance_total = (
-        intraday["positive_semivariance"] + intraday["negative_semivariance"]
-    )
+    semivariance_total = intraday["positive_semivariance"] + intraday["negative_semivariance"]
     if not isclose(
         semivariance_total,
         intraday["realized_variance"],

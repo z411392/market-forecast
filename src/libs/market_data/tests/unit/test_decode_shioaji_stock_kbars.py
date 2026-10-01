@@ -25,22 +25,10 @@ def _provider_ns(hour: int, minute: int) -> int:
 
 def _payload() -> dict[str, object]:
     labels = [
-        *[
-            _provider_ns(9 + minute_index // 60, 1 + minute_index % 60)
-            for minute_index in range(59)
-        ],
-        *[
-            _provider_ns(10 + minute_index // 60, minute_index % 60)
-            for minute_index in range(60)
-        ],
-        *[
-            _provider_ns(11 + minute_index // 60, minute_index % 60)
-            for minute_index in range(60)
-        ],
-        *[
-            _provider_ns(12 + minute_index // 60, minute_index % 60)
-            for minute_index in range(60)
-        ],
+        *[_provider_ns(9 + minute_index // 60, 1 + minute_index % 60) for minute_index in range(59)],
+        *[_provider_ns(10 + minute_index // 60, minute_index % 60) for minute_index in range(60)],
+        *[_provider_ns(11 + minute_index // 60, minute_index % 60) for minute_index in range(60)],
+        *[_provider_ns(12 + minute_index // 60, minute_index % 60) for minute_index in range(60)],
         *[_provider_ns(13, minute_index) for minute_index in range(26)],
         _provider_ns(13, 30),
     ]

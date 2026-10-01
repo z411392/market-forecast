@@ -40,9 +40,7 @@ def decode_shioaji_stock_kbars(
         raise InvalidProviderCaptureInputError("shioaji_kbars_missing_field")
 
     count = len(timestamps)
-    if count == 0 or any(
-        len(values) != count for values in (opens, highs, lows, closes, volumes)
-    ):
+    if count == 0 or any(len(values) != count for values in (opens, highs, lows, closes, volumes)):
         raise InvalidProviderCaptureInputError("shioaji_kbars_inconsistent_lengths")
 
     try:
@@ -67,27 +65,17 @@ def decode_shioaji_stock_kbars(
         low_price = _positive_number(lows[index])
         close_price = _positive_number(closes[index])
         volume = _non_negative_number(volumes[index])
-        if (
-            open_price is None
-            or high_price is None
-            or low_price is None
-            or close_price is None
-        ):
+        if open_price is None or high_price is None or low_price is None or close_price is None:
             raise InvalidProviderCaptureInputError("shioaji_invalid_price")
         if volume is None:
             raise InvalidProviderCaptureInputError("shioaji_invalid_volume")
-        if not (
-            low_price <= open_price <= high_price
-            and low_price <= close_price <= high_price
-        ):
+        if not (low_price <= open_price <= high_price and low_price <= close_price <= high_price):
             raise InvalidProviderCaptureInputError("shioaji_invalid_ohlc_envelope")
 
         label_time = local_label.time()
         if label_time == time(13, 30):
             if index != count - 1 or closing_auction is not None:
-                raise InvalidProviderCaptureInputError(
-                    "shioaji_invalid_closing_auction_position"
-                )
+                raise InvalidProviderCaptureInputError("shioaji_invalid_closing_auction_position")
             closing_auction = {
                 "security": security,
                 "session_date": expected_session_date,
@@ -98,9 +86,7 @@ def decode_shioaji_stock_kbars(
             }
         else:
             if label_time < time(9, 1) or label_time > time(13, 25):
-                raise InvalidProviderCaptureInputError(
-                    "shioaji_unexpected_regular_label"
-                )
+                raise InvalidProviderCaptureInputError("shioaji_unexpected_regular_label")
             bar_start_local = local_label - timedelta(minutes=1)
             bar_start_utc = bar_start_local.astimezone(timezone.utc)
             bar: CanonicalMinuteBar = {

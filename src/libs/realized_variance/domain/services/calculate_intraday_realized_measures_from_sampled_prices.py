@@ -77,10 +77,7 @@ def calculate_intraday_realized_measures_from_sampled_prices(
         if index < len(samples) - 1 and sample["role"] != "regular_interval_close":
             raise InvalidRealizedVarianceInputError("invalid_regular_sample_role")
         if previous_sample is not None:
-            if (
-                sample["observed_at_utc"] - previous_sample["observed_at_utc"]
-                != expected_step
-            ):
+            if sample["observed_at_utc"] - previous_sample["observed_at_utc"] != expected_step:
                 raise InvalidRealizedVarianceInputError("non_uniform_sampling_grid")
 
         bucket_start = (
@@ -140,12 +137,7 @@ def _validate_sample_provenance(
 
     lower = sample["staleness_lower_bound_seconds"]
     upper = sample["staleness_upper_bound_seconds"]
-    if (
-        not isfinite(lower)
-        or not isfinite(upper)
-        or lower < 0.0
-        or upper < lower
-    ):
+    if not isfinite(lower) or not isfinite(upper) or lower < 0.0 or upper < lower:
         raise InvalidRealizedVarianceInputError("invalid_sample_staleness_bounds")
 
     if sample["role"] == "closing_auction_close":
@@ -173,9 +165,7 @@ def _validate_sample_provenance(
 
     if sample["observation_mode"] == "observed_bucket_close":
         if source_start < bucket_start or source_start >= observed_at:
-            raise InvalidRealizedVarianceInputError(
-                "observed_source_outside_sampling_bucket"
-            )
+            raise InvalidRealizedVarianceInputError("observed_source_outside_sampling_bucket")
         return
 
     if sample["observation_mode"] != "previous_tick":
@@ -183,9 +173,7 @@ def _validate_sample_provenance(
     if previous_sample is None:
         raise InvalidRealizedVarianceInputError("previous_tick_on_first_sample")
     if source_end > bucket_start:
-        raise InvalidRealizedVarianceInputError(
-            "previous_tick_source_inside_sampling_bucket"
-        )
+        raise InvalidRealizedVarianceInputError("previous_tick_source_inside_sampling_bucket")
     if (
         source_start != previous_sample["source_interval_start_utc"]
         or source_end != previous_sample["source_interval_end_utc"]

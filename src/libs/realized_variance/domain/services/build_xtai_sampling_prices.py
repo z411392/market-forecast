@@ -103,9 +103,7 @@ def build_xtai_sampling_prices(
 
     while boundary < closing_at_utc:
         if boundary > continuous_end_utc:
-            raise InvalidRealizedVarianceInputError(
-                "sampling_boundary_inside_closing_auction"
-            )
+            raise InvalidRealizedVarianceInputError("sampling_boundary_inside_closing_auction")
 
         bucket_observed_bar: CanonicalMinuteBar | None = None
         while bar_index < len(bars) and bars[bar_index]["bar_start_utc"] < boundary:
@@ -128,17 +126,11 @@ def build_xtai_sampling_prices(
         source_start = source_bar["bar_start_utc"]
         source_end = source_start + timedelta(minutes=1)
         if source_end > boundary:
-            raise InvalidRealizedVarianceInputError(
-                "sample_source_after_sampling_boundary"
-            )
+            raise InvalidRealizedVarianceInputError("sample_source_after_sampling_boundary")
         if observation_mode == "observed_bucket_close" and source_start < window_start:
-            raise InvalidRealizedVarianceInputError(
-                "observed_source_outside_sampling_bucket"
-            )
+            raise InvalidRealizedVarianceInputError("observed_source_outside_sampling_bucket")
         if observation_mode == "previous_tick" and source_end > window_start:
-            raise InvalidRealizedVarianceInputError(
-                "previous_tick_source_inside_sampling_bucket"
-            )
+            raise InvalidRealizedVarianceInputError("previous_tick_source_inside_sampling_bucket")
 
         sampled.append(
             {
@@ -152,12 +144,8 @@ def build_xtai_sampling_prices(
                 "source_interval_start_utc": source_start,
                 "source_interval_end_utc": source_end,
                 "observation_mode": observation_mode,
-                "staleness_lower_bound_seconds": (
-                    boundary - source_end
-                ).total_seconds(),
-                "staleness_upper_bound_seconds": (
-                    boundary - source_start
-                ).total_seconds(),
+                "staleness_lower_bound_seconds": (boundary - source_end).total_seconds(),
+                "staleness_upper_bound_seconds": (boundary - source_start).total_seconds(),
                 "algorithm_version": XTAI_REALIZED_VARIANCE_ALGORITHM_VERSION,
             }
         )

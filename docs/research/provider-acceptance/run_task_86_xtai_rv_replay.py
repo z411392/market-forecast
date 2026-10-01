@@ -139,27 +139,15 @@ def main() -> None:
                 )
                 expected_observation_count = 270 // interval
                 if measures["observation_count"] != expected_observation_count:
-                    raise RuntimeError(
-                        "unexpected_observation_count:"
-                        f"{symbol}:{session_date}:{interval}"
-                    )
+                    raise RuntimeError("unexpected_observation_count:" f"{symbol}:{session_date}:{interval}")
                 if len(sampled) != expected_observation_count:
                     raise RuntimeError(
-                        "unexpected_sampled_price_count:"
-                        f"{symbol}:{session_date}:{interval}"
+                        "unexpected_sampled_price_count:" f"{symbol}:{session_date}:{interval}"
                     )
-                if (
-                    measures["algorithm_version"]
-                    != XTAI_REALIZED_VARIANCE_ALGORITHM_VERSION
-                ):
-                    raise RuntimeError(
-                        "unexpected_algorithm_version:"
-                        f"{symbol}:{session_date}:{interval}"
-                    )
+                if measures["algorithm_version"] != XTAI_REALIZED_VARIANCE_ALGORITHM_VERSION:
+                    raise RuntimeError("unexpected_algorithm_version:" f"{symbol}:{session_date}:{interval}")
 
-                expected_v3 = EXPECTED_V3_RV.get(
-                    (symbol, session_date.isoformat(), interval)
-                )
+                expected_v3 = EXPECTED_V3_RV.get((symbol, session_date.isoformat(), interval))
                 if expected_v3 is not None and not math.isclose(
                     measures["realized_variance"],
                     expected_v3,
@@ -178,11 +166,7 @@ def main() -> None:
                     if sample["observation_mode"] == "previous_tick"
                 ]
 
-                if (
-                    symbol == "2454"
-                    and session_date == date(2026, 5, 4)
-                    and interval == 5
-                ):
+                if symbol == "2454" and session_date == date(2026, 5, 4) and interval == 5:
                     _assert_2454_blocker_sample(sampled)
 
                 interval_results.append(
@@ -214,9 +198,7 @@ def main() -> None:
                         session_open["source_interval_start_utc"].isoformat()
                     ),
                     "session_open_price": session_open["price"],
-                    "first_canonical_minute_start_utc": (
-                        bars[0]["bar_start_utc"].isoformat()
-                    ),
+                    "first_canonical_minute_start_utc": (bars[0]["bar_start_utc"].isoformat()),
                     "closing_auction_at_utc": closing["matched_at_utc"].isoformat(),
                     "closing_auction_price": closing["price"],
                     "intervals": interval_results,
@@ -235,11 +217,7 @@ def main() -> None:
 
 def _assert_2454_blocker_sample(samples: tuple[dict[str, Any], ...]) -> None:
     blocker = next(
-        (
-            sample
-            for sample in samples
-            if sample["observed_at_utc"] == BLOCKER_BOUNDARY_UTC
-        ),
+        (sample for sample in samples if sample["observed_at_utc"] == BLOCKER_BOUNDARY_UTC),
         None,
     )
     if blocker is None:

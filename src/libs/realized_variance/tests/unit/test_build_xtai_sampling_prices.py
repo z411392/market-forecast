@@ -120,9 +120,7 @@ def test_build_xtai_sampling_prices() -> None:
         assert sampled[-1]["algorithm_version"] == XTAI_REALIZED_VARIANCE_ALGORITHM_VERSION
 
         for previous, current in zip(sampled, sampled[1:]):
-            assert current["observed_at_utc"] - previous["observed_at_utc"] == timedelta(
-                minutes=interval
-            )
+            assert current["observed_at_utc"] - previous["observed_at_utc"] == timedelta(minutes=interval)
 
     bars_5m = build_xtai_sampling_prices(
         _bars(),
@@ -192,11 +190,7 @@ def test_build_xtai_sampling_prices() -> None:
     assert sparse_5m[10]["staleness_lower_bound_seconds"] == 60.0
     assert sparse_5m[10]["staleness_upper_bound_seconds"] == 120.0
 
-    empty_internal_bucket = tuple(
-        bar
-        for index, bar in enumerate(_bars())
-        if index not in range(50, 55)
-    )
+    empty_internal_bucket = tuple(bar for index, bar in enumerate(_bars()) if index not in range(50, 55))
     carried_5m = build_xtai_sampling_prices(
         empty_internal_bucket,
         _session_open(),

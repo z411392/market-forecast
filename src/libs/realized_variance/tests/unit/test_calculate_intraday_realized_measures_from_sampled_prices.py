@@ -48,10 +48,7 @@ def _sample(
     observation_mode: str = "observed_bucket_close",
     source_interval_start_utc: datetime | None = None,
 ) -> SampledIntradayPrice:
-    observed_at = (
-        datetime(2026, 9, 24, 1, 5, tzinfo=timezone.utc)
-        + timedelta(minutes=5 * index)
-    )
+    observed_at = datetime(2026, 9, 24, 1, 5, tzinfo=timezone.utc) + timedelta(minutes=5 * index)
     if role == "closing_auction_close":
         source_start = observed_at
         source_end = observed_at
