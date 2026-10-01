@@ -48,6 +48,12 @@ AD_HOC_FULL_DAY_CLOSURES = {
     date(2026, 7, 10): "typhoon_bavi_twse_full_day_closure",
 }
 
+SYMBOL_SPECIFIC_FULL_DAY_HALTS = {
+    "2317": {
+        date(2025, 7, 30): "twse_material_information_trading_halt",
+    },
+}
+
 OUTPUT_ROOT = Path(
     "artifacts/private/provider-captures/task-101-taiwan-canonical-panel"
 )
@@ -149,6 +155,7 @@ def main() -> None:
                 "status": "fetching",
                 "query_chunks": [],
                 "missing_expected_sessions": [],
+                "explained_symbol_halt_sessions": [],
                 "extra_provider_sessions": [],
                 "ignored_out_of_calendar_provider_sessions": [],
                 "cached_chunk_count": 0,
@@ -178,8 +185,25 @@ def main() -> None:
             expected_set = set(expected_sessions)
             missing = sorted(expected_set - provider_dates)
             extra = sorted(provider_dates - expected_set)
+            known_halts = SYMBOL_SPECIFIC_FULL_DAY_HALTS.get(
+                symbol,
+                {},
+            )
+            explained_missing = [
+                value for value in missing if value in known_halts
+            ]
+            unexplained_missing = [
+                value for value in missing if value not in known_halts
+            ]
             symbol_result["missing_expected_sessions"] = [
-                value.isoformat() for value in missing
+                value.isoformat() for value in unexplained_missing
+            ]
+            symbol_result["explained_symbol_halt_sessions"] = [
+                {
+                    "session_date": value.isoformat(),
+                    "reason": known_halts[value],
+                }
+                for value in explained_missing
             ]
             symbol_result["extra_provider_sessions"] = [
                 value.isoformat() for value in extra
@@ -198,12 +222,12 @@ def main() -> None:
                 }
                 for value in extra
             ]
-            if missing:
+            if unexplained_missing:
                 symbol_result["status"] = "session_coverage_failed"
                 _write_json(SUMMARY_PATH, summary)
                 raise RuntimeError(
                     "task101_tw_session_coverage_mismatch:"
-                    f"{symbol}:missing={len(missing)}:"
+                    f"{symbol}:missing={len(unexplained_missing)}:"
                     f"extra={len(extra)}"
                 )
 
@@ -215,6 +239,8 @@ def main() -> None:
             }
             decoded: dict[date, tuple[Any, Any, Any]] = {}
             for session_date in expected_sessions:
+                if session_date not in provider_sessions:
+                    continue
                 decoded[session_date] = decode_shioaji_stock_kbars(
                     provider_sessions[session_date],
                     security,
@@ -227,6 +253,27 @@ def main() -> None:
             previous_tick_sessions: set[date] = set()
 
             for session_date in panel_sessions:
+                if session_date not in decoded:
+                    halt_reason = known_halts.get(session_date)
+                    if halt_reason is None:
+                        raise RuntimeError(
+                            "task101_tw_unexplained_missing_measurement:"
+                            f"{symbol}:{session_date}"
+                        )
+                    rows.append(
+                        {
+                            "session_date": session_date.isoformat(),
+                            "whole_day_variance": None,
+                            "regular_session_variance": None,
+                            "overnight_variance": None,
+                            "overnight_log_return": None,
+                            "observation_count": 0,
+                            "source_chunk_sha256": None,
+                            "missing_reason": halt_reason,
+                        }
+                    )
+                    continue
+
                 bars, session_open, closing = decoded[session_date]
                 overnight = calculate_overnight_log_return(
                     previous_closing["price"],
@@ -304,6 +351,14 @@ def main() -> None:
                 provider_sessions
             )
             symbol_result["accepted_panel_sessions"] = len(rows)
+            symbol_result["measured_panel_sessions"] = sum(
+                row["whole_day_variance"] is not None
+                for row in rows
+            )
+            symbol_result["missing_measurement_sessions"] = sum(
+                row["whole_day_variance"] is None
+                for row in rows
+            )
             symbol_result["status"] = "accepted"
             all_daily[symbol] = rows
             _write_json(SUMMARY_PATH, summary)
