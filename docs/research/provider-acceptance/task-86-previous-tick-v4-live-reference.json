@@ -1,0 +1,111 @@
+{
+  "artifact_version": "task-86-previous-tick-v4-live-reference-v1",
+  "task": 86,
+  "algorithm_version": "rv-core-v1+xtai-closing-auction-v4",
+  "provider": "shioaji",
+  "provider_version": "1.7.6",
+  "environment": "production",
+  "simulation": false,
+  "subscribe_trade": false,
+  "ca_activated": false,
+  "workflow": {
+    "candidate_sha": "3befeaa7266f122e41ac7c5942bf1a4a57ebef43",
+    "live_run_id": 36521091803,
+    "static_run_id": 36521091786,
+    "artifact_id": 11012452255,
+    "artifact_sha256": "78f122cc5e791771f5e39ee9c1c4ee5cecdeb84478d79936eee0afc5ad84cbb6",
+    "summary_sha256": "d7ec306930ab0265f1c6277555ac0a2a61b72ac67436f86a6e32cbf4cac2444e"
+  },
+  "blocker_case": {
+    "symbol": "2454",
+    "session_date": "2026-05-04",
+    "provider_bar_count": 151,
+    "observed_trade_bearing_minute_count": 150,
+    "session_open_price": 2870.0,
+    "closing_auction_price": 2870.0,
+    "sdk_payload_sha256": "a2cea118284452a277c2cb41451443432f78a98f34e0f906d8f535ea64f58a4d",
+    "measurements": {
+      "5": {
+        "sampled_price_count": 54,
+        "observation_count": 54,
+        "previous_tick_sample_count": 1,
+        "regular_session_variance": 0.0,
+        "realized_quarticity": 0.0,
+        "positive_semivariance": 0.0,
+        "negative_semivariance": 0.0,
+        "blocker_boundary_sample": {
+          "observed_at_utc": "2026-05-04T03:30:00+00:00",
+          "price": 2870.0,
+          "observation_mode": "previous_tick",
+          "source_interval_start_utc": "2026-05-04T03:23:00+00:00",
+          "source_interval_end_utc": "2026-05-04T03:24:00+00:00",
+          "staleness_lower_bound_seconds": 360.0,
+          "staleness_upper_bound_seconds": 420.0
+        }
+      },
+      "10": {
+        "sampled_price_count": 27,
+        "observation_count": 27,
+        "previous_tick_sample_count": 0,
+        "regular_session_variance": 0.0
+      },
+      "15": {
+        "sampled_price_count": 18,
+        "observation_count": 18,
+        "previous_tick_sample_count": 0,
+        "regular_session_variance": 0.0
+      }
+    }
+  },
+  "reference_cases": {
+    "2317_2025_11_17": {
+      "previous_tick_counts": {"5": 0, "10": 0, "15": 0},
+      "regular_session_variance": {
+        "5": 0.0005654172179537024,
+        "10": 0.00032639986742110836,
+        "15": 0.0004428205189068247
+      },
+      "numeric_drift_vs_v3": false
+    },
+    "2317_2026_09_24": {
+      "previous_tick_counts": {"5": 0, "10": 0, "15": 0},
+      "regular_session_variance": {
+        "5": 0.00013091528840799728,
+        "10": 0.00013074199229837273,
+        "15": 0.0001147259495782424
+      },
+      "numeric_drift_vs_v3": false
+    },
+    "2330_2024_07_02": {
+      "previous_tick_counts": {"5": 0, "10": 0, "15": 0},
+      "regular_session_variance": {
+        "5": 0.00010221288319299749,
+        "10": 0.00008706959301028129,
+        "15": 0.00013856332496125267
+      },
+      "numeric_drift_vs_v3": false
+    },
+    "2330_2026_09_24": {
+      "previous_tick_counts": {"5": 0, "10": 0, "15": 0},
+      "regular_session_variance": {
+        "5": 0.00010964302898558377,
+        "10": 0.00005283407680026145,
+        "15": 0.00003659131792395245
+      },
+      "numeric_drift_vs_v3": false
+    }
+  },
+  "interpretation": {
+    "observation_mode_is_bucket_relative": true,
+    "stale_duration_alone_does_not_imply_previous_tick_mode": true,
+    "synthetic_minute_bars_created": false,
+    "synthetic_boundary_transactions_created": false,
+    "previous_tick_provenance_live_accepted": true
+  },
+  "ruling": {
+    "status": "accepted",
+    "previous_tick_v4_live_accepted": true,
+    "task89_empty_bucket_blocker_resolved": true,
+    "task89_panel_rerun_allowed_after_upstream_sync": true
+  }
+}

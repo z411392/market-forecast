@@ -1,0 +1,64 @@
+{
+  "artifact_version": "task-86-session-open-v3-static-reference-v1",
+  "task": 86,
+  "algorithm_version": "rv-core-v1+xtai-closing-auction-v3",
+  "upstream_empirical_evidence": {
+    "task": 89,
+    "diagnostic_run_id": 36471072390,
+    "diagnostic_artifact_id": 10992060353,
+    "diagnostic_artifact_sha256": "51e30f2cf4e0c4f8538bf8912551b48d76f0725c5aea5f530370c09c0196fc5b",
+    "diagnostic_summary_sha256": "e90679914e0c7f543f73f2de694e8b72f8582df396a94f3564045fe23d86ac3a",
+    "twse_opening_price_definition": "first matched trade price of the current session",
+    "twse_rule_source": "https://twse-regulation.twse.com.tw/ENG/EN/law/DAT07.aspx?FLCODE=FL007304&FLNO=58-8&LDATE=20251020&LSID=FL007304&TY=L",
+    "blocker_example": {
+      "symbol": "2317",
+      "session_date": "2025-11-17",
+      "first_matched_trade_local": "09:02:00",
+      "opening_price": 241.0,
+      "first_kbar_label_local": "09:03",
+      "first_kbar_open": 241.0
+    }
+  },
+  "contract": {
+    "session_open_price_observation": {
+      "source_interval_start_utc": "start of the first trade-bearing one-minute Kbar",
+      "price": "official opening price inferred from the first emitted Kbar Open",
+      "exact_first_trade_second_is_not_fabricated": true
+    },
+    "sampling": {
+      "session_open_is_not_a_sampled_price": true,
+      "sampled_prices_are_exchange_clock_boundaries": true,
+      "first_return": "first boundary close divided by official opening price",
+      "zero_tick_minutes_are_not_synthesized": true,
+      "empty_required_sampling_bucket_fails_closed": true,
+      "closing_auction_remains_distinct": true
+    },
+    "expected_observation_counts": {
+      "5": 54,
+      "10": 27,
+      "15": 18
+    },
+    "xnys_path_unchanged": true
+  },
+  "tests_first": {
+    "red_candidate_sha": "12777a16045b066d981b7a8527449f85332153a6",
+    "red_workflow_run_id": 36472007619,
+    "red_result": "expected_module_not_found",
+    "green_candidate_sha": "7b9a627d01e7760d867834a13cfe25c606c92fa7",
+    "green_workflow_run_id": 36472362906,
+    "green_result": "pass",
+    "focused_oracles": "pass",
+    "market_data_and_realized_variance_regressions": "pass",
+    "ruff": "pass",
+    "pyright": "pass"
+  },
+  "live_verification": {
+    "v3_provider_replay_executed": false,
+    "next_bounded_slice": [
+      "replay 2317 on 2025-11-17",
+      "replay a normal 2317 reference session",
+      "replay existing frozen 2330 sessions",
+      "persist v3 live evidence before Task 89 panel rerun"
+    ]
+  }
+}
