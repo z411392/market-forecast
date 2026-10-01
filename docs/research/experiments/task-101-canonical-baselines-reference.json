@@ -1,0 +1,89 @@
+{
+  "artifact_version": "task-101-canonical-baselines-reference-v1",
+  "task": 101,
+  "slice": "S2-mandatory-baselines",
+  "status": "accepted_with_garch_fail_closed",
+  "branch": "codex/101-canonical-transferability-v2",
+  "workflow_run_id": 36851900386,
+  "artifact_id": 11156380209,
+  "artifact_sha256": "31c09450baacd2fa9c3e2dee892a1509666e2b7c73e521619a7fa87eceaab12c",
+  "summary_sha256": "49e5e3c4508b46381edcebe8923e918c38d3dcb714e0ed6353156a406cff4a57",
+  "per_symbol_sha256": "facf92a47df21b73dd413bdc30c03875d496356660f2b9559991024931f02201",
+  "bootstrap_sha256": "ebe41de165f4e1fe0aacca73df9e9860cec79c366532aa143e3a419ee45de9ed",
+  "forecast_diagnostics_sha256": "36c3ba540f92f943cc87e79b4c582878beaea708a5b6f3021393d28ffca816a4",
+  "input_panel": {
+    "artifact_id": 11154198322,
+    "artifact_sha256": "4bd4cf2c5056205e80c321d963b083b67f14ff4cfa6e0e1554c7e1c61789a1ea",
+    "panel_sha256": "439968db10da894d3024ca5cbe38e74259328c28307f65477d3ddfa482183a4e"
+  },
+  "accepted_models": [
+    "global",
+    "level_har",
+    "log_har",
+    "ewma",
+    "naive"
+  ],
+  "garch": {
+    "status": "failed_closed_not_reexecuted",
+    "reference": "docs/research/experiments/task-101-canonical-garch-failure-reference.json",
+    "failing_symbol": "TSM",
+    "observed_return_index": 643,
+    "persistence": 1.000001321089813,
+    "gate": "persistence must be strictly below 1",
+    "rescue_authorized": false,
+    "qlike_reported": false
+  },
+  "overall": {
+    "global_qlike": 0.18989113724233714,
+    "level_har_qlike": 0.17588480527223127,
+    "log_har_qlike": 0.18674421813821807,
+    "ewma_qlike": 0.21662622569180504,
+    "naive_qlike": 0.25193925910326537,
+    "comparisons": {
+      "level_har_minus_global": {
+        "mean": -0.014006331970105883,
+        "ci_025": -0.04803538143594674,
+        "ci_975": 0.00273865042541685
+      },
+      "log_har_minus_level_har": {
+        "mean": 0.010859412865986802,
+        "ci_025": -0.008308179633841254,
+        "ci_975": 0.04425379139532121
+      },
+      "ewma_minus_level_har": {
+        "mean": 0.04074142041957377,
+        "ci_025": 0.00499375675399685,
+        "ci_975": 0.11189563003752741
+      },
+      "naive_minus_level_har": {
+        "mean": 0.07605445383103404,
+        "ci_025": 0.054350465409027375,
+        "ci_975": 0.11744858563812212
+      }
+    }
+  },
+  "us": {
+    "level_har_minus_global": {
+      "mean": -0.02360677252163478,
+      "ci_025": -0.053892844242923364,
+      "ci_975": -0.002306137957349979
+    }
+  },
+  "taiwan": {
+    "level_har_minus_global": {
+      "mean": -0.0008708277401143062,
+      "ci_025": -0.06409985684668432,
+      "ci_975": 0.03312224773205864
+    }
+  },
+  "ruling": {
+    "ewma_promoted": false,
+    "naive_promoted": false,
+    "log_har_promoted_over_level_har": false,
+    "garch_promoted": false,
+    "garch_reason": "preregistered replacement QMLE path failed stationarity and must not be rescued post hoc",
+    "level_har_vs_global_overall": "inconclusive",
+    "level_har_vs_global_us": "level_har_favored",
+    "level_har_vs_global_taiwan": "inconclusive"
+  }
+}
