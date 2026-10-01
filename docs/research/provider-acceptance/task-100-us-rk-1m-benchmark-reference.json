@@ -1,0 +1,108 @@
+{
+  "artifact_version": "task-100-us-rk-1m-benchmark-reference-v1",
+  "task": 100,
+  "parent_task": 12,
+  "status": "accepted_inconclusive",
+  "estimator": {
+    "version": "us-rk-parzen-1m-v1",
+    "kernel": "parzen",
+    "endpoint_jitter_m": 2,
+    "bandwidth_constant": 3.5134,
+    "noise_target_seconds": 120,
+    "sparse_interval_seconds": 1200,
+    "sparse_phase_shift_seconds": 60,
+    "input": "accepted_split_adjusted_alpaca_sip_1m"
+  },
+  "source": {
+    "task": 97,
+    "run_id": 36823983535,
+    "artifact_id": 11144780888,
+    "artifact_sha256": "39a419d8aa070c2f3b641c5f93dde638189164bb933a7780615a24c6b7e6c812"
+  },
+  "workflow": {
+    "run_id": 36825418006,
+    "artifact_id": 11144968136,
+    "artifact_sha256": "1211d8bb42b453b1d96705a0831e5e2e0a0d7aedc0a6c85d658335889fd053e1",
+    "summary_sha256": "d98c1135aab5198d37758d8783ae2f5a3c011a2ff07eda64e5e6b9c4d433755f",
+    "daily_values_sha256": "713568ad8fd05fab7686081c9b12f30cd90b7ffd1fa6b6ca1884324ed326fb64",
+    "status": "pass",
+    "self_check": "pass"
+  },
+  "audit_window": {
+    "prior_session": "2025-09-23",
+    "first": "2025-09-24",
+    "last": "2026-09-24",
+    "audit_sessions_per_symbol": 252,
+    "symbols": [
+      "AAPL",
+      "NVDA"
+    ]
+  },
+  "metrics": {
+    "AAPL": {
+      "5m": {
+        "geometric_bias_pct": 8.92661309323266,
+        "mean_abs_log_gap": 0.1645111167065922,
+        "pearson_log": 0.9598064771144091,
+        "spearman": 0.9503008106853595
+      },
+      "10m": {
+        "geometric_bias_pct": 5.024731274941718,
+        "mean_abs_log_gap": 0.1515692680364784,
+        "pearson_log": 0.9629594025628715,
+        "spearman": 0.9507469838320352
+      },
+      "15m": {
+        "geometric_bias_pct": 3.3856662616153166,
+        "mean_abs_log_gap": 0.20218001580231817,
+        "pearson_log": 0.9418267933042959,
+        "spearman": 0.9255213289510883
+      }
+    },
+    "NVDA": {
+      "5m": {
+        "geometric_bias_pct": 6.514255246265677,
+        "mean_abs_log_gap": 0.13069222179455975,
+        "pearson_log": 0.9703386404371681,
+        "spearman": 0.9720470648930722
+      },
+      "10m": {
+        "geometric_bias_pct": 3.885329898348777,
+        "mean_abs_log_gap": 0.131415261701126,
+        "pearson_log": 0.9723697414728291,
+        "spearman": 0.9669276967042427
+      },
+      "15m": {
+        "geometric_bias_pct": 1.042198487349455,
+        "mean_abs_log_gap": 0.1550944679588745,
+        "pearson_log": 0.9618441652325271,
+        "spearman": 0.9619957962241004
+      }
+    },
+    "panel_medians": {
+      "5m": {
+        "geometric_bias_pct": 7.7204341697491685,
+        "mean_abs_log_gap": 0.14760166925057597
+      },
+      "10m": {
+        "geometric_bias_pct": 4.455030586645248,
+        "mean_abs_log_gap": 0.1414922648688022
+      },
+      "15m": {
+        "geometric_bias_pct": 2.213932374482386,
+        "mean_abs_log_gap": 0.17863724188059632
+      }
+    }
+  },
+  "decision": {
+    "best_absolute_level_bias_by_symbol": {
+      "AAPL": "15m",
+      "NVDA": "15m"
+    },
+    "best_panel_median_abs_log_gap": "10m",
+    "freeze_allowed": false,
+    "us_canonical_sampling": "INCONCLUSIVE",
+    "forecast_score_used": false
+  },
+  "next_step": "test feasibility of the same Parzen realized-kernel family on Alpaca SIP transaction trades before opening a full tick panel"
+}
