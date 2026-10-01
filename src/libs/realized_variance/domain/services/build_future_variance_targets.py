@@ -21,16 +21,9 @@ def build_future_variance_targets(
     if horizon_sessions not in (5, 20):
         raise InvalidRealizedVarianceInputError("unsupported future-variance horizon")
     if len(items) != len(dates):
-        raise InvalidRealizedVarianceInputError(
-            "measurement and session-date counts must match"
-        )
-    if any(
-        current_date >= next_date
-        for current_date, next_date in zip(dates, dates[1:])
-    ):
-        raise InvalidRealizedVarianceInputError(
-            "session dates must be strictly increasing"
-        )
+        raise InvalidRealizedVarianceInputError("measurement and session-date counts must match")
+    if any(current_date >= next_date for current_date, next_date in zip(dates, dates[1:])):
+        raise InvalidRealizedVarianceInputError("session dates must be strictly increasing")
     if not items:
         return ()
 
@@ -51,23 +44,18 @@ def build_future_variance_targets(
         if measurement["price_basis"] != expected_price_basis:
             raise InvalidRealizedVarianceInputError("mixed price basis")
         if measurement["algorithm_version"] != expected_algorithm_version:
-            raise InvalidRealizedVarianceInputError(
-                "mixed realized-variance algorithm"
-            )
+            raise InvalidRealizedVarianceInputError("mixed realized-variance algorithm")
 
         whole_day_variance = measurement["whole_day_variance"]
         if not isfinite(whole_day_variance) or whole_day_variance < 0.0:
-            raise InvalidRealizedVarianceInputError(
-                "whole-day variance must be finite and non-negative"
-            )
+            raise InvalidRealizedVarianceInputError("whole-day variance must be finite and non-negative")
 
     targets: list[FutureVarianceTarget] = []
     for origin_index in range(len(items) - horizon_sessions):
         first_target_index = origin_index + 1
         last_target_index = origin_index + horizon_sessions
         future_variances = tuple(
-            item["whole_day_variance"]
-            for item in items[first_target_index : last_target_index + 1]
+            item["whole_day_variance"] for item in items[first_target_index : last_target_index + 1]
         )
 
         targets.append(
@@ -80,9 +68,7 @@ def build_future_variance_targets(
                 "horizon_sessions": horizon_sessions,
                 "first_target_session_date": dates[first_target_index],
                 "last_target_session_date": dates[last_target_index],
-                "average_whole_day_variance": (
-                    sum(future_variances) / horizon_sessions
-                ),
+                "average_whole_day_variance": (sum(future_variances) / horizon_sessions),
                 "realized_session_count": horizon_sessions,
                 "target_version": "whole_day_variance_v1",
             }

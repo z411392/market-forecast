@@ -40,17 +40,9 @@ class FilesystemProviderCaptureEvidenceAdapter(PersistProviderCaptureEvidencePor
 
         digest = sha256(raw_response).hexdigest()
         if receipt["raw_artifact_sha256"] != digest:
-            raise ProviderCaptureEvidenceIntegrityError(
-                "provider_capture_evidence_hash_mismatch"
-            )
+            raise ProviderCaptureEvidenceIntegrityError("provider_capture_evidence_hash_mismatch")
 
-        evidence_dir = (
-            self._root
-            / provider
-            / retrieval_date.isoformat()
-            / session_date.isoformat()
-            / digest
-        )
+        evidence_dir = self._root / provider / retrieval_date.isoformat() / session_date.isoformat() / digest
         evidence_dir.mkdir(parents=True, exist_ok=True)
 
         _write_immutable(
@@ -65,9 +57,7 @@ class FilesystemProviderCaptureEvidenceAdapter(PersistProviderCaptureEvidencePor
 
 def _validate_raw_response(raw_response: bytes) -> None:
     if type(raw_response) is not bytes or not raw_response:
-        raise ProviderCaptureEvidenceIntegrityError(
-            "provider_capture_evidence_invalid_raw_response"
-        )
+        raise ProviderCaptureEvidenceIntegrityError("provider_capture_evidence_invalid_raw_response")
 
 
 def _validate_provider(
@@ -77,9 +67,7 @@ def _validate_provider(
         return "massive"
     if provider == "finmind":
         return "finmind"
-    raise ProviderCaptureEvidenceIntegrityError(
-        "provider_capture_evidence_invalid_provider"
-    )
+    raise ProviderCaptureEvidenceIntegrityError("provider_capture_evidence_invalid_provider")
 
 
 def _validate_plain_date(value: object, error_type: str) -> date:
@@ -110,8 +98,6 @@ def _json_default(value: object) -> str:
 def _write_immutable(path: Path, payload: bytes) -> None:
     if path.exists():
         if path.read_bytes() != payload:
-            raise ProviderCaptureEvidenceConflictError(
-                "provider_capture_evidence_conflict"
-            )
+            raise ProviderCaptureEvidenceConflictError("provider_capture_evidence_conflict")
         return
     path.write_bytes(payload)

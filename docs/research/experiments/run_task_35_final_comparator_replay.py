@@ -86,7 +86,13 @@ def load(symbol, market, path):
     exported = {name: [] for name in EXPORTED}
     with path.open(newline="", encoding="utf-8-sig") as handle:
         reader = csv.DictReader(handle)
-        required = {"time", "P4_INTRABAR_COUNT_5M", "P4_RV_WHOLE_DAY_5M", *FORECAST.values(), *EXPORTED.values()}
+        required = {
+            "time",
+            "P4_INTRABAR_COUNT_5M",
+            "P4_RV_WHOLE_DAY_5M",
+            *FORECAST.values(),
+            *EXPORTED.values(),
+        }
         missing = required.difference(reader.fieldnames or [])
         if missing:
             raise ValueError(f"{symbol}: missing columns {sorted(missing)}")
@@ -127,7 +133,13 @@ def load(symbol, market, path):
 
 
 def eligible(panel):
-    return np.isfinite(panel["rv22"]) & np.isfinite(panel["y5"]) & np.isfinite(panel["xd"]) & np.isfinite(panel["xw"]) & np.isfinite(panel["z"])
+    return (
+        np.isfinite(panel["rv22"])
+        & np.isfinite(panel["y5"])
+        & np.isfinite(panel["xd"])
+        & np.isfinite(panel["xw"])
+        & np.isfinite(panel["z"])
+    )
 
 
 def train_rows(data, held):
@@ -201,7 +213,15 @@ def alignment(data, evals, markets):
                 raise AssertionError(f"{symbol} {name}: no alignment overlap")
             maximum = max(diffs)
             worst = max(worst, maximum)
-            rows.append({"symbol": symbol, "market": markets[symbol], "model": name, "n_overlap": len(diffs), "max_abs_diff": maximum})
+            rows.append(
+                {
+                    "symbol": symbol,
+                    "market": markets[symbol],
+                    "model": name,
+                    "n_overlap": len(diffs),
+                    "max_abs_diff": maximum,
+                }
+            )
     if worst > TOL:
         raise AssertionError(f"alignment worst={worst:.17g} > {TOL:.17g}")
     return rows
@@ -218,8 +238,13 @@ def write_csv(path, rows):
 def main():
     a = args()
     specs = (
-        ("GOOGL", "us", a.googl), ("NVDA", "us", a.nvda), ("QQQ", "us", a.qqq), ("TSM", "us", a.tsm),
-        ("2330", "taiwan", getattr(a, "2330")), ("2317", "taiwan", getattr(a, "2317")), ("2454", "taiwan", getattr(a, "2454")),
+        ("GOOGL", "us", a.googl),
+        ("NVDA", "us", a.nvda),
+        ("QQQ", "us", a.qqq),
+        ("TSM", "us", a.tsm),
+        ("2330", "taiwan", getattr(a, "2330")),
+        ("2317", "taiwan", getattr(a, "2317")),
+        ("2454", "taiwan", getattr(a, "2454")),
     )
     for symbol, _, path in specs:
         if sha(path) != HASHES[symbol]:
@@ -229,7 +254,12 @@ def main():
     evals = {symbol: evaluate(data, symbol) for symbol in data}
     parity = alignment(data, evals, markets)
     per_symbol = [
-        {"symbol": symbol, "market": markets[symbol], "n_eval": result["dates"].size, **{f"{model}_qlike": float(result["losses"][model].mean()) for model in MODELS}}
+        {
+            "symbol": symbol,
+            "market": markets[symbol],
+            "n_eval": result["dates"].size,
+            **{f"{model}_qlike": float(result["losses"][model].mean()) for model in MODELS},
+        }
         for symbol, result in evals.items()
     ]
     bootstrap = []
@@ -237,7 +267,16 @@ def main():
         losses = {model: date_means(evals, markets, model, market) for model in MODELS}
         for first, second in COMPARISONS:
             mean, lo, hi = block_ci(losses[first] - losses[second])
-            bootstrap.append({"scope": scope, "comparison": f"{first}_minus_{second}", "n_dates": len(losses[first]), "mean_delta": mean, "ci_025": lo, "ci_975": hi})
+            bootstrap.append(
+                {
+                    "scope": scope,
+                    "comparison": f"{first}_minus_{second}",
+                    "n_dates": len(losses[first]),
+                    "mean_delta": mean,
+                    "ci_025": lo,
+                    "ci_975": hi,
+                }
+            )
     if a.output_dir is not None:
         write_csv(a.output_dir / "per_symbol_qlike.csv", per_symbol)
         write_csv(a.output_dir / "bootstrap_comparisons.csv", bootstrap)

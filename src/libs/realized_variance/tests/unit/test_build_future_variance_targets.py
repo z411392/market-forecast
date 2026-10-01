@@ -2,6 +2,8 @@ from datetime import date, timedelta
 from math import inf, nan
 from typing import Literal
 
+from pytest import approx, mark, raises
+
 from libs.market_data.dtos.security_identity import SecurityIdentity
 from libs.realized_variance.constants.realized_variance_algorithm_version import (
     REALIZED_VARIANCE_ALGORITHM_VERSION,
@@ -13,7 +15,6 @@ from libs.realized_variance.dtos.daily_realized_measures import DailyRealizedMea
 from libs.realized_variance.exceptions.invalid_realized_variance_input_error import (
     InvalidRealizedVarianceInputError,
 )
-from pytest import approx, mark, raises
 
 
 def _security(symbol: str = "TEST") -> SecurityIdentity:
@@ -58,8 +59,7 @@ def test_build_future_variance_targets() -> None:
     start = date(2026, 1, 1)
     dates_7 = tuple(start + timedelta(days=index) for index in range(7))
     measurements_7 = tuple(
-        _daily(session_date, float(index + 1))
-        for index, session_date in enumerate(dates_7)
+        _daily(session_date, float(index + 1)) for index, session_date in enumerate(dates_7)
     )
 
     targets_5 = build_future_variance_targets(measurements_7, dates_7, 5)
@@ -83,8 +83,7 @@ def test_build_future_variance_targets() -> None:
 
     dates_21 = tuple(start + timedelta(days=index) for index in range(21))
     measurements_21 = tuple(
-        _daily(session_date, float(index + 1))
-        for index, session_date in enumerate(dates_21)
+        _daily(session_date, float(index + 1)) for index, session_date in enumerate(dates_21)
     )
 
     targets_20 = build_future_variance_targets(measurements_21, dates_21, 20)

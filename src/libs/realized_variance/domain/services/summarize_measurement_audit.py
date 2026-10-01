@@ -44,9 +44,7 @@ def summarize_measurement_audit(
             row["whole_day_variance_15m"],
         )
         if any(not isfinite(value) or value <= 0.0 for value in values):
-            raise InvalidRealizedVarianceInputError(
-                "whole-day variances must be finite and positive"
-            )
+            raise InvalidRealizedVarianceInputError("whole-day variances must be finite and positive")
 
         variance_5m.append(values[0])
         variance_10m.append(values[1])
@@ -56,12 +54,10 @@ def summarize_measurement_audit(
     log_10m = tuple(log(value) for value in variance_10m)
     log_15m = tuple(log(value) for value in variance_15m)
     log_ratio_5m_10m = tuple(
-        value_5m - value_10m
-        for value_5m, value_10m in zip(log_5m, log_10m, strict=True)
+        value_5m - value_10m for value_5m, value_10m in zip(log_5m, log_10m, strict=True)
     )
     log_ratio_5m_15m = tuple(
-        value_5m - value_15m
-        for value_5m, value_15m in zip(log_5m, log_15m, strict=True)
+        value_5m - value_15m for value_5m, value_15m in zip(log_5m, log_15m, strict=True)
     )
 
     return {
@@ -79,20 +75,10 @@ def summarize_measurement_audit(
             _average_ranks(variance_5m),
             _average_ranks(variance_15m),
         ),
-        "geometric_bias_5m_vs_10m_pct": (
-            exp(_mean(log_ratio_5m_10m)) - 1.0
-        )
-        * 100.0,
-        "geometric_bias_5m_vs_15m_pct": (
-            exp(_mean(log_ratio_5m_15m)) - 1.0
-        )
-        * 100.0,
-        "mean_abs_log_gap_5m_10m": _mean(
-            tuple(abs(value) for value in log_ratio_5m_10m)
-        ),
-        "mean_abs_log_gap_5m_15m": _mean(
-            tuple(abs(value) for value in log_ratio_5m_15m)
-        ),
+        "geometric_bias_5m_vs_10m_pct": (exp(_mean(log_ratio_5m_10m)) - 1.0) * 100.0,
+        "geometric_bias_5m_vs_15m_pct": (exp(_mean(log_ratio_5m_15m)) - 1.0) * 100.0,
+        "mean_abs_log_gap_5m_10m": _mean(tuple(abs(value) for value in log_ratio_5m_10m)),
+        "mean_abs_log_gap_5m_15m": _mean(tuple(abs(value) for value in log_ratio_5m_15m)),
         "first_session_date": min(row["session_date"] for row in items),
         "last_session_date": max(row["session_date"] for row in items),
         "audit_version": "rv_measurement_audit_v1",
@@ -112,8 +98,7 @@ def _pearson(
     left_centered = tuple(value - left_mean for value in left)
     right_centered = tuple(value - right_mean for value in right)
     denominator = sqrt(
-        sum(value * value for value in left_centered)
-        * sum(value * value for value in right_centered)
+        sum(value * value for value in left_centered) * sum(value * value for value in right_centered)
     )
     if denominator == 0.0:
         raise InvalidRealizedVarianceInputError("correlation is undefined for constant input")

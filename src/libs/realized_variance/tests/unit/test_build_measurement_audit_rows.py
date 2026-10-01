@@ -2,6 +2,8 @@ from datetime import date
 from math import inf, log, nan
 from typing import Literal
 
+from pytest import approx, mark, raises
+
 from libs.market_data.dtos.security_identity import SecurityIdentity
 from libs.realized_variance.constants.realized_variance_algorithm_version import (
     REALIZED_VARIANCE_ALGORITHM_VERSION,
@@ -13,7 +15,6 @@ from libs.realized_variance.dtos.daily_realized_measures import DailyRealizedMea
 from libs.realized_variance.exceptions.invalid_realized_variance_input_error import (
     InvalidRealizedVarianceInputError,
 )
-from pytest import approx, mark, raises
 
 
 def _security(symbol: str = "TEST") -> SecurityIdentity:

@@ -6,7 +6,6 @@ from libs.market_data.exceptions.invalid_provider_request_input_error import (
     InvalidProviderRequestInputError,
 )
 
-
 _FINMIND_SOURCE_SYMBOL = re.compile(r"[0-9]+\Z")
 
 

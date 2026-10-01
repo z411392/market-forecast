@@ -9,14 +9,14 @@ from libs.market_data.dtos.security_identity import SecurityIdentity
 from libs.market_data.exceptions.invalid_provider_capture_input_error import (
     InvalidProviderCaptureInputError,
 )
-from libs.market_data.services.build_provider_capture_acceptance_receipt import (
-    build_provider_capture_acceptance_receipt,
-)
 from libs.market_data.services.build_finmind_stock_kbar_request import (
     build_finmind_stock_kbar_request,
 )
 from libs.market_data.services.build_massive_minute_request import (
     build_massive_minute_request,
+)
+from libs.market_data.services.build_provider_capture_acceptance_receipt import (
+    build_provider_capture_acceptance_receipt,
 )
 
 

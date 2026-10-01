@@ -10,9 +10,7 @@ from pathlib import Path
 
 
 def _parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Verify Task #63 FinMind 2330 TradingView parity reference."
-    )
+    parser = argparse.ArgumentParser(description="Verify Task #63 FinMind 2330 TradingView parity reference.")
     parser.add_argument("--reference", type=Path, required=True)
     parser.add_argument("--source", type=Path, required=True)
     return parser.parse_args()
@@ -57,10 +55,14 @@ def main() -> None:
 
     by_date: dict[str, dict[str, str]] = {}
     for row in rows:
-        session_date = datetime.fromtimestamp(
-            int(float(row["time"])),
-            tz=timezone.utc,
-        ).date().isoformat()
+        session_date = (
+            datetime.fromtimestamp(
+                int(float(row["time"])),
+                tz=timezone.utc,
+            )
+            .date()
+            .isoformat()
+        )
         by_date[session_date] = row
 
     if max(by_date) != tv["latest_session_date"]:

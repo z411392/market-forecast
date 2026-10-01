@@ -51,17 +51,14 @@ def decode_massive_minute_aggregates(
         high_price = _positive_number(result["h"])
         low_price = _positive_number(result["l"])
         close_price = _positive_number(result["c"])
-        if None in (open_price, high_price, low_price, close_price):
+        if open_price is None or high_price is None or low_price is None or close_price is None:
             raise InvalidProviderCaptureInputError("massive_invalid_price")
 
         volume = _non_negative_number(result["v"])
         if volume is None:
             raise InvalidProviderCaptureInputError("massive_invalid_volume")
 
-        if not (
-            low_price <= open_price <= high_price
-            and low_price <= close_price <= high_price
-        ):
+        if not (low_price <= open_price <= high_price and low_price <= close_price <= high_price):
             raise InvalidProviderCaptureInputError("massive_invalid_ohlc_envelope")
 
         raw_timestamp = result["t"]

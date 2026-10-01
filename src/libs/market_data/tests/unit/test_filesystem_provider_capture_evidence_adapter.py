@@ -57,13 +57,7 @@ def test_filesystem_provider_capture_evidence_adapter(tmp_path: Path) -> None:
 
     adapter(raw_response=raw_response, receipt=receipt)
 
-    evidence_dir = (
-        tmp_path
-        / "massive"
-        / "2024-07-03"
-        / "2024-07-02"
-        / digest
-    )
+    evidence_dir = tmp_path / "massive" / "2024-07-03" / "2024-07-02" / digest
     raw_path = evidence_dir / "raw-response.bin"
     receipt_path = evidence_dir / "acceptance-receipt.json"
 
@@ -95,13 +89,7 @@ def test_filesystem_provider_capture_evidence_adapter(tmp_path: Path) -> None:
         match="provider_capture_evidence_hash_mismatch",
     ):
         adapter(raw_response=raw_response, receipt=mismatched)
-    assert not (
-        tmp_path
-        / "massive"
-        / "2024-07-03"
-        / "2024-07-02"
-        / ("0" * 64)
-    ).exists()
+    assert not (tmp_path / "massive" / "2024-07-03" / "2024-07-02" / ("0" * 64)).exists()
 
     raw_path.write_bytes(b"tampered")
     with raises(
@@ -114,14 +102,7 @@ def test_filesystem_provider_capture_evidence_adapter(tmp_path: Path) -> None:
     other_root = tmp_path / "receipt-conflict"
     other = FilesystemProviderCaptureEvidenceAdapter(root=other_root)
     other(raw_response=raw_response, receipt=receipt)
-    other_receipt = (
-        other_root
-        / "massive"
-        / "2024-07-03"
-        / "2024-07-02"
-        / digest
-        / "acceptance-receipt.json"
-    )
+    other_receipt = other_root / "massive" / "2024-07-03" / "2024-07-02" / digest / "acceptance-receipt.json"
     other_receipt.write_bytes(b"{}\n")
     with raises(
         ProviderCaptureEvidenceConflictError,

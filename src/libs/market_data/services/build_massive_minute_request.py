@@ -6,7 +6,6 @@ from libs.market_data.exceptions.invalid_provider_request_input_error import (
     InvalidProviderRequestInputError,
 )
 
-
 _MASSIVE_SOURCE_SYMBOL = re.compile(r"[A-Z0-9.-]+\Z")
 
 
@@ -22,10 +21,7 @@ def build_massive_minute_request(
     date_text = session_date.isoformat()
     return {
         "method": "GET",
-        "path": (
-            f"/v2/aggs/ticker/{source_symbol}/range/1/minute/"
-            f"{date_text}/{date_text}"
-        ),
+        "path": (f"/v2/aggs/ticker/{source_symbol}/range/1/minute/" f"{date_text}/{date_text}"),
         "query": (
             ("adjusted", "false"),
             ("sort", "asc"),

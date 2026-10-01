@@ -7,7 +7,6 @@ import math
 import re
 from pathlib import Path
 
-
 VAR_TOLERANCE = 1e-15
 DISPLAY_TOLERANCE = 1e-10
 
@@ -46,9 +45,7 @@ def _read_pine_constants(path: Path) -> dict[str, dict[str, float | int]]:
     result: dict[str, dict[str, float | int]] = {}
     current: str | None = None
     ticker_pattern = re.compile(r'(?:if|else if) tickerId == "([^"]+)"')
-    value_pattern = re.compile(
-        r"(beta0|betaD|betaW|betaM|freezeYear|freezeMonth|freezeDay) := (.+)"
-    )
+    value_pattern = re.compile(r"(beta0|betaD|betaW|betaM|freezeYear|freezeMonth|freezeDay) := (.+)")
 
     for raw_line in path.read_text(encoding="utf-8").splitlines():
         line = raw_line.strip()
@@ -142,8 +139,7 @@ def main() -> None:
         )
         if freeze_date != entry["fit_bar_date"]:
             raise AssertionError(
-                f"{tickerid}: Pine freeze date {freeze_date} "
-                f"!= manifest {entry['fit_bar_date']}"
+                f"{tickerid}: Pine freeze date {freeze_date} " f"!= manifest {entry['fit_bar_date']}"
             )
 
         rv1 = float(row["rv1"])
