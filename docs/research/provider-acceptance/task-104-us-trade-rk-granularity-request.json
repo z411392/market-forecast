@@ -1,0 +1,19 @@
+{
+  "task": 104,
+  "session_date": "2026-09-24",
+  "symbols": [
+    "AAPL",
+    "NVDA"
+  ],
+  "inputs": {
+    "task100_artifact_id": 11144968136,
+    "task100_sha256": "1211d8bb42b453b1d96705a0831e5e2e0a0d7aedc0a6c85d658335889fd053e1",
+    "task102_artifact_id": 11145730777,
+    "task102_sha256": "a34d32b443d82df4de548a2eca834b438cff4aa2dba03c0107a63c8a76981d3f",
+    "task103_artifact_id": 11145463492,
+    "task103_sha256": "78ea597e5c364db51c9d9f8293ebbff5d60317803dc9f0a08777251249be54df"
+  },
+  "provider_calls_allowed": false,
+  "sampling_freeze_allowed": false,
+  "threshold_ratio": 1.1
+}
