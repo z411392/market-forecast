@@ -1,0 +1,81 @@
+name: task-100-us-rk-1m-benchmark
+
+on:
+  push:
+    branches:
+      - codex/100-us-rk-1m-benchmark
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Compile benchmark runner
+        run: |
+          uv run python -m py_compile \
+            docs/research/provider-acceptance/run_task_100_us_rk_1m_benchmark.py
+
+      - name: Lint benchmark runner
+        run: |
+          uv run ruff check \
+            docs/research/provider-acceptance/run_task_100_us_rk_1m_benchmark.py
+
+  empirical:
+    if: contains(github.event.head_commit.message, '[us-rk-empirical]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Restore immutable Task 97 artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          input_root="artifacts/private/provider-captures/task-100-us-rk-input"
+          rm -rf "$input_root"
+          mkdir -p "$input_root"
+          gh api \
+            "repos/${GITHUB_REPOSITORY}/actions/artifacts/11144780888/zip" \
+            > /tmp/task97.zip
+          actual_sha="$(sha256sum /tmp/task97.zip | cut -d' ' -f1)"
+          test "$actual_sha" = "39a419d8aa070c2f3b641c5f93dde638189164bb933a7780615a24c6b7e6c812"
+          unzip -q /tmp/task97.zip -d "$input_root"
+
+      - name: Execute provider-free U.S. RK benchmark
+        run: |
+          uv run python \
+            docs/research/provider-acceptance/run_task_100_us_rk_1m_benchmark.py
+
+      - name: Upload benchmark evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: task-100-us-rk-1m-benchmark
+          path: artifacts/private/provider-captures/task-100-us-rk-benchmark
+          retention-days: 30
