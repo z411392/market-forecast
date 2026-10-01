@@ -460,8 +460,34 @@ jobs:
           done < /tmp/task101-baseline-inputs.tsv
 
       - name: Execute canonical mandatory baselines
+        shell: bash
         run: |
-          uv run python             docs/research/experiments/run_task_101_canonical_baselines.py
+          set -euo pipefail
+          non_garch_only="$(uv run python - <<'PY'
+          import json
+          from pathlib import Path
+
+          request = json.loads(
+              Path(
+                  "docs/research/experiments/"
+                  "task-101-canonical-baseline-request.json"
+              ).read_text(encoding="utf-8")
+          )
+          print(
+              "true"
+              if request.get("non_garch_only") is True
+              else "false"
+          )
+          PY
+          )"
+          if [ "$non_garch_only" = "true" ]; then
+            uv run python \
+              docs/research/experiments/run_task_101_canonical_baselines.py \
+              --non-garch-only
+          else
+            uv run python \
+              docs/research/experiments/run_task_101_canonical_baselines.py
+          fi
 
       - name: Upload canonical baseline evidence
         if: always()
