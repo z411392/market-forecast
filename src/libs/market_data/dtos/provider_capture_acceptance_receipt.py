@@ -6,7 +6,7 @@ from libs.market_data.dtos.security_identity import SecurityIdentity
 
 
 class ProviderCaptureAcceptanceReceipt(TypedDict):
-    provider: Literal["massive", "finmind"]
+    provider: Literal["massive", "finmind", "alpaca"]
     source_symbol: str
     security: SecurityIdentity
     session_date: date
