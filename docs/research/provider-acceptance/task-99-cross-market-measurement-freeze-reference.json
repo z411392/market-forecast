@@ -1,0 +1,39 @@
+{
+  "artifact_version": "task-99-cross-market-measurement-freeze-reference-v1",
+  "task": 99,
+  "parent_task": 12,
+  "parent_story": 5,
+  "status": "accepted",
+  "manifest": "docs/research/provider-acceptance/cross-market-rv-measurement-target-manifest-v1.json",
+  "human_readable": "docs/research/provider-acceptance/cross-market-rv-measurement-target-manifest-v1.md",
+  "verification": {
+    "workflow": "task-99-cross-market-measurement-freeze",
+    "run_id": 36824650427,
+    "candidate_sha": "a34891c2dd0af365960a7fbe16c7ebce08503c28",
+    "result": "pass",
+    "target_builder_regression": "pass",
+    "ruff": "pass"
+  },
+  "frozen_measurement": {
+    "US": {
+      "sampling_minutes": 5,
+      "price_basis": "split_adjusted",
+      "algorithm_version": "rv-core-v1",
+      "provider": "alpaca",
+      "feed": "sip"
+    },
+    "Taiwan": {
+      "sampling_minutes": 15,
+      "price_basis": "as_printed",
+      "algorithm_version": "rv-core-v1+xtai-closing-auction-v4",
+      "provider": "shioaji"
+    }
+  },
+  "target": {
+    "target_version": "whole_day_variance_v1",
+    "primary_horizon_sessions": 5,
+    "confirmatory_horizon_sessions": 20,
+    "current_day_excluded": true
+  },
+  "ruling": "MEASUREMENT_FROZEN"
+}
