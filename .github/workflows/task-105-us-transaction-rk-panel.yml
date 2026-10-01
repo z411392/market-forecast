@@ -1,0 +1,121 @@
+name: task-105-us-transaction-rk-panel
+
+on:
+  push:
+    branches:
+      - codex/105-us-transaction-rk-panel
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Verify frozen calendar sample
+        run: |
+          uv run python - <<'PY'
+          import json
+          import math
+          from pathlib import Path
+
+          import exchange_calendars as xcals
+
+          plan = json.loads(
+              Path(
+                  "docs/research/provider-acceptance/"
+                  "task-105-us-transaction-rk-plan.json"
+              ).read_text(encoding="utf-8")
+          )
+          calendar = xcals.get_calendar("XNAS")
+          sessions = [
+              ts.date().isoformat()
+              for ts in calendar.sessions_in_range(
+                  plan["full_audit_window"]["first"],
+                  plan["full_audit_window"]["last"],
+              )
+          ]
+          if len(sessions) != 252:
+              raise SystemExit(f"unexpected_session_count:{len(sessions)}")
+
+          indices = [
+              math.floor((k + 0.5) * 252 / 24)
+              for k in range(24)
+          ]
+          if indices != plan["sample"]["zero_based_indices"]:
+              raise SystemExit("sample_index_mismatch")
+
+          selected = [sessions[index] for index in indices]
+          if selected != plan["sample"]["dates"]:
+              raise SystemExit(
+                  f"sample_date_mismatch:{selected}"
+              )
+
+          flattened = [
+              value
+              for batch in plan["batches"]
+              for value in batch["dates"]
+          ]
+          if flattened != selected:
+              raise SystemExit("batch_date_mismatch")
+          PY
+
+      - name: Compile batch collector
+        run: |
+          uv run python -m py_compile             docs/research/provider-acceptance/run_task_105_trade_batch.py
+
+      - name: Lint batch collector
+        run: |
+          uv run ruff check             docs/research/provider-acceptance/run_task_105_trade_batch.py
+
+  live-batch:
+    if: contains(github.event.head_commit.message, '[task105-trade-batch]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      MARKET_FORECAST_ALPACA_API_KEY_ID: ${{ secrets.MARKET_FORECAST_ALPACA_API_KEY_ID }}
+      MARKET_FORECAST_ALPACA_SECRET_KEY: ${{ secrets.MARKET_FORECAST_ALPACA_SECRET_KEY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Verify Alpaca credentials
+        shell: bash
+        run: |
+          test -n "${MARKET_FORECAST_ALPACA_API_KEY_ID:-}"
+          test -n "${MARKET_FORECAST_ALPACA_SECRET_KEY:-}"
+
+      - name: Execute frozen trade batch
+        run: |
+          uv run python             docs/research/provider-acceptance/run_task_105_trade_batch.py
+
+      - name: Upload trade batch evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: task-105-trade-batch
+          path: artifacts/private/provider-captures/task-105-us-transaction-rk-batch
+          if-no-files-found: ignore
+          retention-days: 30
