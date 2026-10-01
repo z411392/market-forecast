@@ -67,9 +67,22 @@ jobs:
     env:
       MARKET_FORECAST_ALPACA_API_KEY_ID: ${{ secrets.MARKET_FORECAST_ALPACA_API_KEY_ID }}
       MARKET_FORECAST_ALPACA_SECRET_KEY: ${{ secrets.MARKET_FORECAST_ALPACA_SECRET_KEY }}
+      GH_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Restore prior U.S. panel cache
+        if: contains(github.event.head_commit.message, '[canonical-us-panel]')
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="artifacts/private/provider-captures/task-101-us-canonical-panel"
+          mkdir -p "$target"
+          gh api             "repos/${GITHUB_REPOSITORY}/actions/artifacts/11150665585/zip"             > /tmp/task101-us-partial.zip
+          actual_sha="$(sha256sum /tmp/task101-us-partial.zip | cut -d' ' -f1)"
+          test "$actual_sha" = "0c5c01c64dacee1865512b1a78040374a31460c3fc1dd982b9bba16704bb0cfc"
+          unzip -q /tmp/task101-us-partial.zip -d "$target"
 
       - name: Set up uv
         uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
