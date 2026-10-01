@@ -1,0 +1,24 @@
+{
+  "task": 98,
+  "authorized": true,
+  "provider": "alpaca",
+  "feed": "sip",
+  "price_basis": "split_adjusted",
+  "symbols": [
+    "AAPL",
+    "NVDA"
+  ],
+  "prior_session": "2025-09-23",
+  "first_audit_session": "2025-09-24",
+  "last_audit_session": "2026-09-24",
+  "audit_session_count": 252,
+  "provider_requests_planned": 506,
+  "request_sleep_seconds": 0.35,
+  "forecast_score_used": false,
+  "sampling_decision_gate": {
+    "reference": "5m",
+    "freeze_5m_only_if_each_symbol_abs_bias_5m_10m_lt_pct": 10,
+    "freeze_5m_only_if_each_symbol_abs_bias_5m_15m_lt_pct": 10,
+    "otherwise": "US_CANONICAL_SAMPLING_INCONCLUSIVE"
+  }
+}
