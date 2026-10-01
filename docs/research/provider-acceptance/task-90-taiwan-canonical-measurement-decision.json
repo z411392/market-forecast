@@ -1,0 +1,259 @@
+{
+  "artifact_version": "task-90-taiwan-canonical-measurement-decision-v1",
+  "task": 90,
+  "parent_task": 12,
+  "parent_story": 5,
+  "status": "accepted_final",
+  "decision": {
+    "taiwan_canonical_sampling": "15m",
+    "canonical_estimator_role": "fixed_grid_whole_day_realized_variance",
+    "fixed_grid_algorithm_version": "rv-core-v1+xtai-closing-auction-v4",
+    "noise_robust_benchmark": "tw-rk-parzen-trades-v1",
+    "benchmark_role": "independent_measurement_identification_only",
+    "forecast_score_used": false,
+    "rk_promoted_to_production_target": false
+  },
+  "empirical_window": {
+    "symbols": [
+      "2330",
+      "2317",
+      "2454"
+    ],
+    "prior_session_for_first_overnight": "2025-09-10",
+    "first_audit_session": "2025-09-11",
+    "last_audit_session": "2026-09-24",
+    "audit_sessions_per_symbol": 252
+  },
+  "final_workflow": {
+    "run_id": 36812956091,
+    "artifact_id": 11140371482,
+    "artifact_sha256": "50d54a24cab251c83b11ea8718333128cfdd5d7d0333c750f965db32cb2e7a6f",
+    "summary_sha256": "101ad519301c989daf8e0c791aab560f60d233ea0e156ed7596e19102b7088d2",
+    "daily_values_sha256": "606107ad2b27a63df0761df6d88c589f08a2d47a28c593996827c7295898b259",
+    "status": "pass",
+    "provider_calls": 0
+  },
+  "batch_artifacts": [
+    {
+      "batch": 1,
+      "artifact_id": 11089220372,
+      "digest": "sha256:0312e2f2731ff7c718a6053631119d11dc540338ef49bf418edea041dad858bf"
+    },
+    {
+      "batch": 2,
+      "artifact_id": 11088642834,
+      "digest": "sha256:bbcd71baf9a3db4f9e4b2efb17c8c441983a21f87085582f702f794f6d14da07"
+    },
+    {
+      "batch": 3,
+      "artifact_id": 11095812044,
+      "digest": "sha256:26f3ab32b41963e5ac25a2d88859ab065c73e5d7cbe2a57d67eb4b4a717b7e10"
+    },
+    {
+      "batch": 4,
+      "artifact_id": 11096276516,
+      "digest": "sha256:0d49a2edb455457916b6c267de057539f1057840860b36a90ad0262428e4a583"
+    },
+    {
+      "batch": 5,
+      "artifact_id": 11096306965,
+      "digest": "sha256:5ab210d5a56b50e50bf38bcd415fe965a5646d9c92f8503204c94c9e7da1a75b"
+    },
+    {
+      "batch": 6,
+      "artifact_id": 11140021792,
+      "digest": "sha256:249926da745df0c9624b8fddd0809c768be791849b1624a2b46d865a487aee16"
+    },
+    {
+      "batch": 7,
+      "artifact_id": 11139932346,
+      "digest": "sha256:bb25dfa0b003415a69ef85deaf7176788ed98ae4e17b2d5e1861ff1cdae63749"
+    },
+    {
+      "batch": 8,
+      "artifact_id": 11140321291,
+      "digest": "sha256:3cad89220bf9c20b7a17d93fa8fdfcbd92044d5c899d530744a78873117a35cb"
+    }
+  ],
+  "panel_medians": {
+    "5m": {
+      "geometric_bias_pct": 34.43629113966982,
+      "mean_abs_log_gap": 0.351075992080523,
+      "pearson_log": 0.9467763284800659,
+      "spearman": 0.9403447756124009,
+      "median_ratio": 1.2903161883301508
+    },
+    "10m": {
+      "geometric_bias_pct": 17.68937325359683,
+      "mean_abs_log_gap": 0.2723642233937315,
+      "pearson_log": 0.9444300960521406,
+      "spearman": 0.9272872747669214,
+      "median_ratio": 1.1277724086814929
+    },
+    "15m": {
+      "geometric_bias_pct": 8.538480452993769,
+      "mean_abs_log_gap": 0.2659580435108529,
+      "pearson_log": 0.9400054527104931,
+      "spearman": 0.9215425143019114,
+      "median_ratio": 1.0707832657736003
+    }
+  },
+  "symbol_metrics": {
+    "2317": {
+      "5m": {
+        "geometric_bias_pct": 34.43629113966982,
+        "mean_abs_log_gap": 0.3164723998560835,
+        "pearson_log": 0.9513365151766057,
+        "spearman": 0.9403447756124009
+      },
+      "10m": {
+        "geometric_bias_pct": 17.155608613592644,
+        "mean_abs_log_gap": 0.24464271836067922,
+        "pearson_log": 0.9339364600290989,
+        "spearman": 0.9183458149333777
+      },
+      "15m": {
+        "geometric_bias_pct": 7.05284611655399,
+        "mean_abs_log_gap": 0.2520545187328714,
+        "pearson_log": 0.9228488274286408,
+        "spearman": 0.8997895112566863
+      }
+    },
+    "2330": {
+      "5m": {
+        "geometric_bias_pct": 86.1945606927628,
+        "mean_abs_log_gap": 0.6221496028184431,
+        "pearson_log": 0.9160018317875239,
+        "spearman": 0.8726464366512869
+      },
+      "10m": {
+        "geometric_bias_pct": 52.42219736943257,
+        "mean_abs_log_gap": 0.4248589161514211,
+        "pearson_log": 0.9444300960521406,
+        "spearman": 0.9272872747669214
+      },
+      "15m": {
+        "geometric_bias_pct": 35.98908351333306,
+        "mean_abs_log_gap": 0.3289394185460646,
+        "pearson_log": 0.9400054527104931,
+        "spearman": 0.9215425143019114
+      }
+    },
+    "2454": {
+      "5m": {
+        "geometric_bias_pct": 33.125670925556584,
+        "mean_abs_log_gap": 0.351075992080523,
+        "pearson_log": 0.9467763284800659,
+        "spearman": 0.9406529725254826
+      },
+      "10m": {
+        "geometric_bias_pct": 17.68937325359683,
+        "mean_abs_log_gap": 0.2723642233937315,
+        "pearson_log": 0.9512672284632775,
+        "spearman": 0.9450749608379958
+      },
+      "15m": {
+        "geometric_bias_pct": 8.538480452993769,
+        "mean_abs_log_gap": 0.2659580435108529,
+        "pearson_log": 0.9437086465489133,
+        "spearman": 0.9368758731308532
+      }
+    }
+  },
+  "outliers_15m": {
+    "2317": [
+      {
+        "session_date": "2025-10-09",
+        "abs_log_gap": 0.9645,
+        "fixed_grid_to_rk_ratio": 2.624
+      },
+      {
+        "session_date": "2026-08-21",
+        "abs_log_gap": 0.9637,
+        "fixed_grid_to_rk_ratio": 0.381
+      },
+      {
+        "session_date": "2026-01-15",
+        "abs_log_gap": 0.9007,
+        "fixed_grid_to_rk_ratio": 2.461
+      }
+    ],
+    "2330": [
+      {
+        "session_date": "2025-09-15",
+        "abs_log_gap": 1.6556,
+        "fixed_grid_to_rk_ratio": 5.236
+      },
+      {
+        "session_date": "2026-09-03",
+        "abs_log_gap": 1.3913,
+        "fixed_grid_to_rk_ratio": 4.02
+      },
+      {
+        "session_date": "2026-04-20",
+        "abs_log_gap": 1.3318,
+        "fixed_grid_to_rk_ratio": 3.788
+      }
+    ],
+    "2454": [
+      {
+        "session_date": "2026-05-07",
+        "abs_log_gap": 1.4846,
+        "fixed_grid_to_rk_ratio": 4.413
+      },
+      {
+        "session_date": "2026-06-03",
+        "abs_log_gap": 1.3481,
+        "fixed_grid_to_rk_ratio": 0.26
+      },
+      {
+        "session_date": "2026-01-23",
+        "abs_log_gap": 1.2281,
+        "fixed_grid_to_rk_ratio": 3.415
+      }
+    ]
+  },
+  "validation": {
+    "final_gate_ready": true,
+    "level_bias_ordering": {
+      "2317": [
+        "15m",
+        "10m",
+        "5m"
+      ],
+      "2330": [
+        "15m",
+        "10m",
+        "5m"
+      ],
+      "2454": [
+        "15m",
+        "10m",
+        "5m"
+      ]
+    },
+    "formula_cross_check_session": "2026-04-20",
+    "q_identity": "pass",
+    "bandwidth_identity": "pass",
+    "max_noise_variance_abs_diff": 8.470329472543003e-22,
+    "max_sparse_rv_abs_diff": 2.710505431213761e-20,
+    "max_rk_abs_diff": 4.914146346790549e-17,
+    "fifteen_minute_previous_tick_finding": "Task #89 v4 panel recorded zero previous-tick samples at 15m for all three pilot symbols"
+  },
+  "rationale": [
+    "Task #89 was inconclusive because cross-frequency rank/log agreement was already high while level sensitivity was systematic and economically material.",
+    "The independent realized-kernel benchmark was selected and parameterized before fixed-grid benchmark outcomes were observed.",
+    "On the full 252-session panel, 15m has the smallest absolute geometric level bias versus RK for every pilot symbol.",
+    "The panel-median mean absolute log gap is also smallest at 15m.",
+    "2317 has a small 10m advantage on mean absolute log gap, but 15m retains materially lower level bias; this does not overturn the cross-symbol level-bias identification that motivated Task #90.",
+    "Higher 5m/10m correlations do not resolve the original identification problem because high correlation was already known in Task #89; the unresolved quantity was variance level under microstructure noise.",
+    "No forecast QLIKE or model score entered the decision."
+  ],
+  "boundaries": {
+    "us_measurement_frozen": false,
+    "cross_market_measurement_frozen": false,
+    "forecast_model_changed": false,
+    "market_specific_parameters_established": false,
+    "broad_30_plus_30_validation_performed": false
+  }
+}
