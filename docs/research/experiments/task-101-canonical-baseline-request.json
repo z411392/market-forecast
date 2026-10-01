@@ -14,8 +14,9 @@
     "artifact_id": 11152655928,
     "artifact_sha256": "9b348d4878b781642a9daff9d376e147b0beabea88950d3c92401be6cfa8f3c3"
   },
-  "baseline_execution_allowed": false,
+  "baseline_execution_allowed": true,
   "provider_calls_allowed": false,
   "measurement_reselection_allowed": false,
-  "hyperparameter_tuning_allowed": false
+  "hyperparameter_tuning_allowed": false,
+  "execution_sequence": 1
 }
