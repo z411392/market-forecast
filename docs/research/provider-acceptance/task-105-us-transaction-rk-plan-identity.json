@@ -1,0 +1,10 @@
+{
+  "artifact_version": "task-105-plan-identity-v1",
+  "task": 105,
+  "plan_path": "docs/research/provider-acceptance/task-105-us-transaction-rk-plan.json",
+  "plan_commit": "3e6fc11fa8f8774620257ff325e7217d90fb2841",
+  "canonicalization": "json.dumps(payload, sort_keys=True, separators=(',', ':'), ensure_ascii=False).encode('utf-8')",
+  "canonical_sha256": "bc088cb5409bb2075b138f11a07ca5f5252d1dd7784bdb899aa17d543be3c1b2",
+  "correction_timing": "before any transaction-RK value was computed",
+  "scientific_content_changed": false
+}
