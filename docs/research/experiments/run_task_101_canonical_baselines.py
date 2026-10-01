@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import csv
 import hashlib
 import json
@@ -66,7 +67,38 @@ COMPARISONS = (
 )
 
 
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Run Task #101 canonical mandatory baseline comparison."
+    )
+    parser.add_argument(
+        "--non-garch-only",
+        action="store_true",
+        help=(
+            "Run unaffected global/HAR/Log-HAR/EWMA/naive comparators "
+            "after the preregistered GARCH path has failed closed."
+        ),
+    )
+    return parser.parse_args()
+
+
 def main() -> None:
+    args = _parse_args()
+    active_model_names = (
+        tuple(name for name in MODEL_NAMES if name != "garch")
+        if args.non_garch_only
+        else MODEL_NAMES
+    )
+    active_comparisons = (
+        tuple(
+            pair
+            for pair in COMPARISONS
+            if "garch" not in pair
+        )
+        if args.non_garch_only
+        else COMPARISONS
+    )
+
     panel = _load_json(PANEL_PATH)
     _validate_panel(panel)
 
@@ -93,10 +125,20 @@ def main() -> None:
         level_har = _har_forecast(item, use_log=False)
         log_har = _har_forecast(item, use_log=True)
         ewma = _ewma_forecast(item["returns"])
-        garch, garch_diag = _garch_forecast(
-            symbol,
-            item["returns"],
-        )
+        if args.non_garch_only:
+            garch = None
+            garch_diag = {
+                "status": "failed_closed_not_reexecuted",
+                "reference": (
+                    "docs/research/experiments/"
+                    "task-101-canonical-garch-failure-reference.json"
+                ),
+            }
+        else:
+            garch, garch_diag = _garch_forecast(
+                symbol,
+                item["returns"],
+            )
         naive = item["rv5"].copy()
         global_forecast = global_forecasts[symbol]
 
@@ -104,10 +146,11 @@ def main() -> None:
             "global": global_forecast,
             "level_har": level_har,
             "log_har": log_har,
-            "garch": garch,
             "ewma": ewma,
             "naive": naive,
         }
+        if garch is not None:
+            forecasts["garch"] = garch
         common = (
             np.array(
                 [value >= EVAL_START for value in item["dates"]],
@@ -164,6 +207,8 @@ def main() -> None:
             symbol: data[symbol]["market"]
             for symbol in SYMBOLS
         },
+        active_model_names,
+        active_comparisons,
     )
 
     OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
@@ -184,7 +229,16 @@ def main() -> None:
         "artifact_version": "task-101-canonical-baselines-v1",
         "task": 101,
         "slice": "S2-mandatory-baselines",
-        "status": "accepted",
+        "status": (
+            "accepted_non_garch_subset"
+            if args.non_garch_only
+            else "accepted"
+        ),
+        "garch_status": (
+            "failed_closed_not_reexecuted"
+            if args.non_garch_only
+            else "included"
+        ),
         "input_sha256": {
             "canonical_panel": _sha256(PANEL_PATH),
         },
@@ -787,6 +841,8 @@ def _global_ridge_forecasts(
 def _bootstrap_rows(
     scored: dict[str, dict[str, np.ndarray]],
     markets: dict[str, Market],
+    model_names: tuple[str, ...],
+    comparisons: tuple[tuple[str, str], ...],
 ) -> list[dict[str, object]]:
     rows: list[dict[str, object]] = []
     for scope, market in (
@@ -803,10 +859,10 @@ def _bootstrap_rows(
                     session_date,
                     {
                         name: []
-                        for name in MODEL_NAMES
+                        for name in model_names
                     },
                 )
-                for name in MODEL_NAMES:
+                for name in model_names:
                     target[name].append(
                         float(item[name][row_index])
                     )
@@ -824,10 +880,10 @@ def _bootstrap_rows(
                 ],
                 dtype=float,
             )
-            for name in MODEL_NAMES
+            for name in model_names
         }
 
-        for first, second in COMPARISONS:
+        for first, second in comparisons:
             delta = mean_losses[first] - mean_losses[second]
             mean, lower, upper = _moving_block_ci(delta)
             rows.append(
