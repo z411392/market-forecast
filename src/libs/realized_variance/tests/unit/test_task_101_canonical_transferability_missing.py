@@ -1,13 +1,29 @@
-from datetime import date, timedelta
-
+import importlib.util
 import math
+import sys
+from datetime import date, timedelta
+from pathlib import Path
 
 import numpy as np
 from pytest import mark
 
-from docs.research.experiments.run_task_101_canonical_transferability import (
-    _build_panel,
+_RUNNER_PATH = (
+    Path(__file__).parents[5]
+    / "docs"
+    / "research"
+    / "experiments"
+    / "run_task_101_canonical_transferability.py"
 )
+_SPEC = importlib.util.spec_from_file_location(
+    "task_101_canonical_transferability_runner",
+    _RUNNER_PATH,
+)
+if _SPEC is None or _SPEC.loader is None:
+    raise RuntimeError("task101_test_runner_import_spec_missing")
+_MODULE = importlib.util.module_from_spec(_SPEC)
+sys.modules[_SPEC.name] = _MODULE
+_SPEC.loader.exec_module(_MODULE)
+_build_panel = _MODULE._build_panel
 
 
 @mark.unit
@@ -33,15 +49,10 @@ def test_task_101_missing_measurement_breaks_local_session_windows() -> None:
 
     assert math.isnan(h5.rv[20])
 
-    # A 5-day trailing mean is unavailable until five complete local-session
-    # observations exist again after the explicit missing measurement.
     assert np.all(np.isnan(h5.x_w[20:25]))
     assert np.isfinite(h5.x_w[25])
 
-    # The 22-day denominator remains unavailable for the next 21 local
-    # sessions; no row deletion/compression is allowed.
     assert np.all(np.isnan(h5.rv22[20:40]))
 
-    # Future targets that cross the missing local session are unavailable.
     assert np.all(np.isnan(h5.target[15:21]))
     assert np.all(np.isnan(h20.target[0:21]))
