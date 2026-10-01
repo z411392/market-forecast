@@ -1,0 +1,16 @@
+{
+  "task": 103,
+  "inputs": {
+    "task97_artifact_id": 11144780888,
+    "task97_sha256": "39a419d8aa070c2f3b641c5f93dde638189164bb933a7780615a24c6b7e6c812",
+    "task102_artifact_id": 11145730777,
+    "task102_sha256": "a34d32b443d82df4de548a2eca834b438cff4aa2dba03c0107a63c8a76981d3f"
+  },
+  "session_date": "2026-09-24",
+  "symbols": [
+    "AAPL",
+    "NVDA"
+  ],
+  "provider_calls_allowed": false,
+  "rk_values_allowed": false
+}
