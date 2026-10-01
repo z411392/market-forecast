@@ -1,0 +1,60 @@
+{
+  "artifact_version": "task-104-us-trade-rk-granularity-reference-v1",
+  "task": 104,
+  "status": "accepted",
+  "workflow": {
+    "run_id": 36828345487,
+    "artifact_id": 11146116203,
+    "artifact_sha256": "9bcb1c7b0ae2924833f97617e8b97259988e01437caebaa02e55dcaad2a0bb38"
+  },
+  "session_date": "2026-09-24",
+  "estimator": {
+    "version": "us-rk-parzen-trades-diagnostic-v1",
+    "kernel": "parzen",
+    "endpoint_jitter_m": 2,
+    "bandwidth_constant": 3.5134,
+    "noise_target_seconds": 120,
+    "sparse_interval_seconds": 1200,
+    "sparse_phase_shift_seconds": 1,
+    "price_input": "task-103-price-eligible-sip-trades"
+  },
+  "symbols": {
+    "AAPL": {
+      "eligible_trade_count": 131127,
+      "q": 672,
+      "bandwidth": 436,
+      "whole_day_1m_rk": 0.00011556096112456508,
+      "whole_day_trade_rk": 0.00013397252490570516,
+      "one_minute_to_trade_rk_ratio": 0.862572092344316,
+      "abs_log_ratio": 0.14783654824293785,
+      "within_10pct_log_boundary": false,
+      "fixed_to_trade_rk_ratio": {
+        "5m": 0.7743163955694261,
+        "10m": 0.6810920103771528,
+        "15m": 1.0555973323748733
+      }
+    },
+    "NVDA": {
+      "eligible_trade_count": 193239,
+      "q": 991,
+      "bandwidth": 634,
+      "whole_day_1m_rk": 0.0003477839432794303,
+      "whole_day_trade_rk": 0.00040485317159341823,
+      "one_minute_to_trade_rk_ratio": 0.8590372206067319,
+      "abs_log_ratio": 0.1519430277774302,
+      "within_10pct_log_boundary": false,
+      "fixed_to_trade_rk_ratio": {
+        "5m": 0.9848038178788534,
+        "10m": 0.9104002420112194,
+        "15m": 0.8232371093596409
+      }
+    }
+  },
+  "ruling": {
+    "source_granularity": "MATERIAL_SOURCE_GRANULARITY_MISMATCH",
+    "provider_calls": 0,
+    "sampling_frozen": false,
+    "forecast_score_used": false,
+    "interpretation": "one-session eligible trade-RK materially differs from 1m-bar RK on both symbols; fixed-grid closest interval also differs by symbol"
+  }
+}
