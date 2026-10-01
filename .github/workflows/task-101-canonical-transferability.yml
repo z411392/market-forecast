@@ -59,7 +59,9 @@ jobs:
             src/libs/realized_variance/domain/services/calculate_daily_realized_measures.py
 
   us-panel-live:
-    if: contains(github.event.head_commit.message, '[canonical-panel-live]')
+    if: >-
+      contains(github.event.head_commit.message, '[canonical-panel-live]') ||
+      contains(github.event.head_commit.message, '[canonical-us-panel]')
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
@@ -98,15 +100,30 @@ jobs:
           retention-days: 30
 
   taiwan-panel-live:
-    if: contains(github.event.head_commit.message, '[canonical-panel-live]')
+    if: >-
+      contains(github.event.head_commit.message, '[canonical-panel-live]') ||
+      contains(github.event.head_commit.message, '[canonical-taiwan-panel]')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
       MARKET_FORECAST_SHIOAJI_API_KEY: ${{ secrets.MARKET_FORECAST_SHIOAJI_API_KEY }}
       MARKET_FORECAST_SHIOAJI_SECRET_KEY: ${{ secrets.MARKET_FORECAST_SHIOAJI_SECRET_KEY }}
+      GH_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Restore prior Taiwan chunk cache
+        if: contains(github.event.head_commit.message, '[canonical-taiwan-panel]')
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="artifacts/private/provider-captures/task-101-taiwan-canonical-panel"
+          mkdir -p "$target"
+          gh api             "repos/${GITHUB_REPOSITORY}/actions/artifacts/11149119172/zip"             > /tmp/task101-taiwan-partial.zip
+          actual_sha="$(sha256sum /tmp/task101-taiwan-partial.zip | cut -d' ' -f1)"
+          test "$actual_sha" = "25c2fff0691a5c91e60670cf1a173fd3aedb5cc4f39ce99c71d320327dc4832c"
+          unzip -q /tmp/task101-taiwan-partial.zip -d "$target"
 
       - name: Set up uv
         uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
