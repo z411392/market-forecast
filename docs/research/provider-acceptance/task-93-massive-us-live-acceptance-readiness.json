@@ -1,0 +1,61 @@
+{
+  "artifact_version": "task-93-massive-us-live-acceptance-readiness-v1",
+  "task": 93,
+  "parent_spike": 4,
+  "parent_task": 12,
+  "branch": "codex/93-massive-us-live-acceptance",
+  "status": "static_green_live_blocked",
+  "provider": "massive",
+  "refreshed_official_contract": {
+    "custom_bars_path": "/v2/aggs/ticker/{ticker}/range/{multiplier}/{timespan}/{from}/{to}",
+    "from_to_accept_unix_milliseconds": true,
+    "adjusted_false_is_as_printed": true,
+    "bearer_auth_supported": true,
+    "endpoint_can_include_extended_hours": true
+  },
+  "request_contract": {
+    "regular_session_bounded_at_provider_request": true,
+    "start_bound": "session_start_utc as Unix milliseconds",
+    "end_bound": "session_end_utc_exclusive minus 1 millisecond",
+    "sort": "asc",
+    "limit": "50000",
+    "price_basis_mapping": {
+      "as_printed": "adjusted=false",
+      "split_adjusted": "adjusted=true"
+    }
+  },
+  "preregistered_cases": [
+    "AAPL 2024-07-02 as_printed ordinary",
+    "AAPL 2024-07-03 as_printed early-close",
+    "NVDA 2024-06-07 as_printed pre-split",
+    "NVDA 2024-06-10 as_printed post-split",
+    "NVDA 2024-06-07 split-adjusted pre-split",
+    "NVDA 2024-06-10 split-adjusted post-split"
+  ],
+  "tests_first": {
+    "red_run_id": 36816113987,
+    "red_reason": "new regular-session request builder absent",
+    "green_request_run_id": 36816182233,
+    "final_static_run_id": 36816731567,
+    "market_data_test_count": 16,
+    "market_data_tests": "pass",
+    "runner_compile": "pass",
+    "ruff": "pass"
+  },
+  "credential_gate": {
+    "run_id": 36816242668,
+    "secret_name": "MARKET_FORECAST_MASSIVE_API_KEY",
+    "status": "absent",
+    "provider_request_executed": false
+  },
+  "live_request": {
+    "manifest": "docs/research/provider-acceptance/task-93-massive-live-acceptance-request.json",
+    "provider_request_allowed": false,
+    "quota_or_spend_allowed": false,
+    "live_marker": "[massive-live-acceptance]"
+  },
+  "blocker": [
+    "configure MARKET_FORECAST_MASSIVE_API_KEY repository secret",
+    "explicitly authorize narrow provider quota/spend before setting both live manifest booleans true"
+  ]
+}
