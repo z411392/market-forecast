@@ -78,7 +78,8 @@ jobs:
             src/libs/market_data/tests/unit/test_build_alpaca_historical_bars_request.py \
             src/libs/market_data/tests/unit/test_decode_alpaca_stock_bars.py \
             src/libs/market_data/tests/unit/test_httpx_alpaca_provider_raw_response_adapter.py \
-            src/libs/market_data/tests/unit/test_build_alpaca_provider_capture_acceptance.py
+            src/libs/market_data/tests/unit/test_build_alpaca_provider_capture_acceptance.py \
+            src/libs/market_data/tests/unit/test_build_provider_request_sha256.py
 
       - name: Run full market_data regressions
         run: uv run pytest -q src/libs/market_data/tests
