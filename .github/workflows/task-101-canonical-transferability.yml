@@ -120,9 +120,9 @@ jobs:
           set -euo pipefail
           target="artifacts/private/provider-captures/task-101-taiwan-canonical-panel"
           mkdir -p "$target"
-          gh api             "repos/${GITHUB_REPOSITORY}/actions/artifacts/11149119172/zip"             > /tmp/task101-taiwan-partial.zip
+          gh api             "repos/${GITHUB_REPOSITORY}/actions/artifacts/11150515509/zip"             > /tmp/task101-taiwan-partial.zip
           actual_sha="$(sha256sum /tmp/task101-taiwan-partial.zip | cut -d' ' -f1)"
-          test "$actual_sha" = "25c2fff0691a5c91e60670cf1a173fd3aedb5cc4f39ce99c71d320327dc4832c"
+          test "$actual_sha" = "362ca769d1478ef1497134b9874703ba3bbdfdc05031e05afe71ce6437592688"
           unzip -q /tmp/task101-taiwan-partial.zip -d "$target"
 
       - name: Set up uv
