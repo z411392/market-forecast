@@ -1,0 +1,19 @@
+{
+  "task": 97,
+  "authorized": true,
+  "provider": "alpaca",
+  "feed": "sip",
+  "price_basis": "split_adjusted",
+  "symbols": [
+    "AAPL",
+    "NVDA"
+  ],
+  "audit_session_count": 252,
+  "prior_session_count": 1,
+  "end_session": "2026-09-24",
+  "provider_request_count": 506,
+  "trading_api_allowed": false,
+  "account_api_allowed": false,
+  "paid_subscription_purchase_allowed": false,
+  "execution_sequence": 1
+}
