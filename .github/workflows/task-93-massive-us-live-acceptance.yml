@@ -1,0 +1,44 @@
+name: task-93-massive-us-live-acceptance
+
+on:
+  push:
+    branches:
+      - codex/93-massive-us-live-acceptance
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Run Task 93 request/receipt oracles
+        run: |
+          uv run pytest -q \
+            src/libs/market_data/tests/unit/test_build_massive_regular_session_minute_request.py \
+            src/libs/market_data/tests/unit/test_build_provider_capture_acceptance_receipt.py
+
+  credential-presence:
+    if: contains(github.event.head_commit.message, '[massive-secret-check]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      MARKET_FORECAST_MASSIVE_API_KEY: ${{ secrets.MARKET_FORECAST_MASSIVE_API_KEY }}
+    steps:
+      - name: Check Massive credential presence only
+        shell: bash
+        run: |
+          test -n "${MARKET_FORECAST_MASSIVE_API_KEY:-}"
