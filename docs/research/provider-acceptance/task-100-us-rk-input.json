@@ -1,0 +1,33 @@
+{
+  "artifact_version": "task-100-us-rk-input-v1",
+  "task": 100,
+  "estimator_version": "us-rk-parzen-1m-v1",
+  "source_task": 97,
+  "source_run_id": 36823983535,
+  "source_artifact_id": 11144780888,
+  "source_artifact_sha256": "39a419d8aa070c2f3b641c5f93dde638189164bb933a7780615a24c6b7e6c812",
+  "expected_receipt_count": 506,
+  "symbols": [
+    "AAPL",
+    "NVDA"
+  ],
+  "expected_session_count": 253,
+  "expected_audit_session_count": 252,
+  "price_basis": "split_adjusted",
+  "parameters": {
+    "kernel": "parzen",
+    "endpoint_jitter_m": 2,
+    "bandwidth_constant": 3.5134,
+    "noise_target_seconds": 120,
+    "sparse_interval_seconds": 1200,
+    "sparse_phase_shift_seconds": 60
+  },
+  "decision_rule": {
+    "primary": "smallest absolute geometric level bias vs RK",
+    "cross_symbol_unanimity_required": true,
+    "panel_median_mean_abs_log_gap_must_agree": true,
+    "correlation_is_secondary": true,
+    "forecast_score_used": false
+  },
+  "execution_sequence": 1
+}
