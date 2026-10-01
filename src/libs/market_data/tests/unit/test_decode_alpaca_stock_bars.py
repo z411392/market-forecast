@@ -61,9 +61,7 @@ def test_decode_alpaca_stock_bars() -> None:
     assert len(bars) == 2
     assert bars[0]["security"] == _security()
     assert bars[0]["session_date"] == date(2024, 7, 2)
-    assert bars[0]["bar_start_utc"] == datetime(
-        2024, 7, 2, 13, 30, tzinfo=timezone.utc
-    )
+    assert bars[0]["bar_start_utc"] == datetime(2024, 7, 2, 13, 30, tzinfo=timezone.utc)
     assert bars[0]["price_basis"] == "as_printed"
     assert bars[0]["open"] == 216.15
     assert bars[0]["close"] == 215.9301

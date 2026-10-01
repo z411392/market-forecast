@@ -25,9 +25,7 @@ from libs.market_data.services.execute_and_persist_provider_capture_acceptance i
     execute_and_persist_provider_capture_acceptance,
 )
 
-OUTPUT_ROOT = Path(
-    "artifacts/private/provider-captures/task-95-alpaca-us-live-acceptance"
-)
+OUTPUT_ROOT = Path("artifacts/private/provider-captures/task-95-alpaca-us-live-acceptance")
 EVIDENCE_ROOT = OUTPUT_ROOT / "evidence"
 SUMMARY_PATH = OUTPUT_ROOT / "summary.json"
 
@@ -108,10 +106,7 @@ def main() -> None:
     }
     _write_summary(summary)
 
-    securities = {
-        symbol: _security(symbol)
-        for symbol in ("AAPL", "NVDA")
-    }
+    securities = {symbol: _security(symbol) for symbol in ("AAPL", "NVDA")}
 
     with httpx.Client(timeout=30.0) as client:
         fetch = HttpxAlpacaProviderRawResponseAdapter(
@@ -120,9 +115,7 @@ def main() -> None:
             secret_key=secret,
             allow_live=True,
         )
-        persist = FilesystemProviderCaptureEvidenceAdapter(
-            EVIDENCE_ROOT
-        )
+        persist = FilesystemProviderCaptureEvidenceAdapter(EVIDENCE_ROOT)
 
         for (
             symbol,
@@ -135,9 +128,7 @@ def main() -> None:
         ) in CASES:
             start = datetime.fromisoformat(start_text)
             end = datetime.fromisoformat(end_text)
-            typed_basis: Literal[
-                "as_printed", "split_adjusted"
-            ] = price_basis  # type: ignore[assignment]
+            typed_basis: Literal["as_printed", "split_adjusted"] = price_basis  # type: ignore[assignment]
             request = build_alpaca_historical_bars_request(
                 source_symbol=symbol,
                 session_start_utc=start,
@@ -158,9 +149,7 @@ def main() -> None:
                 expected_minute_count=expected_count,
                 price_basis=typed_basis,
             )
-            request_digest = build_provider_request_sha256(
-                receipt["request"]
-            )
+            request_digest = build_provider_request_sha256(receipt["request"])
             raw_path = (
                 EVIDENCE_ROOT
                 / "alpaca"
@@ -170,9 +159,7 @@ def main() -> None:
                 / receipt["raw_artifact_sha256"]
                 / "raw-response.bin"
             )
-            payload = json.loads(
-                raw_path.read_text(encoding="utf-8")
-            )
+            payload = json.loads(raw_path.read_text(encoding="utf-8"))
             bars = payload["bars"]
             if not isinstance(bars, list) or not bars:
                 raise RuntimeError("task95_missing_persisted_bars")
@@ -182,39 +169,22 @@ def main() -> None:
                     "symbol": symbol,
                     "session_date": session_date.isoformat(),
                     "price_basis": typed_basis,
-                    "observed_minute_count": receipt[
-                        "observed_minute_count"
-                    ],
+                    "observed_minute_count": receipt["observed_minute_count"],
                     "gap_count": receipt["gap_count"],
-                    "missing_grid_minutes": receipt[
-                        "missing_grid_minutes"
-                    ],
-                    "raw_artifact_sha256": receipt[
-                        "raw_artifact_sha256"
-                    ],
-                    "first_bar_start_utc": receipt[
-                        "first_bar_start_utc"
-                    ].isoformat(),
-                    "last_bar_start_utc": receipt[
-                        "last_bar_start_utc"
-                    ].isoformat(),
+                    "missing_grid_minutes": receipt["missing_grid_minutes"],
+                    "raw_artifact_sha256": receipt["raw_artifact_sha256"],
+                    "first_bar_start_utc": receipt["first_bar_start_utc"].isoformat(),
+                    "last_bar_start_utc": receipt["last_bar_start_utc"].isoformat(),
                     "first_open": float(bars[0]["o"]),
                     "last_close": float(bars[-1]["c"]),
                 }
             )
             _write_summary(summary)
 
-    by_role = {
-        case["role"]: case
-        for case in summary["cases"]
-    }
-    pre_ratio = (
-        by_role["nvda_pre_split_raw"]["last_close"]
-        / by_role["nvda_pre_split_adjusted"]["last_close"]
-    )
+    by_role = {case["role"]: case for case in summary["cases"]}
+    pre_ratio = by_role["nvda_pre_split_raw"]["last_close"] / by_role["nvda_pre_split_adjusted"]["last_close"]
     post_ratio = (
-        by_role["nvda_post_split_raw"]["first_open"]
-        / by_role["nvda_post_split_adjusted"]["first_open"]
+        by_role["nvda_post_split_raw"]["first_open"] / by_role["nvda_post_split_adjusted"]["first_open"]
     )
     if not math.isclose(
         pre_ratio,
@@ -222,18 +192,14 @@ def main() -> None:
         rel_tol=0.02,
         abs_tol=0.0,
     ):
-        raise RuntimeError(
-            f"task95_unexpected_pre_split_ratio:{pre_ratio}"
-        )
+        raise RuntimeError(f"task95_unexpected_pre_split_ratio:{pre_ratio}")
     if not math.isclose(
         post_ratio,
         1.0,
         rel_tol=0.02,
         abs_tol=0.0,
     ):
-        raise RuntimeError(
-            f"task95_unexpected_post_split_ratio:{post_ratio}"
-        )
+        raise RuntimeError(f"task95_unexpected_post_split_ratio:{post_ratio}")
 
     summary["split_semantics"] = {
         "pre_split_raw_to_adjusted_close_ratio": pre_ratio,

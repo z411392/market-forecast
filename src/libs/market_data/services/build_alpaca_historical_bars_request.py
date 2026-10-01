@@ -17,34 +17,19 @@ def build_alpaca_historical_bars_request(
     session_end_utc_exclusive: datetime,
     price_basis: Literal["as_printed", "split_adjusted"],
 ) -> ProviderRequestSpec:
-    if (
-        not isinstance(source_symbol, str)
-        or _ALPACA_SOURCE_SYMBOL.fullmatch(source_symbol) is None
-    ):
-        raise InvalidProviderRequestInputError(
-            "invalid_alpaca_source_symbol"
-        )
+    if not isinstance(source_symbol, str) or _ALPACA_SOURCE_SYMBOL.fullmatch(source_symbol) is None:
+        raise InvalidProviderRequestInputError("invalid_alpaca_source_symbol")
     if not _is_utc_minute(session_start_utc):
-        raise InvalidProviderRequestInputError(
-            "invalid_alpaca_session_start_utc"
-        )
+        raise InvalidProviderRequestInputError("invalid_alpaca_session_start_utc")
     if not _is_utc_minute(session_end_utc_exclusive):
-        raise InvalidProviderRequestInputError(
-            "invalid_alpaca_session_end_utc"
-        )
+        raise InvalidProviderRequestInputError("invalid_alpaca_session_end_utc")
     if session_end_utc_exclusive <= session_start_utc:
-        raise InvalidProviderRequestInputError(
-            "invalid_alpaca_session_window"
-        )
+        raise InvalidProviderRequestInputError("invalid_alpaca_session_window")
     if price_basis not in ("as_printed", "split_adjusted"):
-        raise InvalidProviderRequestInputError(
-            "invalid_alpaca_price_basis"
-        )
+        raise InvalidProviderRequestInputError("invalid_alpaca_price_basis")
 
     request_end = session_end_utc_exclusive - timedelta(seconds=1)
-    adjustment = (
-        "raw" if price_basis == "as_printed" else "split"
-    )
+    adjustment = "raw" if price_basis == "as_printed" else "split"
     return {
         "method": "GET",
         "path": f"/v2/stocks/{source_symbol}/bars",

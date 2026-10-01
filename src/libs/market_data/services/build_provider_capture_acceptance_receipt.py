@@ -80,12 +80,8 @@ def _build_expected_request(
     if manifest["provider"] == "alpaca":
         return build_alpaca_historical_bars_request(
             source_symbol=manifest["source_symbol"],
-            session_start_utc=manifest[
-                "expected_session_start_utc"
-            ],
-            session_end_utc_exclusive=manifest[
-                "expected_session_end_utc_exclusive"
-            ],
+            session_start_utc=manifest["expected_session_start_utc"],
+            session_end_utc_exclusive=manifest["expected_session_end_utc_exclusive"],
             price_basis=manifest["price_basis"],
         )
     raise InvalidProviderCaptureInputError("unsupported_provider")

@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 import httpx
 from pytest import mark, raises
 
@@ -10,7 +12,6 @@ from libs.market_data.exceptions.provider_transport_error import (
 from libs.market_data.services.build_alpaca_historical_bars_request import (
     build_alpaca_historical_bars_request,
 )
-from datetime import datetime, timezone
 
 
 @mark.unit
@@ -26,12 +27,8 @@ def test_httpx_alpaca_provider_raw_response_adapter() -> None:
 
     request = build_alpaca_historical_bars_request(
         source_symbol="AAPL",
-        session_start_utc=datetime(
-            2024, 7, 2, 13, 30, tzinfo=timezone.utc
-        ),
-        session_end_utc_exclusive=datetime(
-            2024, 7, 2, 20, 0, tzinfo=timezone.utc
-        ),
+        session_start_utc=datetime(2024, 7, 2, 13, 30, tzinfo=timezone.utc),
+        session_end_utc_exclusive=datetime(2024, 7, 2, 20, 0, tzinfo=timezone.utc),
         price_basis="as_printed",
     )
 

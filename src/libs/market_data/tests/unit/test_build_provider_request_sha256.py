@@ -1,5 +1,5 @@
-from hashlib import sha256
 import json
+from hashlib import sha256
 
 from pytest import mark
 
@@ -37,7 +37,4 @@ def test_build_provider_request_sha256() -> None:
             ("adjustment", "split"),
         ),
     }
-    assert (
-        build_provider_request_sha256(adjusted)
-        != build_provider_request_sha256(request)
-    )
+    assert build_provider_request_sha256(adjusted) != build_provider_request_sha256(request)

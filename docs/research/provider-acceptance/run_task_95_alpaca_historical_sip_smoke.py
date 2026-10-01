@@ -4,10 +4,7 @@ from pathlib import Path
 
 import httpx
 
-OUTPUT = Path(
-    "artifacts/private/provider-captures/"
-    "task-95-alpaca-historical-sip-smoke"
-)
+OUTPUT = Path("artifacts/private/provider-captures/" "task-95-alpaca-historical-sip-smoke")
 RAW = OUTPUT / "raw-response.json"
 SUMMARY = OUTPUT / "summary.json"
 

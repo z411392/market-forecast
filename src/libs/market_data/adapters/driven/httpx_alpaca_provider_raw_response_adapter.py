@@ -14,9 +14,7 @@ from libs.market_data.ports.fetch_provider_raw_response_port import (
 )
 
 
-class HttpxAlpacaProviderRawResponseAdapter(
-    FetchProviderRawResponsePort
-):
+class HttpxAlpacaProviderRawResponseAdapter(FetchProviderRawResponsePort):
     def __init__(
         self,
         *,
@@ -56,9 +54,7 @@ class HttpxAlpacaProviderRawResponseAdapter(
                 },
             )
         except httpx.HTTPError:
-            raise ProviderTransportError(
-                "provider_transport_error"
-            ) from None
+            raise ProviderTransportError("provider_transport_error") from None
 
         if not 200 <= response.status_code < 300:
             raise ProviderTransportError("provider_http_error")

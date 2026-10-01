@@ -63,14 +63,7 @@ def test_filesystem_provider_capture_evidence_adapter(tmp_path: Path) -> None:
 
     adapter(raw_response=raw_response, receipt=receipt)
 
-    evidence_dir = (
-        tmp_path
-        / "massive"
-        / "2024-07-03"
-        / "2024-07-02"
-        / request_digest
-        / digest
-    )
+    evidence_dir = tmp_path / "massive" / "2024-07-03" / "2024-07-02" / request_digest / digest
     raw_path = evidence_dir / "raw-response.bin"
     receipt_path = evidence_dir / "acceptance-receipt.json"
 
@@ -112,14 +105,7 @@ def test_filesystem_provider_capture_evidence_adapter(tmp_path: Path) -> None:
     split_request_digest = build_provider_request_sha256(
         split_receipt["request"]  # type: ignore[arg-type]
     )
-    split_dir = (
-        tmp_path
-        / "massive"
-        / "2024-07-03"
-        / "2024-07-02"
-        / split_request_digest
-        / digest
-    )
+    split_dir = tmp_path / "massive" / "2024-07-03" / "2024-07-02" / split_request_digest / digest
     assert split_dir != evidence_dir
     assert (split_dir / "raw-response.bin").read_bytes() == raw_response
 
@@ -130,14 +116,7 @@ def test_filesystem_provider_capture_evidence_adapter(tmp_path: Path) -> None:
         match="provider_capture_evidence_hash_mismatch",
     ):
         adapter(raw_response=raw_response, receipt=mismatched)
-    assert not (
-        tmp_path
-        / "massive"
-        / "2024-07-03"
-        / "2024-07-02"
-        / request_digest
-        / ("0" * 64)
-    ).exists()
+    assert not (tmp_path / "massive" / "2024-07-03" / "2024-07-02" / request_digest / ("0" * 64)).exists()
 
     raw_path.write_bytes(b"tampered")
     with raises(
