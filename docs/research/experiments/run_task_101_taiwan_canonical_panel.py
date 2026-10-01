@@ -43,6 +43,8 @@ MAX_CURRENT_RUN_DELTA_BYTES = 250 * 1024 * 1024
 FIELDS = ("ts", "Open", "High", "Low", "Close", "Volume", "Amount")
 
 AD_HOC_FULL_DAY_CLOSURES = {
+    date(2023, 1, 18): "lunar_new_year_twse_full_day_closure",
+    date(2024, 10, 31): "typhoon_kong_rey_twse_full_day_closure",
     date(2026, 7, 10): "typhoon_bavi_twse_full_day_closure",
 }
 
@@ -148,6 +150,9 @@ def main() -> None:
                 "query_chunks": [],
                 "missing_expected_sessions": [],
                 "extra_provider_sessions": [],
+                "ignored_out_of_calendar_provider_sessions": [],
+                "cached_chunk_count": 0,
+                "provider_chunk_fetch_count": 0,
                 "previous_tick_sample_count": 0,
                 "previous_tick_session_count": 0,
                 "max_previous_tick_staleness_upper_seconds": 0.0,
@@ -179,7 +184,21 @@ def main() -> None:
             symbol_result["extra_provider_sessions"] = [
                 value.isoformat() for value in extra
             ]
-            if missing or extra:
+            symbol_result[
+                "ignored_out_of_calendar_provider_sessions"
+            ] = [
+                {
+                    "session_date": value.isoformat(),
+                    "provider_bar_count": len(
+                        provider_sessions[value]["ts"]
+                    ),
+                    "reason": (
+                        "outside_canonical_xtai_session_calendar"
+                    ),
+                }
+                for value in extra
+            ]
+            if missing:
                 symbol_result["status"] = "session_coverage_failed"
                 _write_json(SUMMARY_PATH, summary)
                 raise RuntimeError(
@@ -353,49 +372,84 @@ def _fetch_symbol_sessions(
     cursor = first_session
 
     while cursor <= last_session:
-        usage = usage_reader()
-        _enforce_usage_guard(usage, initial_used_bytes)
-
         chunk_end = min(
             cursor
             + timedelta(days=QUERY_CHUNK_CALENDAR_DAYS - 1),
             last_session,
         )
-        provider = api.kbars(
-            contract=contract,
-            start=cursor.isoformat(),
-            end=chunk_end.isoformat(),
-            timeout=15000,
-        )
-        normalized = _normalize_provider_payload(
-            provider.dict()
-        )
-        payload = {
-            "provider": "shioaji",
-            "provider_version": sj.__version__,
-            "symbol": symbol,
-            "start_date": cursor.isoformat(),
-            "end_date": chunk_end.isoformat(),
-            "payload": normalized,
-        }
-        encoded = (
-            json.dumps(
-                payload,
-                ensure_ascii=False,
-                sort_keys=True,
-                separators=(",", ":"),
-            )
-            + "\n"
-        ).encode("utf-8")
-        digest = sha256(encoded).hexdigest()
-
         path = (
             CHUNK_ROOT
             / symbol
             / f"{cursor.isoformat()}_{chunk_end.isoformat()}.json"
         )
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(encoded)
+
+        if path.is_file():
+            encoded = path.read_bytes()
+            try:
+                cached = json.loads(encoded)
+            except (json.JSONDecodeError, UnicodeDecodeError) as error:
+                raise RuntimeError(
+                    "task101_tw_invalid_cached_chunk_json"
+                ) from error
+            if (
+                not isinstance(cached, dict)
+                or cached.get("provider") != "shioaji"
+                or cached.get("symbol") != symbol
+                or cached.get("start_date") != cursor.isoformat()
+                or cached.get("end_date") != chunk_end.isoformat()
+                or not isinstance(cached.get("payload"), dict)
+            ):
+                raise RuntimeError(
+                    "task101_tw_cached_chunk_identity_mismatch"
+                )
+            normalized = _normalize_provider_payload(
+                cached["payload"]
+            )
+            digest = sha256(encoded).hexdigest()
+            usage = None
+            after = None
+            symbol_result["cached_chunk_count"] += 1
+        else:
+            usage = usage_reader()
+            _enforce_usage_guard(usage, initial_used_bytes)
+            provider = api.kbars(
+                contract=contract,
+                start=cursor.isoformat(),
+                end=chunk_end.isoformat(),
+                timeout=15000,
+            )
+            normalized = _normalize_provider_payload(
+                provider.dict()
+            )
+            payload = {
+                "provider": "shioaji",
+                "provider_version": sj.__version__,
+                "symbol": symbol,
+                "start_date": cursor.isoformat(),
+                "end_date": chunk_end.isoformat(),
+                "payload": normalized,
+            }
+            encoded = (
+                json.dumps(
+                    payload,
+                    ensure_ascii=False,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                )
+                + "\n"
+            ).encode("utf-8")
+            digest = sha256(encoded).hexdigest()
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(encoded)
+
+            after = usage_reader()
+            if after["used_bytes"] < usage["used_bytes"]:
+                raise RuntimeError(
+                    "task101_tw_decreasing_usage_counter"
+                )
+            symbol_result["provider_chunk_fetch_count"] += 1
+            summary["latest_usage"] = dict(after)
+            _enforce_usage_guard(after, initial_used_bytes)
 
         chunk_dates = _merge_sessions(
             by_session,
@@ -409,27 +463,26 @@ def _fetch_symbol_sessions(
                 )
             session_chunk_sha[session_date] = digest
 
-        after = usage_reader()
-        if after["used_bytes"] < usage["used_bytes"]:
-            raise RuntimeError(
-                "task101_tw_decreasing_usage_counter"
-            )
         symbol_result["query_chunks"].append(
             {
                 "start_date": cursor.isoformat(),
                 "end_date": chunk_end.isoformat(),
                 "row_count": len(normalized["ts"]),
                 "chunk_sha256": digest,
-                "usage_before": dict(usage),
-                "usage_after": dict(after),
+                "cache_hit": usage is None,
+                "usage_before": (
+                    dict(usage) if usage is not None else None
+                ),
+                "usage_after": (
+                    dict(after) if after is not None else None
+                ),
             }
         )
-        summary["latest_usage"] = dict(after)
         _write_json(SUMMARY_PATH, summary)
-        _enforce_usage_guard(after, initial_used_bytes)
 
         cursor = chunk_end + timedelta(days=1)
-        time.sleep(0.2)
+        if usage is not None:
+            time.sleep(0.2)
 
     return by_session, session_chunk_sha
 
