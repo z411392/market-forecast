@@ -188,15 +188,23 @@ def main() -> None:
                     security=securities[symbol],
                     price_basis="split_adjusted",
                 )
+                expected_starts = {
+                    request_start + timedelta(minutes=index)
+                    for index in range(expected_minute_count)
+                }
+                observed_starts = {
+                    bar["bar_start_utc"] for bar in preview
+                }
+                missing_starts = sorted(
+                    expected_starts - observed_starts
+                )
+                incomplete_panel_session = (
+                    not is_prior_anchor
+                    and len(preview) != expected_minute_count
+                )
+
                 if len(preview) != expected_minute_count:
-                    expected_starts = {
-                        request_start + timedelta(minutes=index)
-                        for index in range(expected_minute_count)
-                    }
-                    observed_starts = {
-                        bar["bar_start_utc"] for bar in preview
-                    }
-                    summary["last_failed_attempt"] = {
+                    diagnostic = {
                         "symbol": symbol,
                         "session_date": session_date.isoformat(),
                         "role": (
@@ -218,17 +226,91 @@ def main() -> None:
                         ),
                         "missing_minute_starts_utc": [
                             value.isoformat()
-                            for value in sorted(
-                                expected_starts - observed_starts
-                            )
+                            for value in missing_starts
                         ],
+                        "request_sha256": (
+                            build_provider_request_sha256(request)
+                        ),
+                        "raw_artifact_sha256": __import__(
+                            "hashlib"
+                        ).sha256(raw).hexdigest(),
                     }
-                    _write_json(SUMMARY_PATH, summary)
-                    raise RuntimeError(
-                        "task101_us_unexpected_minute_count:"
-                        f"{symbol}:{label}:"
-                        f"{len(preview)}/{expected_minute_count}"
+                    summary.setdefault(
+                        "incomplete_source_sessions",
+                        [],
+                    ).append(diagnostic)
+                    _write_diagnostic_raw(
+                        symbol=symbol,
+                        session_date=session_date,
+                        request=request,
+                        raw=raw,
                     )
+
+                    if is_prior_anchor:
+                        raise RuntimeError(
+                            "task101_us_prior_anchor_incomplete:"
+                            f"{symbol}:{label}:"
+                            f"{len(preview)}/{expected_minute_count}"
+                        )
+                    if not preview:
+                        raise RuntimeError(
+                            "task101_us_empty_panel_session:"
+                            f"{symbol}:{label}"
+                        )
+                    if (
+                        preview[0]["bar_start_utc"] != session_open
+                        or preview[-1]["bar_start_utc"]
+                        != session_close - timedelta(minutes=1)
+                    ):
+                        raise RuntimeError(
+                            "task101_us_missing_open_or_close_anchor:"
+                            f"{symbol}:{label}"
+                        )
+
+                if incomplete_panel_session:
+                    progress["accepted_source_sessions"] += 1
+                    progress.setdefault(
+                        "incomplete_panel_sessions",
+                        0,
+                    )
+                    progress["incomplete_panel_sessions"] += 1
+
+                    overnight = calculate_overnight_log_return(
+                        previous_close[symbol],
+                        preview[0]["open"],
+                    )
+                    daily_rows[symbol].append(
+                        {
+                            "session_date": session_date.isoformat(),
+                            "whole_day_variance": None,
+                            "regular_session_variance": None,
+                            "overnight_variance": (
+                                overnight * overnight
+                            ),
+                            "overnight_log_return": overnight,
+                            "observation_count": 0,
+                            "request_sha256": (
+                                build_provider_request_sha256(request)
+                            ),
+                            "raw_artifact_sha256": __import__(
+                                "hashlib"
+                            ).sha256(raw).hexdigest(),
+                            "missing_reason": (
+                                "incomplete_regular_session_sip_minutes"
+                            ),
+                            "missing_minute_starts_utc": [
+                                value.isoformat()
+                                for value in missing_starts
+                            ],
+                        }
+                    )
+                    progress["accepted_panel_sessions"] += 1
+                    progress["missing_grid_minutes"] += len(
+                        missing_starts
+                    )
+                    previous_close[symbol] = preview[-1]["close"]
+                    _write_json(SUMMARY_PATH, summary)
+                    continue
 
                 manifest, bars = assemble_provider_capture_sample(
                     provider="alpaca",
@@ -311,12 +393,6 @@ def main() -> None:
             raise RuntimeError(
                 f"task101_us_panel_count_mismatch:{symbol}:{len(rows)}"
             )
-        if summary["symbol_progress"][symbol][
-            "missing_grid_minutes"
-        ] != 0:
-            raise RuntimeError(
-                f"task101_us_missing_minutes:{symbol}"
-            )
         if summary["symbol_progress"][symbol]["gap_count"] != 0:
             raise RuntimeError(f"task101_us_gap_count:{symbol}")
 
@@ -344,6 +420,29 @@ def main() -> None:
     )
 
 
+
+
+def _write_diagnostic_raw(
+    *,
+    symbol: str,
+    session_date: date,
+    request: dict[str, Any],
+    raw: bytes,
+) -> None:
+    import hashlib
+
+    request_sha = build_provider_request_sha256(request)
+    raw_sha = hashlib.sha256(raw).hexdigest()
+    path = (
+        OUTPUT_ROOT
+        / "diagnostics"
+        / symbol
+        / session_date.isoformat()
+        / request_sha
+        / f"{raw_sha}.json"
+    )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(raw)
 
 def _load_cached_raw(
     *,
