@@ -1,0 +1,17 @@
+{
+  "task": 102,
+  "provider": "alpaca",
+  "feed": "sip",
+  "session_date": "2026-09-24",
+  "symbols": [
+    "AAPL",
+    "NVDA"
+  ],
+  "endpoint": "/v2/stocks/{symbol}/trades",
+  "start_end": "exact XNAS regular session",
+  "sort": "asc",
+  "limit": 10000,
+  "follow_next_page_token": true,
+  "benchmark_values_allowed": false,
+  "full_panel_authorized": false
+}
