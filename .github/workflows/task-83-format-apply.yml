@@ -1,0 +1,48 @@
+name: task-83-format-apply
+
+on:
+  push:
+    branches:
+      - codex/83-governance-ci-reconciliation
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: contains(github.event.head_commit.message, '[apply-task83-format]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync project
+        run: uv sync
+
+      - name: Recompute deterministic formatting
+        run: uv run ruff format .
+
+      - name: Verify formatted file set
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --name-only -- '*.py' | sort > /tmp/actual.txt
+          sort docs/research/provider-acceptance/task-83-format-preview-manifest.txt > /tmp/expected.txt
+          diff -u /tmp/expected.txt /tmp/actual.txt
+
+      - name: Commit exact formatter output
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "ChatGPT Commander"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          xargs -a docs/research/provider-acceptance/task-83-format-preview-manifest.txt git add --
+          git diff --cached --check
+          git commit -m "task-83: apply deterministic Ruff 0.8.6 formatting"
+          git push origin HEAD:codex/83-governance-ci-reconciliation
