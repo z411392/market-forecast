@@ -41,7 +41,8 @@
       "input": "observed close-to-close log returns in the frozen market price basis",
       "recursion": "h_t=lambda*h_(t-1)+(1-lambda)*r_t^2",
       "h5_forecast": "current EWMA variance repeated for each of next 5 sessions",
-      "missing_behavior": "non-trading session has no return update; target remains uncompressed canonical-session sequence"
+      "missing_behavior": "non-trading session has no return update; target remains uncompressed canonical-session sequence",
+      "initialization": "first finite observed close-to-close return squared"
     },
     "level_har": {
       "identity": "causal-level-har-504-v1",
@@ -77,7 +78,11 @@
       "estimator": "arch 8.x continuous QMLE",
       "fit_scale": "returns multiplied by 100; forecast variances divided by 10000",
       "horizon_sessions": 5,
-      "output": "average of 5 conditional variance forecasts"
+      "output": "average of 5 conditional variance forecasts",
+      "refit_anchor": "first observed-return index with 504 finite observed returns; refit at that index and every 20 subsequent observed-return indices",
+      "state_update": "between refits, keep fitted omega/alpha/beta fixed and update conditional variance causally with each newly observed close-to-close return",
+      "fit_failure_behavior": "fail closed on non-converged QMLE or invalid/nonstationary parameters",
+      "package_runtime": "arch==8.0.0 in current uv lock/runtime"
     }
   },
   "provenance_exception": {
