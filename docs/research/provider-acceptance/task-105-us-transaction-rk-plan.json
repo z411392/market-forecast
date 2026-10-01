@@ -1,0 +1,161 @@
+{
+  "artifact_version": "task-105-us-transaction-rk-plan-v1",
+  "task": 105,
+  "symbols": [
+    "AAPL",
+    "NVDA"
+  ],
+  "full_audit_window": {
+    "first": "2025-09-24",
+    "last": "2026-09-24",
+    "session_count": 252
+  },
+  "sample": {
+    "session_count": 24,
+    "formula": "floor((k + 0.5) * N / K), k=0..23, N=252, K=24",
+    "zero_based_indices": [
+      5,
+      15,
+      26,
+      36,
+      47,
+      57,
+      68,
+      78,
+      89,
+      99,
+      110,
+      120,
+      131,
+      141,
+      152,
+      162,
+      173,
+      183,
+      194,
+      204,
+      215,
+      225,
+      236,
+      246
+    ],
+    "dates": [
+      "2025-10-01",
+      "2025-10-15",
+      "2025-10-30",
+      "2025-11-13",
+      "2025-12-01",
+      "2025-12-15",
+      "2025-12-31",
+      "2026-01-15",
+      "2026-02-02",
+      "2026-02-17",
+      "2026-03-04",
+      "2026-03-18",
+      "2026-04-02",
+      "2026-04-17",
+      "2026-05-04",
+      "2026-05-18",
+      "2026-06-03",
+      "2026-06-17",
+      "2026-07-06",
+      "2026-07-20",
+      "2026-08-04",
+      "2026-08-18",
+      "2026-09-02",
+      "2026-09-17"
+    ],
+    "selection_uses_outcomes": false
+  },
+  "estimator": {
+    "identity": "us-rk-parzen-trades-v1",
+    "endpoint_jitter_m": 2,
+    "bandwidth_constant": 3.5134,
+    "noise_target_spacing_seconds": 120,
+    "sparse_interval_seconds": 1200,
+    "sparse_phase_shift_seconds": 1,
+    "eligibility_reference": "task-103-alpaca-trade-price-eligibility-reference-v1"
+  },
+  "acquisition": {
+    "provider": "alpaca",
+    "feed": "sip",
+    "endpoint": "/v2/stocks/{symbol}/trades",
+    "page_limit": 10000,
+    "sort": "asc",
+    "session_bounds": "exact XNAS regular session",
+    "symbol_order": [
+      "AAPL",
+      "NVDA"
+    ],
+    "page_sleep_seconds": 0.4,
+    "retry_policy": "none",
+    "raw_pages_persisted": true
+  },
+  "batches": [
+    {
+      "batch": 1,
+      "dates": [
+        "2025-10-01",
+        "2025-10-15",
+        "2025-10-30",
+        "2025-11-13"
+      ]
+    },
+    {
+      "batch": 2,
+      "dates": [
+        "2025-12-01",
+        "2025-12-15",
+        "2025-12-31",
+        "2026-01-15"
+      ]
+    },
+    {
+      "batch": 3,
+      "dates": [
+        "2026-02-02",
+        "2026-02-17",
+        "2026-03-04",
+        "2026-03-18"
+      ]
+    },
+    {
+      "batch": 4,
+      "dates": [
+        "2026-04-02",
+        "2026-04-17",
+        "2026-05-04",
+        "2026-05-18"
+      ]
+    },
+    {
+      "batch": 5,
+      "dates": [
+        "2026-06-03",
+        "2026-06-17",
+        "2026-07-06",
+        "2026-07-20"
+      ]
+    },
+    {
+      "batch": 6,
+      "dates": [
+        "2026-08-04",
+        "2026-08-18",
+        "2026-09-02",
+        "2026-09-17"
+      ]
+    }
+  ],
+  "decision_rule": {
+    "primary": "absolute geometric level bias vs transaction RK",
+    "unanimous_symbol_requirement": true,
+    "diagnostics_not_winner": [
+      "mean_abs_log_gap",
+      "pearson_log",
+      "spearman"
+    ],
+    "no_unanimous_candidate": "US_CANONICAL_SAMPLING_INCONCLUSIVE",
+    "forecast_score_used": false
+  }
+}
