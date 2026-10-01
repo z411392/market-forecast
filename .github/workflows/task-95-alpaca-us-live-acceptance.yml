@@ -56,3 +56,25 @@ jobs:
           path: artifacts/private/provider-captures/task-95-alpaca-historical-sip-smoke
           if-no-files-found: ignore
           retention-days: 30
+
+  static:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Run Task 95 Alpaca oracles
+        run: |
+          uv run pytest -q \
+            src/libs/market_data/tests/unit/test_build_alpaca_historical_bars_request.py \
+            src/libs/market_data/tests/unit/test_decode_alpaca_stock_bars.py \
+            src/libs/market_data/tests/unit/test_httpx_alpaca_provider_raw_response_adapter.py
