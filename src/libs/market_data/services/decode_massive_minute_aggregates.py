@@ -51,12 +51,7 @@ def decode_massive_minute_aggregates(
         high_price = _positive_number(result["h"])
         low_price = _positive_number(result["l"])
         close_price = _positive_number(result["c"])
-        if (
-            open_price is None
-            or high_price is None
-            or low_price is None
-            or close_price is None
-        ):
+        if open_price is None or high_price is None or low_price is None or close_price is None:
             raise InvalidProviderCaptureInputError("massive_invalid_price")
 
         volume = _non_negative_number(result["v"])
