@@ -72,11 +72,13 @@ def _validate_raw_response(raw_response: bytes) -> None:
 
 def _validate_provider(
     provider: str,
-) -> Literal["massive", "finmind"]:
+) -> Literal["massive", "finmind", "alpaca"]:
     if provider == "massive":
         return "massive"
     if provider == "finmind":
         return "finmind"
+    if provider == "alpaca":
+        return "alpaca"
     raise ProviderCaptureEvidenceIntegrityError(
         "provider_capture_evidence_invalid_provider"
     )
