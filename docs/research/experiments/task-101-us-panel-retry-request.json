@@ -1,0 +1,9 @@
+{
+  "task": 101,
+  "slice": "S1-us-canonical-panel-retry",
+  "prior_anchor_rule": "final_regular_minute_only",
+  "panel_session_rule": "strict_full_exchange_calendar_minute_coverage",
+  "failure_diagnostic": "persist exact missing minute starts before fail-closed",
+  "cache_first": true,
+  "model_execution_allowed": false
+}
