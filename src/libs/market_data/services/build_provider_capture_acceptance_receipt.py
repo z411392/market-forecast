@@ -12,8 +12,8 @@ from libs.market_data.exceptions.invalid_provider_capture_input_error import (
 from libs.market_data.services.build_finmind_stock_kbar_request import (
     build_finmind_stock_kbar_request,
 )
-from libs.market_data.services.build_massive_minute_request import (
-    build_massive_minute_request,
+from libs.market_data.services.build_massive_regular_session_minute_request import (
+    build_massive_regular_session_minute_request,
 )
 from libs.market_data.services.validate_provider_capture_sample import (
     validate_provider_capture_sample,
@@ -65,9 +65,15 @@ def _build_expected_request(
     manifest: ProviderCaptureManifest,
 ) -> ProviderRequestSpec:
     if manifest["provider"] == "massive":
-        return build_massive_minute_request(
-            manifest["source_symbol"],
-            manifest["session_date"],
+        return build_massive_regular_session_minute_request(
+            source_symbol=manifest["source_symbol"],
+            session_start_utc=manifest[
+                "expected_session_start_utc"
+            ],
+            session_end_utc_exclusive=manifest[
+                "expected_session_end_utc_exclusive"
+            ],
+            price_basis=manifest["price_basis"],
         )
     if manifest["provider"] == "finmind":
         return build_finmind_stock_kbar_request(
