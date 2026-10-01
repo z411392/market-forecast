@@ -13,9 +13,7 @@ from libs.market_data.ports.read_corporate_actions_port import ReadCorporateActi
 
 @mark.contract
 def test_corporate_action_contract() -> None:
-    assert CorporateActionsQuery.__required_keys__ == frozenset(
-        {"security", "start_date", "end_date"}
-    )
+    assert CorporateActionsQuery.__required_keys__ == frozenset({"security", "start_date", "end_date"})
     query_hints = get_type_hints(CorporateActionsQuery)
     assert query_hints["security"] is SecurityIdentity
     assert query_hints["start_date"] is date
