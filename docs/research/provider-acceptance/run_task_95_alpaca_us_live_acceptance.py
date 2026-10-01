@@ -18,6 +18,9 @@ from libs.market_data.dtos.security_identity import SecurityIdentity
 from libs.market_data.services.build_alpaca_historical_bars_request import (
     build_alpaca_historical_bars_request,
 )
+from libs.market_data.services.build_provider_request_sha256 import (
+    build_provider_request_sha256,
+)
 from libs.market_data.services.execute_and_persist_provider_capture_acceptance import (
     execute_and_persist_provider_capture_acceptance,
 )
@@ -155,11 +158,15 @@ def main() -> None:
                 expected_minute_count=expected_count,
                 price_basis=typed_basis,
             )
+            request_digest = build_provider_request_sha256(
+                receipt["request"]
+            )
             raw_path = (
                 EVIDENCE_ROOT
                 / "alpaca"
                 / retrieval_date.isoformat()
                 / session_date.isoformat()
+                / request_digest
                 / receipt["raw_artifact_sha256"]
                 / "raw-response.bin"
             )
