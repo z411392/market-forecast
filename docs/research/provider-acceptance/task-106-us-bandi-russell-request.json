@@ -1,0 +1,20 @@
+{
+  "task": 106,
+  "provider": "alpaca",
+  "feed": "sip",
+  "timeframe": "1Min",
+  "price_basis": "split_adjusted",
+  "symbols": [
+    "AAPL",
+    "NVDA"
+  ],
+  "prior_session": "2024-09-18",
+  "first_audit_session": "2024-09-19",
+  "last_audit_session": "2025-09-22",
+  "audit_sessions_per_symbol": 252,
+  "decision_rule": "issue-106-frozen-bandi-russell-mse",
+  "provider_calls_authorized": true,
+  "trading_calls_authorized": false,
+  "forecast_scores_allowed": false,
+  "execution_sequence": 2
+}

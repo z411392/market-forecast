@@ -1,0 +1,58 @@
+{
+  "artifact_version": "task-97-us-rv-audit-plan-v1",
+  "task": 97,
+  "parent_task": 12,
+  "status": "frozen_before_empirical_values",
+  "provider": {
+    "name": "alpaca",
+    "feed": "sip",
+    "timeframe": "1Min",
+    "price_basis": "split_adjusted",
+    "source_acceptance_task": 95
+  },
+  "panel": {
+    "calendar": "XNAS",
+    "symbols": [
+      "AAPL",
+      "NVDA"
+    ],
+    "audit_session_count": 252,
+    "prior_session_count": 1,
+    "end_session": "2026-09-24",
+    "sampling_minutes": [
+      5,
+      10,
+      15
+    ]
+  },
+  "measurement": {
+    "regular_session_only": true,
+    "overnight_squared_return": true,
+    "whole_day_variance": "regular_session_variance + overnight_variance",
+    "missing_minute_synthesis": false
+  },
+  "reporting": [
+    "pearson_log_rv_5m_10m",
+    "pearson_log_rv_5m_15m",
+    "spearman_rv_5m_10m",
+    "spearman_rv_5m_15m",
+    "geometric_bias_5m_vs_10m_pct",
+    "geometric_bias_5m_vs_15m_pct",
+    "mean_abs_log_gap_5m_10m",
+    "mean_abs_log_gap_5m_15m",
+    "monotonic_frequency",
+    "top_abs_log_gap_sessions",
+    "session_coverage"
+  ],
+  "decision_rule": {
+    "forecast_score_used": false,
+    "systematic_monotone_inflation_definition": "for both symbols geometric_bias_5m_vs_10m_pct > 0 and geometric_bias_5m_vs_15m_pct > geometric_bias_5m_vs_10m_pct",
+    "if_systematic_monotone_inflation": "US_CANONICAL_SAMPLING_INCONCLUSIVE_AND_REQUIRE_INDEPENDENT_NOISE_ROBUST_BENCHMARK",
+    "otherwise": "US_CANONICAL_SAMPLING_5M_CANDIDATE",
+    "forbidden": [
+      "select 10m or 15m solely because measured variance is lower",
+      "use forecast QLIKE or model performance",
+      "add a third symbol before this fixed-grid gate is evaluated"
+    ]
+  }
+}
