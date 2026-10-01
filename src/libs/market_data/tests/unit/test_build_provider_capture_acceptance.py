@@ -12,8 +12,8 @@ from libs.market_data.exceptions.invalid_provider_capture_input_error import (
 from libs.market_data.services.build_finmind_stock_kbar_request import (
     build_finmind_stock_kbar_request,
 )
-from libs.market_data.services.build_massive_minute_request import (
-    build_massive_minute_request,
+from libs.market_data.services.build_massive_regular_session_minute_request import (
+    build_massive_regular_session_minute_request,
 )
 from libs.market_data.services.build_provider_capture_acceptance import (
     build_provider_capture_acceptance,
@@ -92,7 +92,12 @@ def test_build_provider_capture_acceptance() -> None:
 
     us_raw = _massive_raw()
     us_start = datetime(2025, 11, 26, 14, 30, tzinfo=timezone.utc)
-    us_request = build_massive_minute_request("AAPL", date(2025, 11, 26))
+    us_request = build_massive_regular_session_minute_request(
+        source_symbol="AAPL",
+        session_start_utc=us_start,
+        session_end_utc_exclusive=us_start + timedelta(minutes=2),
+        price_basis="as_printed",
+    )
     us_receipt = build_provider_capture_acceptance(
         request=us_request,
         provider="massive",
