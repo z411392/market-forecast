@@ -1,0 +1,71 @@
+{
+  "artifact_version": "task-102-alpaca-trade-feasibility-reference-v1",
+  "task": 102,
+  "parent_task": 12,
+  "status": "accepted_feasibility_full_panel_not_authorized",
+  "provider": "alpaca",
+  "feed": "sip",
+  "session_date": "2026-09-24",
+  "workflow": {
+    "run_id": 36826142897,
+    "artifact_id": 11145730777,
+    "artifact_sha256": "a34d32b443d82df4de548a2eca834b438cff4aa2dba03c0107a63c8a76981d3f"
+  },
+  "observed_totals": {
+    "symbol_days": 2,
+    "page_count": 260,
+    "trade_count": 2593439,
+    "raw_response_bytes": 255163719,
+    "raw_response_mib": 243.34308528900146
+  },
+  "symbols": {
+    "AAPL": {
+      "page_count": 51,
+      "trade_count": 506108,
+      "raw_response_bytes": 49253464,
+      "bytes_per_trade": 97.31809020999471,
+      "first_trade_timestamp": "2026-09-24T13:30:00.020911445Z",
+      "last_trade_timestamp": "2026-09-24T19:59:59.999651359Z",
+      "duplicate_timestamp_adjacency_count": 0,
+      "odd_lot_condition_I_count": 370363,
+      "odd_lot_condition_I_pct": 73.17864961628743
+    },
+    "NVDA": {
+      "page_count": 209,
+      "trade_count": 2087331,
+      "raw_response_bytes": 205910255,
+      "bytes_per_trade": 98.64762943682626,
+      "first_trade_timestamp": "2026-09-24T13:30:00.008733404Z",
+      "last_trade_timestamp": "2026-09-24T19:59:59.99276339Z",
+      "duplicate_timestamp_adjacency_count": 0,
+      "odd_lot_condition_I_count": 1890866,
+      "odd_lot_condition_I_pct": 90.58774099555845
+    }
+  },
+  "panel_projection": {
+    "target_symbol_days": 506,
+    "projected_page_requests": 65780,
+    "projected_raw_response_bytes": 64556420907,
+    "projected_raw_response_mib": 61565.80057811737,
+    "projected_raw_response_gib": 60.122852127067745,
+    "planning_only": true,
+    "full_panel_authorized": false
+  },
+  "condition_semantics": {
+    "official_alpaca_rule": "minute-bar price fields use SIP trade-condition update rules; odd-lot condition I does not update open/close/high/low",
+    "observed_implication": "raw all-trade sequence is not measurement-equivalent to the accepted Alpaca minute-bar price process",
+    "eligibility_filter_required_before_transaction_rk": true
+  },
+  "ruling": {
+    "historical_sip_trade_source_access": "TECHNICALLY_FEASIBLE",
+    "full_506_symbol_day_raw_tick_panel": "NOT_BOUNDED_UNDER_CURRENT_PLAN",
+    "transaction_rk_ready": false,
+    "reasons": [
+      "projected raw capture is about 60.1 GiB and 65,780 paginated requests",
+      "AAPL/NVDA raw streams are dominated by price-ineligible odd-lot trades under Alpaca minute-bar update rules",
+      "a deterministic bar-price-eligible trade filter must be frozen before any transaction-RK benchmark value is computed"
+    ],
+    "benchmark_values_computed": false,
+    "forecast_score_used": false
+  }
+}
