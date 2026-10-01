@@ -49,21 +49,15 @@ END_SESSION = date(2026, 9, 24)
 AUDIT_SESSION_COUNT = 252
 SAMPLING_INTERVALS = (5, 10, 15)
 REQUEST_SLEEP_SECONDS = 0.5
-OUTPUT_ROOT = Path(
-    "artifacts/private/provider-captures/task-97-us-rv-measurement-audit"
-)
+OUTPUT_ROOT = Path("artifacts/private/provider-captures/task-97-us-rv-measurement-audit")
 EVIDENCE_ROOT = OUTPUT_ROOT / "evidence"
 SUMMARY_PATH = OUTPUT_ROOT / "summary.json"
 DAILY_PATH = OUTPUT_ROOT / "daily-values.json"
 
 
 def main() -> None:
-    api_key_id = _required_secret(
-        "MARKET_FORECAST_ALPACA_API_KEY_ID"
-    )
-    secret_key = _required_secret(
-        "MARKET_FORECAST_ALPACA_SECRET_KEY"
-    )
+    api_key_id = _required_secret("MARKET_FORECAST_ALPACA_API_KEY_ID")
+    secret_key = _required_secret("MARKET_FORECAST_ALPACA_SECRET_KEY")
     retrieval_date = datetime.now(timezone.utc).date()
 
     calendar = xcals.get_calendar("XNAS")
@@ -79,13 +73,8 @@ def main() -> None:
     if sessions[-1] != END_SESSION:
         raise RuntimeError("unexpected_xnas_end_session")
 
-    security_by_symbol = {
-        symbol: _security(symbol)
-        for symbol in SYMBOLS
-    }
-    persist = FilesystemProviderCaptureEvidenceAdapter(
-        EVIDENCE_ROOT
-    )
+    security_by_symbol = {symbol: _security(symbol) for symbol in SYMBOLS}
+    persist = FilesystemProviderCaptureEvidenceAdapter(EVIDENCE_ROOT)
 
     summary: dict[str, Any] = {
         "task": 97,
@@ -107,12 +96,8 @@ def main() -> None:
     }
     _write_json(SUMMARY_PATH, summary)
 
-    measurements_by_symbol: dict[str, list[dict[str, Any]]] = {
-        symbol: [] for symbol in SYMBOLS
-    }
-    daily_rows: dict[str, list[dict[str, Any]]] = {
-        symbol: [] for symbol in SYMBOLS
-    }
+    measurements_by_symbol: dict[str, list[dict[str, Any]]] = {symbol: [] for symbol in SYMBOLS}
+    daily_rows: dict[str, list[dict[str, Any]]] = {symbol: [] for symbol in SYMBOLS}
     previous_close: dict[str, float] = {}
 
     with httpx.Client(timeout=30.0) as client:
@@ -136,23 +121,16 @@ def main() -> None:
             }
             for symbol in SYMBOLS
         }
-        summary["symbols_result"] = [
-            symbol_results[symbol]
-            for symbol in SYMBOLS
-        ]
+        summary["symbols_result"] = [symbol_results[symbol] for symbol in SYMBOLS]
         _write_json(SUMMARY_PATH, summary)
 
         for session_index, session_date in enumerate(sessions):
             label = session_date.isoformat()
             session_open = calendar.session_open(label).to_pydatetime()
             session_close = calendar.session_close(label).to_pydatetime()
-            expected_count = int(
-                (session_close - session_open).total_seconds() // 60
-            )
+            expected_count = int((session_close - session_open).total_seconds() // 60)
             if expected_count not in (210, 390):
-                raise RuntimeError(
-                    f"unexpected_xnas_session_minutes:{label}:{expected_count}"
-                )
+                raise RuntimeError(f"unexpected_xnas_session_minutes:{label}:{expected_count}")
 
             for symbol in SYMBOLS:
                 request = build_alpaca_historical_bars_request(
@@ -190,9 +168,7 @@ def main() -> None:
                 symbol_result = symbol_results[symbol]
                 symbol_result["accepted_session_count"] += 1
                 symbol_result["gap_count"] += receipt["gap_count"]
-                symbol_result["missing_grid_minutes"] += receipt[
-                    "missing_grid_minutes"
-                ]
+                symbol_result["missing_grid_minutes"] += receipt["missing_grid_minutes"]
                 if expected_count == 390:
                     symbol_result["full_session_count"] += 1
                 else:
@@ -200,19 +176,11 @@ def main() -> None:
                 symbol_result["request_receipts"].append(
                     {
                         "session_date": session_date.isoformat(),
-                        "raw_artifact_sha256": receipt[
-                            "raw_artifact_sha256"
-                        ],
-                        "expected_minute_count": receipt[
-                            "expected_minute_count"
-                        ],
-                        "observed_minute_count": receipt[
-                            "observed_minute_count"
-                        ],
+                        "raw_artifact_sha256": receipt["raw_artifact_sha256"],
+                        "expected_minute_count": receipt["expected_minute_count"],
+                        "observed_minute_count": receipt["observed_minute_count"],
                         "gap_count": receipt["gap_count"],
-                        "missing_grid_minutes": receipt[
-                            "missing_grid_minutes"
-                        ],
+                        "missing_grid_minutes": receipt["missing_grid_minutes"],
                     }
                 )
 
@@ -233,27 +201,17 @@ def main() -> None:
                             interval,
                             session_open,
                         )
-                        intraday = calculate_intraday_realized_measures(
-                            aggregated
-                        )
+                        intraday = calculate_intraday_realized_measures(aggregated)
                         daily = calculate_daily_realized_measures(
                             intraday,
                             overnight,
                         )
                         measurements_by_symbol[symbol].append(daily)
                         session_daily[f"{interval}m"] = {
-                            "whole_day_variance": daily[
-                                "whole_day_variance"
-                            ],
-                            "regular_session_variance": daily[
-                                "regular_session_variance"
-                            ],
-                            "overnight_variance": daily[
-                                "overnight_variance"
-                            ],
-                            "observation_count": daily[
-                                "observation_count"
-                            ],
+                            "whole_day_variance": daily["whole_day_variance"],
+                            "regular_session_variance": daily["regular_session_variance"],
+                            "overnight_variance": daily["overnight_variance"],
+                            "observation_count": daily["observation_count"],
                         }
                     daily_rows[symbol].append(session_daily)
                     previous_close[symbol] = bars[-1]["close"]
@@ -262,19 +220,11 @@ def main() -> None:
                 time.sleep(REQUEST_SLEEP_SECONDS)
 
     for symbol in SYMBOLS:
-        symbol_result = next(
-            item
-            for item in summary["symbols_result"]
-            if item["symbol"] == symbol
-        )
-        rows = build_measurement_audit_rows(
-            measurements_by_symbol[symbol]
-        )
+        symbol_result = next(item for item in summary["symbols_result"] if item["symbol"] == symbol)
+        rows = build_measurement_audit_rows(measurements_by_symbol[symbol])
         audit_summary = summarize_measurement_audit(rows)
         if len(rows) != AUDIT_SESSION_COUNT:
-            raise RuntimeError(
-                f"unexpected_us_audit_row_count:{symbol}:{len(rows)}"
-            )
+            raise RuntimeError(f"unexpected_us_audit_row_count:{symbol}:{len(rows)}")
 
         ordered = sorted(
             rows,
@@ -284,20 +234,10 @@ def main() -> None:
             ),
             reverse=True,
         )
-        monotonic_5_10 = sum(
-            row["whole_day_variance_5m"]
-            > row["whole_day_variance_10m"]
-            for row in rows
-        )
-        monotonic_10_15 = sum(
-            row["whole_day_variance_10m"]
-            > row["whole_day_variance_15m"]
-            for row in rows
-        )
+        monotonic_5_10 = sum(row["whole_day_variance_5m"] > row["whole_day_variance_10m"] for row in rows)
+        monotonic_10_15 = sum(row["whole_day_variance_10m"] > row["whole_day_variance_15m"] for row in rows)
         strict_descending = sum(
-            row["whole_day_variance_5m"]
-            > row["whole_day_variance_10m"]
-            > row["whole_day_variance_15m"]
+            row["whole_day_variance_5m"] > row["whole_day_variance_10m"] > row["whole_day_variance_15m"]
             for row in rows
         )
 
@@ -305,58 +245,30 @@ def main() -> None:
             {
                 "status": "accepted",
                 "audit_row_count": len(rows),
-                "measurement_audit_summary": _serialize_audit_summary(
-                    audit_summary
-                ),
+                "measurement_audit_summary": _serialize_audit_summary(audit_summary),
                 "monotonic_frequency": {
-                    "rv_5m_gt_10m_pct": monotonic_5_10
-                    / len(rows)
-                    * 100.0,
-                    "rv_10m_gt_15m_pct": monotonic_10_15
-                    / len(rows)
-                    * 100.0,
-                    "rv_5m_gt_10m_gt_15m_pct": strict_descending
-                    / len(rows)
-                    * 100.0,
+                    "rv_5m_gt_10m_pct": monotonic_5_10 / len(rows) * 100.0,
+                    "rv_10m_gt_15m_pct": monotonic_10_15 / len(rows) * 100.0,
+                    "rv_5m_gt_10m_gt_15m_pct": strict_descending / len(rows) * 100.0,
                 },
                 "top_abs_log_gap_sessions": [
                     {
-                        "session_date": row[
-                            "session_date"
-                        ].isoformat(),
-                        "whole_day_variance_5m": row[
-                            "whole_day_variance_5m"
-                        ],
-                        "whole_day_variance_10m": row[
-                            "whole_day_variance_10m"
-                        ],
-                        "whole_day_variance_15m": row[
-                            "whole_day_variance_15m"
-                        ],
-                        "log_ratio_5m_10m": row[
-                            "log_ratio_5m_10m"
-                        ],
-                        "log_ratio_5m_15m": row[
-                            "log_ratio_5m_15m"
-                        ],
-                        "abs_log_gap_5m_10m": row[
-                            "abs_log_gap_5m_10m"
-                        ],
-                        "abs_log_gap_5m_15m": row[
-                            "abs_log_gap_5m_15m"
-                        ],
+                        "session_date": row["session_date"].isoformat(),
+                        "whole_day_variance_5m": row["whole_day_variance_5m"],
+                        "whole_day_variance_10m": row["whole_day_variance_10m"],
+                        "whole_day_variance_15m": row["whole_day_variance_15m"],
+                        "log_ratio_5m_10m": row["log_ratio_5m_10m"],
+                        "log_ratio_5m_15m": row["log_ratio_5m_15m"],
+                        "abs_log_gap_5m_10m": row["abs_log_gap_5m_10m"],
+                        "abs_log_gap_5m_15m": row["abs_log_gap_5m_15m"],
                     }
                     for row in ordered[:10]
                 ],
             }
         )
 
-    summary["panel_median_metrics"] = _panel_medians(
-        summary["symbols_result"]
-    )
-    summary["decision_diagnostic"] = _decision_diagnostic(
-        summary["symbols_result"]
-    )
+    summary["panel_median_metrics"] = _panel_medians(summary["symbols_result"])
+    summary["decision_diagnostic"] = _decision_diagnostic(summary["symbols_result"])
     summary["status"] = "accepted"
     _write_json(SUMMARY_PATH, summary)
     _write_json(
@@ -382,12 +294,8 @@ def _security(symbol: str) -> SecurityIdentity:
 def _serialize_audit_summary(value: dict[str, Any]) -> dict[str, Any]:
     result = dict(value)
     result["security"] = dict(value["security"])
-    result["first_session_date"] = value[
-        "first_session_date"
-    ].isoformat()
-    result["last_session_date"] = value[
-        "last_session_date"
-    ].isoformat()
+    result["first_session_date"] = value["first_session_date"].isoformat()
+    result["last_session_date"] = value["last_session_date"].isoformat()
     return result
 
 
@@ -405,10 +313,7 @@ def _panel_medians(
         "mean_abs_log_gap_5m_15m",
     )
     return {
-        key: statistics.median(
-            float(result["measurement_audit_summary"][key])
-            for result in symbol_results
-        )
+        key: statistics.median(float(result["measurement_audit_summary"][key]) for result in symbol_results)
         for key in keys
     }
 
@@ -417,22 +322,13 @@ def _decision_diagnostic(
     symbol_results: list[dict[str, Any]],
 ) -> dict[str, Any]:
     systematic_monotone_inflation = all(
-        result["measurement_audit_summary"][
-            "geometric_bias_5m_vs_10m_pct"
-        ]
-        > 0.0
-        and result["measurement_audit_summary"][
-            "geometric_bias_5m_vs_15m_pct"
-        ]
-        > result["measurement_audit_summary"][
-            "geometric_bias_5m_vs_10m_pct"
-        ]
+        result["measurement_audit_summary"]["geometric_bias_5m_vs_10m_pct"] > 0.0
+        and result["measurement_audit_summary"]["geometric_bias_5m_vs_15m_pct"]
+        > result["measurement_audit_summary"]["geometric_bias_5m_vs_10m_pct"]
         for result in symbol_results
     )
     return {
-        "systematic_monotone_level_inflation": (
-            systematic_monotone_inflation
-        ),
+        "systematic_monotone_level_inflation": (systematic_monotone_inflation),
         "rule_if_true": "US_CANONICAL_SAMPLING_INCONCLUSIVE",
         "rule_if_false": "US_CANONICAL_SAMPLING_5M_CANDIDATE",
         "forecast_score_used": False,

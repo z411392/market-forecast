@@ -4,12 +4,10 @@ from pathlib import Path
 from typing import Any
 
 MANIFEST_PATH = Path(
-    "docs/research/provider-acceptance/"
-    "cross-market-rv-measurement-target-manifest-v2.json"
+    "docs/research/provider-acceptance/" "cross-market-rv-measurement-target-manifest-v2.json"
 )
 US_REFERENCE_PATH = Path(
-    "docs/research/provider-acceptance/"
-    "task-106-us-bandi-russell-final-reference.json"
+    "docs/research/provider-acceptance/" "task-106-us-bandi-russell-final-reference.json"
 )
 
 
@@ -36,33 +34,16 @@ def main() -> None:
 
 
 def _verify_top_level(manifest: dict[str, Any]) -> None:
-    assert (
-        manifest["artifact_version"]
-        == "cross-market-rv-measurement-target-manifest-v2"
-    )
+    assert manifest["artifact_version"] == "cross-market-rv-measurement-target-manifest-v2"
     assert manifest["status"] == "frozen"
     assert manifest["measurement_frozen"] is True
-    assert (
-        manifest["forecast_score_used_for_measurement_selection"]
-        is False
-    )
-    assert (
-        manifest["supersedes"]["artifact_version"]
-        == "cross-market-rv-measurement-target-manifest-v1"
-    )
+    assert manifest["forecast_score_used_for_measurement_selection"] is False
+    assert manifest["supersedes"]["artifact_version"] == "cross-market-rv-measurement-target-manifest-v1"
     invariants = manifest["cross_market_invariants"]
     assert invariants["whole_day_measurement"] is True
     assert invariants["overnight_variance_included"] is True
-    assert (
-        invariants[
-            "future_target_is_average_variance_not_volatility"
-        ]
-        is True
-    )
-    assert (
-        invariants["no_forecast_qlike_in_measurement_selection"]
-        is True
-    )
+    assert invariants["future_target_is_average_variance_not_volatility"] is True
+    assert invariants["no_forecast_qlike_in_measurement_selection"] is True
 
 
 def _verify_us(
@@ -79,9 +60,7 @@ def _verify_us(
     assert primary["decision_gate_passed"] is True
     assert primary["audit_sessions_per_symbol"] == 252
     assert primary["symbols"] == ["AAPL", "NVDA"]
-    assert (
-        primary["first_audit_session"] == "2024-09-19"
-    )
+    assert primary["first_audit_session"] == "2024-09-19"
     assert primary["last_audit_session"] == "2025-09-22"
     for symbol in ("AAPL", "NVDA"):
         result = primary["results"][symbol]
@@ -106,40 +85,16 @@ def _verify_us(
     assert decision["forecast_score_used"] is False
 
     manifest_primary = decision["primary_panel"]
-    assert (
-        manifest_primary["artifact_sha256"]
-        == primary["artifact_sha256"]
-    )
-    assert (
-        manifest_primary["summary_sha256"]
-        == primary["summary_sha256"]
-    )
-    assert (
-        manifest_primary["daily_values_sha256"]
-        == primary["daily_values_sha256"]
-    )
-    assert (
-        manifest_primary["decision_gate_passed"]
-        == primary["decision_gate_passed"]
-    )
+    assert manifest_primary["artifact_sha256"] == primary["artifact_sha256"]
+    assert manifest_primary["summary_sha256"] == primary["summary_sha256"]
+    assert manifest_primary["daily_values_sha256"] == primary["daily_values_sha256"]
+    assert manifest_primary["decision_gate_passed"] == primary["decision_gate_passed"]
 
     manifest_replication = decision["replication_panel"]
-    assert (
-        manifest_replication["artifact_sha256"]
-        == replication["artifact_sha256"]
-    )
-    assert (
-        manifest_replication["summary_sha256"]
-        == replication["summary_sha256"]
-    )
-    assert (
-        manifest_replication["daily_values_sha256"]
-        == replication["daily_values_sha256"]
-    )
-    assert (
-        manifest_replication["replication_candidate"]
-        == replication["replication_candidate"]
-    )
+    assert manifest_replication["artifact_sha256"] == replication["artifact_sha256"]
+    assert manifest_replication["summary_sha256"] == replication["summary_sha256"]
+    assert manifest_replication["daily_values_sha256"] == replication["daily_values_sha256"]
+    assert manifest_replication["replication_candidate"] == replication["replication_candidate"]
 
 
 def _verify_taiwan(
@@ -148,17 +103,11 @@ def _verify_taiwan(
 ) -> None:
     assert reference["status"] == "accepted_final"
     decision_reference = reference["decision"]
-    assert (
-        decision_reference["taiwan_canonical_sampling"]
-        == "15m"
-    )
+    assert decision_reference["taiwan_canonical_sampling"] == "15m"
     assert decision_reference["forecast_score_used"] is False
     assert market["canonical_sampling_minutes"] == 15
     assert market["price_basis"] == "as_printed"
-    assert (
-        market["algorithm_version"]
-        == "rv-core-v1+xtai-closing-auction-v4"
-    )
+    assert market["algorithm_version"] == "rv-core-v1+xtai-closing-auction-v4"
     assert market["provider"] == "shioaji"
 
     decision = market["measurement_decision"]
@@ -168,14 +117,8 @@ def _verify_taiwan(
     final_workflow = reference["final_workflow"]
     assert decision["run_id"] == final_workflow["run_id"]
     assert decision["artifact_id"] == final_workflow["artifact_id"]
-    assert (
-        decision["artifact_sha256"]
-        == final_workflow["artifact_sha256"]
-    )
-    assert (
-        decision["summary_sha256"]
-        == final_workflow["summary_sha256"]
-    )
+    assert decision["artifact_sha256"] == final_workflow["artifact_sha256"]
+    assert decision["summary_sha256"] == final_workflow["summary_sha256"]
 
 
 def _verify_target(target: dict[str, Any]) -> None:
@@ -186,10 +129,7 @@ def _verify_target(target: dict[str, Any]) -> None:
     assert target["confirmatory_horizon_sessions"] == 20
     assert target["origin_session_included"] is False
     assert target["first_target_session_offset"] == 1
-    assert (
-        target["missing_session_behavior"]
-        == "fail_closed_do_not_compress_horizon"
-    )
+    assert target["missing_session_behavior"] == "fail_closed_do_not_compress_horizon"
     assert target["builder"] == "build_future_variance_targets"
 
 

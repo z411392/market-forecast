@@ -15,18 +15,14 @@ class ShioajiProviderTrafficUsageAdapter(ReadProviderTrafficUsagePort):
         try:
             raw = self._api.usage()
         except Exception as error:
-            raise ProviderTransportError(
-                "shioaji_provider_usage_fetch_failed"
-            ) from error
+            raise ProviderTransportError("shioaji_provider_usage_fetch_failed") from error
 
         try:
             used = raw.bytes
             limit = raw.limit_bytes
             remaining = raw.remaining_bytes
         except AttributeError as error:
-            raise ProviderTransportError(
-                "shioaji_provider_usage_invalid_result"
-            ) from error
+            raise ProviderTransportError("shioaji_provider_usage_invalid_result") from error
 
         if (
             type(used) is not int
@@ -38,9 +34,7 @@ class ShioajiProviderTrafficUsageAdapter(ReadProviderTrafficUsagePort):
             or used > limit
             or remaining > limit
         ):
-            raise ProviderTransportError(
-                "shioaji_provider_usage_invalid_result"
-            )
+            raise ProviderTransportError("shioaji_provider_usage_invalid_result")
 
         return {
             "used_bytes": used,

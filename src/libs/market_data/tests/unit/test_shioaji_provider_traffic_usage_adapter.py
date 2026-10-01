@@ -88,9 +88,7 @@ def test_shioaji_provider_traffic_usage_adapter_fails_closed() -> None:
     )
     for usage in invalid_values:
         with raises(ProviderTransportError):
-            ShioajiProviderTrafficUsageAdapter(
-                _Api(usage=usage)
-            )()
+            ShioajiProviderTrafficUsageAdapter(_Api(usage=usage))()
 
     with raises(ProviderTransportError):
         ShioajiProviderTrafficUsageAdapter(

@@ -17,12 +17,9 @@ Market = Literal["us", "taiwan"]
 Mode = Literal["global", "market", "partial"]
 
 PANEL_PATH = Path(
-    "artifacts/private/provider-captures/task-101-canonical-panel/"
-    "canonical-daily-panel.json"
+    "artifacts/private/provider-captures/task-101-canonical-panel/" "canonical-daily-panel.json"
 )
-OUTPUT_ROOT = Path(
-    "artifacts/private/provider-captures/task-101-transferability"
-)
+OUTPUT_ROOT = Path("artifacts/private/provider-captures/task-101-transferability")
 SUMMARY_PATH = OUTPUT_ROOT / "summary.json"
 FINAL_H5_PATH = OUTPUT_ROOT / "h5-final.csv"
 FOLDS_H5_PATH = OUTPUT_ROOT / "h5-expanding-oos.csv"
@@ -66,18 +63,9 @@ class Evaluation:
 
 def main() -> None:
     panel = _load_panel(PANEL_PATH)
-    markets = {
-        symbol: _market(entry["market"])
-        for symbol, entry in panel["daily_values"].items()
-    }
-    data_h5 = {
-        symbol: _build_panel(entry, 5)
-        for symbol, entry in panel["daily_values"].items()
-    }
-    data_h20 = {
-        symbol: _build_panel(entry, 20)
-        for symbol, entry in panel["daily_values"].items()
-    }
+    markets = {symbol: _market(entry["market"]) for symbol, entry in panel["daily_values"].items()}
+    data_h5 = {symbol: _build_panel(entry, 5) for symbol, entry in panel["daily_values"].items()}
+    data_h20 = {symbol: _build_panel(entry, 20) for symbol, entry in panel["daily_values"].items()}
 
     final_h5 = _run_final_holdout(
         data=data_h5,
@@ -104,9 +92,7 @@ def main() -> None:
         "slice": "S2-S3-transferability",
         "status": "accepted",
         "panel_sha256": _sha256(PANEL_PATH),
-        "measurement_manifest_version": panel[
-            "measurement_manifest_version"
-        ],
+        "measurement_manifest_version": panel["measurement_manifest_version"],
         "ridge_alpha": RIDGE_ALPHA,
         "bootstrap": {
             "block_length": BOOTSTRAP_BLOCK_LENGTH,
@@ -134,8 +120,7 @@ def _load_panel(path: Path) -> dict[str, object]:
     if not isinstance(value, dict):
         raise RuntimeError("task101_transfer_panel_not_object")
     if (
-        value.get("artifact_version")
-        != "task-101-canonical-daily-panel-v1"
+        value.get("artifact_version") != "task-101-canonical-daily-panel-v1"
         or value.get("measurement_frozen") is not True
     ):
         raise RuntimeError("task101_transfer_invalid_panel_identity")
@@ -177,9 +162,7 @@ def _build_panel(
     for raw in rows:
         if not isinstance(raw, dict):
             raise RuntimeError("task101_transfer_invalid_row")
-        session_date = date.fromisoformat(
-            _require_str(raw.get("session_date"))
-        )
+        session_date = date.fromisoformat(_require_str(raw.get("session_date")))
         if session_date < START_DATE:
             raise RuntimeError("task101_transfer_row_before_start")
         if previous_date is not None and session_date <= previous_date:
@@ -298,10 +281,7 @@ def _training_rows(
             continue
 
         matured = np.array(
-            [
-                value is not None and value < maturity_before
-                for value in panel.maturity_dates
-            ],
+            [value is not None and value < maturity_before for value in panel.maturity_dates],
             dtype=bool,
         )
         mask = _eligible(panel) & matured
@@ -321,9 +301,7 @@ def _training_rows(
         y_parts.append(panel.z[mask])
 
     if not x_parts or any(part.size == 0 for part in y_parts):
-        raise RuntimeError(
-            f"task101_transfer_no_training_rows:{held_out}:{mode}"
-        )
+        raise RuntimeError(f"task101_transfer_no_training_rows:{held_out}:{mode}")
     return np.vstack(x_parts), np.concatenate(y_parts)
 
 
@@ -371,17 +349,11 @@ def _evaluate(
 ) -> Evaluation:
     panel = data[held_out]
     test_mask = _eligible(panel) & np.array(
-        [
-            value >= test_start
-            and (test_end is None or value <= test_end)
-            for value in panel.dates
-        ],
+        [value >= test_start and (test_end is None or value <= test_end) for value in panel.dates],
         dtype=bool,
     )
     if not np.any(test_mask):
-        raise RuntimeError(
-            f"task101_transfer_no_test_rows:{held_out}:{test_start}"
-        )
+        raise RuntimeError(f"task101_transfer_no_test_rows:{held_out}:{test_start}")
 
     base_test = _design(
         panel.x_d[test_mask],
@@ -462,9 +434,7 @@ def _run_final_holdout(
     )
     for row in rows:
         row["horizon"] = horizon
-        row["evaluation_start"] = (
-            EVALUATION_START_DATE.isoformat()
-        )
+        row["evaluation_start"] = EVALUATION_START_DATE.isoformat()
         row["training_origin_end"] = TRAIN_END_DATE.isoformat()
     return rows
 
@@ -493,11 +463,7 @@ def _run_expanding_folds(
         ):
             row["fold"] = fold_id
             row["start"] = fold_start.isoformat()
-            row["end"] = (
-                fold_end.isoformat()
-                if fold_end is not None
-                else "end"
-            )
+            row["end"] = fold_end.isoformat() if fold_end is not None else "end"
             row["horizon"] = 5
             rows.append(row)
     return rows
@@ -510,18 +476,9 @@ def _result_row(
     market: str,
     evaluation: Evaluation,
 ) -> dict[str, object]:
-    market_global = (
-        evaluation.market_qlike
-        - evaluation.global_qlike
-    )
-    partial_global = (
-        evaluation.partial_qlike
-        - evaluation.global_qlike
-    )
-    partial_market = (
-        evaluation.partial_qlike
-        - evaluation.market_qlike
-    )
+    market_global = evaluation.market_qlike - evaluation.global_qlike
+    partial_global = evaluation.partial_qlike - evaluation.global_qlike
+    partial_market = evaluation.partial_qlike - evaluation.market_qlike
     mg = _moving_block_ci(market_global)
     pg = _moving_block_ci(partial_global)
     pm = _moving_block_ci(partial_market)
@@ -530,15 +487,9 @@ def _result_row(
         "name": name,
         "market": market,
         "n": evaluation.dates.size,
-        "global_qlike": float(
-            evaluation.global_qlike.mean()
-        ),
-        "market_qlike": float(
-            evaluation.market_qlike.mean()
-        ),
-        "partial_qlike": float(
-            evaluation.partial_qlike.mean()
-        ),
+        "global_qlike": float(evaluation.global_qlike.mean()),
+        "market_qlike": float(evaluation.market_qlike.mean()),
+        "partial_qlike": float(evaluation.partial_qlike.mean()),
         "market_minus_global": mg[0],
         "market_global_ci_025": mg[1],
         "market_global_ci_975": mg[2],
@@ -607,10 +558,7 @@ def _scope_row(
         raise RuntimeError(f"task101_transfer_empty_scope:{name}")
 
     date_rows = np.array(
-        [
-            np.mean(per_date[current_date], axis=0)
-            for current_date in sorted(per_date)
-        ],
+        [np.mean(per_date[current_date], axis=0) for current_date in sorted(per_date)],
         dtype=float,
     )
     synthetic = Evaluation(
@@ -632,16 +580,10 @@ def _moving_block_ci(
 ) -> tuple[float, float, float]:
     values = values[np.isfinite(values)]
     if values.size < BOOTSTRAP_BLOCK_LENGTH:
-        raise RuntimeError(
-            "task101_transfer_not_enough_bootstrap_rows"
-        )
+        raise RuntimeError("task101_transfer_not_enough_bootstrap_rows")
     rng = np.random.default_rng(BOOTSTRAP_SEED)
-    starts = np.arange(
-        values.size - BOOTSTRAP_BLOCK_LENGTH + 1
-    )
-    blocks_needed = math.ceil(
-        values.size / BOOTSTRAP_BLOCK_LENGTH
-    )
+    starts = np.arange(values.size - BOOTSTRAP_BLOCK_LENGTH + 1)
+    blocks_needed = math.ceil(values.size / BOOTSTRAP_BLOCK_LENGTH)
     means = np.empty(BOOTSTRAP_REPLICATES)
 
     for index in range(BOOTSTRAP_REPLICATES):
@@ -650,14 +592,9 @@ def _moving_block_ci(
             size=blocks_needed,
             replace=True,
         )
-        sample = np.concatenate(
-            [
-                values[
-                    start : start + BOOTSTRAP_BLOCK_LENGTH
-                ]
-                for start in chosen
-            ]
-        )[: values.size]
+        sample = np.concatenate([values[start : start + BOOTSTRAP_BLOCK_LENGTH] for start in chosen])[
+            : values.size
+        ]
         means[index] = sample.mean()
 
     lower, upper = np.quantile(

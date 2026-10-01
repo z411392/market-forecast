@@ -54,9 +54,7 @@ SYMBOL_SPECIFIC_FULL_DAY_HALTS = {
     },
 }
 
-OUTPUT_ROOT = Path(
-    "artifacts/private/provider-captures/task-101-taiwan-canonical-panel"
-)
+OUTPUT_ROOT = Path("artifacts/private/provider-captures/task-101-taiwan-canonical-panel")
 CHUNK_ROOT = OUTPUT_ROOT / "chunks"
 SUMMARY_PATH = OUTPUT_ROOT / "summary.json"
 DAILY_PATH = OUTPUT_ROOT / "daily-values.json"
@@ -64,9 +62,7 @@ DAILY_PATH = OUTPUT_ROOT / "daily-values.json"
 
 def main() -> None:
     api_key = _required_secret("MARKET_FORECAST_SHIOAJI_API_KEY")
-    secret_key = _required_secret(
-        "MARKET_FORECAST_SHIOAJI_SECRET_KEY"
-    )
+    secret_key = _required_secret("MARKET_FORECAST_SHIOAJI_SECRET_KEY")
 
     calendar = xcals.get_calendar("XTAI")
     scheduled = tuple(
@@ -76,11 +72,7 @@ def main() -> None:
             END_SESSION.isoformat(),
         )
     )
-    adjusted = tuple(
-        value
-        for value in scheduled
-        if value not in AD_HOC_FULL_DAY_CLOSURES
-    )
+    adjusted = tuple(value for value in scheduled if value not in AD_HOC_FULL_DAY_CLOSURES)
     if START_SESSION not in adjusted:
         raise RuntimeError("task101_tw_start_not_xtai_session")
     start_index = adjusted.index(START_SESSION)
@@ -115,9 +107,7 @@ def main() -> None:
                 "session_date": key.isoformat(),
                 "reason": value,
             }
-            for key, value in sorted(
-                AD_HOC_FULL_DAY_CLOSURES.items()
-            )
+            for key, value in sorted(AD_HOC_FULL_DAY_CLOSURES.items())
             if prior_session <= key <= END_SESSION
         ],
         "status": "running",
@@ -146,9 +136,7 @@ def main() -> None:
         for symbol in SYMBOLS:
             contract = api.contracts.get(symbol)
             if contract is None:
-                raise RuntimeError(
-                    f"task101_shioaji_contract_missing:{symbol}"
-                )
+                raise RuntimeError(f"task101_shioaji_contract_missing:{symbol}")
 
             symbol_result: dict[str, Any] = {
                 "symbol": symbol,
@@ -167,18 +155,16 @@ def main() -> None:
             summary["symbols_result"].append(symbol_result)
             _write_json(SUMMARY_PATH, summary)
 
-            provider_sessions, session_chunk_sha = (
-                _fetch_symbol_sessions(
-                    api=api,
-                    usage_reader=usage_reader,
-                    initial_used_bytes=initial_usage["used_bytes"],
-                    contract=contract,
-                    symbol=symbol,
-                    first_session=prior_session,
-                    last_session=END_SESSION,
-                    symbol_result=symbol_result,
-                    summary=summary,
-                )
+            provider_sessions, session_chunk_sha = _fetch_symbol_sessions(
+                api=api,
+                usage_reader=usage_reader,
+                initial_used_bytes=initial_usage["used_bytes"],
+                contract=contract,
+                symbol=symbol,
+                first_session=prior_session,
+                last_session=END_SESSION,
+                symbol_result=symbol_result,
+                summary=summary,
             )
 
             provider_dates = set(provider_sessions)
@@ -189,15 +175,9 @@ def main() -> None:
                 symbol,
                 {},
             )
-            explained_missing = [
-                value for value in missing if value in known_halts
-            ]
-            unexplained_missing = [
-                value for value in missing if value not in known_halts
-            ]
-            symbol_result["missing_expected_sessions"] = [
-                value.isoformat() for value in unexplained_missing
-            ]
+            explained_missing = [value for value in missing if value in known_halts]
+            unexplained_missing = [value for value in missing if value not in known_halts]
+            symbol_result["missing_expected_sessions"] = [value.isoformat() for value in unexplained_missing]
             symbol_result["explained_symbol_halt_sessions"] = [
                 {
                     "session_date": value.isoformat(),
@@ -205,20 +185,12 @@ def main() -> None:
                 }
                 for value in explained_missing
             ]
-            symbol_result["extra_provider_sessions"] = [
-                value.isoformat() for value in extra
-            ]
-            symbol_result[
-                "ignored_out_of_calendar_provider_sessions"
-            ] = [
+            symbol_result["extra_provider_sessions"] = [value.isoformat() for value in extra]
+            symbol_result["ignored_out_of_calendar_provider_sessions"] = [
                 {
                     "session_date": value.isoformat(),
-                    "provider_bar_count": len(
-                        provider_sessions[value]["ts"]
-                    ),
-                    "reason": (
-                        "outside_canonical_xtai_session_calendar"
-                    ),
+                    "provider_bar_count": len(provider_sessions[value]["ts"]),
+                    "reason": ("outside_canonical_xtai_session_calendar"),
                 }
                 for value in extra
             ]
@@ -257,8 +229,7 @@ def main() -> None:
                     halt_reason = known_halts.get(session_date)
                     if halt_reason is None:
                         raise RuntimeError(
-                            "task101_tw_unexplained_missing_measurement:"
-                            f"{symbol}:{session_date}"
+                            "task101_tw_unexplained_missing_measurement:" f"{symbol}:{session_date}"
                         )
                     rows.append(
                         {
@@ -286,34 +257,19 @@ def main() -> None:
                     SAMPLING_MINUTES,
                 )
                 previous_tick = [
-                    sample
-                    for sample in sampled
-                    if sample["observation_mode"] == "previous_tick"
+                    sample for sample in sampled if sample["observation_mode"] == "previous_tick"
                 ]
                 if previous_tick:
                     previous_tick_sessions.add(session_date)
-                    symbol_result[
-                        "previous_tick_sample_count"
-                    ] += len(previous_tick)
-                    symbol_result[
-                        "max_previous_tick_staleness_upper_seconds"
-                    ] = max(
-                        symbol_result[
-                            "max_previous_tick_staleness_upper_seconds"
-                        ],
-                        max(
-                            sample[
-                                "staleness_upper_bound_seconds"
-                            ]
-                            for sample in previous_tick
-                        ),
+                    symbol_result["previous_tick_sample_count"] += len(previous_tick)
+                    symbol_result["max_previous_tick_staleness_upper_seconds"] = max(
+                        symbol_result["max_previous_tick_staleness_upper_seconds"],
+                        max(sample["staleness_upper_bound_seconds"] for sample in previous_tick),
                     )
 
-                intraday = (
-                    calculate_intraday_realized_measures_from_sampled_prices(
-                        sampled,
-                        session_open,
-                    )
+                intraday = calculate_intraday_realized_measures_from_sampled_prices(
+                    sampled,
+                    session_open,
                 )
                 daily = calculate_daily_realized_measures(
                     intraday,
@@ -322,42 +278,24 @@ def main() -> None:
                 rows.append(
                     {
                         "session_date": session_date.isoformat(),
-                        "whole_day_variance": daily[
-                            "whole_day_variance"
-                        ],
-                        "regular_session_variance": daily[
-                            "regular_session_variance"
-                        ],
-                        "overnight_variance": daily[
-                            "overnight_variance"
-                        ],
-                        "overnight_log_return": daily[
-                            "overnight_log_return"
-                        ],
-                        "observation_count": daily[
-                            "observation_count"
-                        ],
-                        "source_chunk_sha256": session_chunk_sha[
-                            session_date
-                        ],
+                        "whole_day_variance": daily["whole_day_variance"],
+                        "regular_session_variance": daily["regular_session_variance"],
+                        "overnight_variance": daily["overnight_variance"],
+                        "overnight_log_return": daily["overnight_log_return"],
+                        "observation_count": daily["observation_count"],
+                        "source_chunk_sha256": session_chunk_sha[session_date],
                     }
                 )
                 previous_closing = closing
 
-            symbol_result["previous_tick_session_count"] = len(
-                previous_tick_sessions
-            )
-            symbol_result["provider_session_count"] = len(
-                provider_sessions
-            )
+            symbol_result["previous_tick_session_count"] = len(previous_tick_sessions)
+            symbol_result["provider_session_count"] = len(provider_sessions)
             symbol_result["accepted_panel_sessions"] = len(rows)
             symbol_result["measured_panel_sessions"] = sum(
-                row["whole_day_variance"] is not None
-                for row in rows
+                row["whole_day_variance"] is not None for row in rows
             )
             symbol_result["missing_measurement_sessions"] = sum(
-                row["whole_day_variance"] is None
-                for row in rows
+                row["whole_day_variance"] is None for row in rows
             )
             symbol_result["status"] = "accepted"
             all_daily[symbol] = rows
@@ -365,9 +303,7 @@ def main() -> None:
 
         final_usage = usage_reader()
         summary["final_usage"] = dict(final_usage)
-        summary["current_run_delta_bytes"] = (
-            final_usage["used_bytes"] - initial_usage["used_bytes"]
-        )
+        summary["current_run_delta_bytes"] = final_usage["used_bytes"] - initial_usage["used_bytes"]
         if summary["current_run_delta_bytes"] < 0:
             raise RuntimeError("task101_tw_decreasing_usage_counter")
         summary["status"] = "accepted"
@@ -375,27 +311,17 @@ def main() -> None:
         _write_json(
             DAILY_PATH,
             {
-                "artifact_version": (
-                    "task-101-taiwan-canonical-panel-v1"
-                ),
+                "artifact_version": ("task-101-taiwan-canonical-panel-v1"),
                 "task": 101,
                 "provider": "shioaji",
                 "provider_version": sj.__version__,
                 "calendar": "XTAI",
                 "price_basis": "as_printed",
                 "sampling_minutes": SAMPLING_MINUTES,
-                "algorithm_version": (
-                    XTAI_REALIZED_VARIANCE_ALGORITHM_VERSION
-                ),
-                "prior_session_for_first_overnight": (
-                    prior_session.isoformat()
-                ),
-                "first_panel_session": (
-                    panel_sessions[0].isoformat()
-                ),
-                "last_panel_session": (
-                    panel_sessions[-1].isoformat()
-                ),
+                "algorithm_version": (XTAI_REALIZED_VARIANCE_ALGORITHM_VERSION),
+                "prior_session_for_first_overnight": (prior_session.isoformat()),
+                "first_panel_session": (panel_sessions[0].isoformat()),
+                "last_panel_session": (panel_sessions[-1].isoformat()),
                 "panel_session_count": len(panel_sessions),
                 "daily_values": all_daily,
             },
@@ -428,24 +354,17 @@ def _fetch_symbol_sessions(
 
     while cursor <= last_session:
         chunk_end = min(
-            cursor
-            + timedelta(days=QUERY_CHUNK_CALENDAR_DAYS - 1),
+            cursor + timedelta(days=QUERY_CHUNK_CALENDAR_DAYS - 1),
             last_session,
         )
-        path = (
-            CHUNK_ROOT
-            / symbol
-            / f"{cursor.isoformat()}_{chunk_end.isoformat()}.json"
-        )
+        path = CHUNK_ROOT / symbol / f"{cursor.isoformat()}_{chunk_end.isoformat()}.json"
 
         if path.is_file():
             encoded = path.read_bytes()
             try:
                 cached = json.loads(encoded)
             except (json.JSONDecodeError, UnicodeDecodeError) as error:
-                raise RuntimeError(
-                    "task101_tw_invalid_cached_chunk_json"
-                ) from error
+                raise RuntimeError("task101_tw_invalid_cached_chunk_json") from error
             if (
                 not isinstance(cached, dict)
                 or cached.get("provider") != "shioaji"
@@ -454,12 +373,8 @@ def _fetch_symbol_sessions(
                 or cached.get("end_date") != chunk_end.isoformat()
                 or not isinstance(cached.get("payload"), dict)
             ):
-                raise RuntimeError(
-                    "task101_tw_cached_chunk_identity_mismatch"
-                )
-            normalized = _normalize_provider_payload(
-                cached["payload"]
-            )
+                raise RuntimeError("task101_tw_cached_chunk_identity_mismatch")
+            normalized = _normalize_provider_payload(cached["payload"])
             digest = sha256(encoded).hexdigest()
             usage = None
             after = None
@@ -473,9 +388,7 @@ def _fetch_symbol_sessions(
                 end=chunk_end.isoformat(),
                 timeout=15000,
             )
-            normalized = _normalize_provider_payload(
-                provider.dict()
-            )
+            normalized = _normalize_provider_payload(provider.dict())
             payload = {
                 "provider": "shioaji",
                 "provider_version": sj.__version__,
@@ -499,9 +412,7 @@ def _fetch_symbol_sessions(
 
             after = usage_reader()
             if after["used_bytes"] < usage["used_bytes"]:
-                raise RuntimeError(
-                    "task101_tw_decreasing_usage_counter"
-                )
+                raise RuntimeError("task101_tw_decreasing_usage_counter")
             symbol_result["provider_chunk_fetch_count"] += 1
             summary["latest_usage"] = dict(after)
             _enforce_usage_guard(after, initial_used_bytes)
@@ -512,10 +423,7 @@ def _fetch_symbol_sessions(
         )
         for session_date in chunk_dates:
             if session_date in session_chunk_sha:
-                raise RuntimeError(
-                    "task101_tw_session_in_multiple_chunks:"
-                    f"{symbol}:{session_date}"
-                )
+                raise RuntimeError("task101_tw_session_in_multiple_chunks:" f"{symbol}:{session_date}")
             session_chunk_sha[session_date] = digest
 
         symbol_result["query_chunks"].append(
@@ -525,12 +433,8 @@ def _fetch_symbol_sessions(
                 "row_count": len(normalized["ts"]),
                 "chunk_sha256": digest,
                 "cache_hit": usage is None,
-                "usage_before": (
-                    dict(usage) if usage is not None else None
-                ),
-                "usage_after": (
-                    dict(after) if after is not None else None
-                ),
+                "usage_before": (dict(usage) if usage is not None else None),
+                "usage_after": (dict(after) if after is not None else None),
             }
         )
         _write_json(SUMMARY_PATH, summary)
@@ -552,9 +456,7 @@ def _enforce_usage_guard(
     if delta < 0:
         raise RuntimeError("task101_tw_decreasing_usage_counter")
     if delta >= MAX_CURRENT_RUN_DELTA_BYTES:
-        raise RuntimeError(
-            "task101_tw_current_run_traffic_guard"
-        )
+        raise RuntimeError("task101_tw_current_run_traffic_guard")
 
 
 def _normalize_provider_payload(
@@ -565,26 +467,17 @@ def _normalize_provider_payload(
         if field not in payload:
             if field == "Amount":
                 continue
-            raise RuntimeError(
-                f"task101_tw_missing_shioaji_field:{field}"
-            )
+            raise RuntimeError(f"task101_tw_missing_shioaji_field:{field}")
         values = payload[field]
         if hasattr(values, "tolist"):
             values = values.tolist()
         if not isinstance(values, list):
             values = list(values)
-        normalized[field] = [
-            _number(value) for value in values
-        ]
+        normalized[field] = [_number(value) for value in values]
 
     expected_count = len(normalized["ts"])
-    if any(
-        len(values) != expected_count
-        for values in normalized.values()
-    ):
-        raise RuntimeError(
-            "task101_tw_inconsistent_chunk_lengths"
-        )
+    if any(len(values) != expected_count for values in normalized.values()):
+        raise RuntimeError("task101_tw_inconsistent_chunk_lengths")
     return normalized
 
 
@@ -595,17 +488,13 @@ def _merge_sessions(
     touched: set[date] = set()
     for index, raw_ts in enumerate(payload["ts"]):
         if not isinstance(raw_ts, int):
-            raise RuntimeError(
-                "task101_tw_unexpected_timestamp_type"
-            )
+            raise RuntimeError("task101_tw_unexpected_timestamp_type")
         seconds, nanoseconds = divmod(
             raw_ts,
             1_000_000_000,
         )
         if nanoseconds != 0:
-            raise RuntimeError(
-                "task101_tw_unexpected_timestamp_precision"
-            )
+            raise RuntimeError("task101_tw_unexpected_timestamp_precision")
         session_date = datetime.fromtimestamp(
             seconds,
             tz=timezone.utc,
@@ -630,9 +519,7 @@ def _number(value: Any) -> int | float:
         return int(value)
     if isinstance(value, float) and math.isfinite(value):
         return float(value)
-    raise RuntimeError(
-        f"task101_tw_invalid_market_number:{type(value).__name__}"
-    )
+    raise RuntimeError(f"task101_tw_invalid_market_number:{type(value).__name__}")
 
 
 def _required_secret(name: str) -> str:

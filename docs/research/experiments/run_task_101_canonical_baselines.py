@@ -16,16 +16,12 @@ from sklearn.preprocessing import StandardScaler
 
 Market = Literal["us", "taiwan"]
 
-INPUT_ROOT = Path(
-    "artifacts/private/provider-captures/task-101-baseline-input"
-)
+INPUT_ROOT = Path("artifacts/private/provider-captures/task-101-baseline-input")
 PANEL_PATH = INPUT_ROOT / "panel" / "canonical-daily-panel.json"
 US_ROOT = INPUT_ROOT / "us"
 TAIWAN_ROOT = INPUT_ROOT / "taiwan"
 
-OUTPUT_ROOT = Path(
-    "artifacts/private/provider-captures/task-101-canonical-baselines"
-)
+OUTPUT_ROOT = Path("artifacts/private/provider-captures/task-101-canonical-baselines")
 SUMMARY_PATH = OUTPUT_ROOT / "summary.json"
 PER_SYMBOL_PATH = OUTPUT_ROOT / "per-symbol.csv"
 BOOTSTRAP_PATH = OUTPUT_ROOT / "bootstrap.csv"
@@ -68,9 +64,7 @@ COMPARISONS = (
 
 
 def _parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Run Task #101 canonical mandatory baseline comparison."
-    )
+    parser = argparse.ArgumentParser(description="Run Task #101 canonical mandatory baseline comparison.")
     parser.add_argument(
         "--non-garch-only",
         action="store_true",
@@ -85,18 +79,10 @@ def _parse_args() -> argparse.Namespace:
 def main() -> None:
     args = _parse_args()
     active_model_names = (
-        tuple(name for name in MODEL_NAMES if name != "garch")
-        if args.non_garch_only
-        else MODEL_NAMES
+        tuple(name for name in MODEL_NAMES if name != "garch") if args.non_garch_only else MODEL_NAMES
     )
     active_comparisons = (
-        tuple(
-            pair
-            for pair in COMPARISONS
-            if "garch" not in pair
-        )
-        if args.non_garch_only
-        else COMPARISONS
+        tuple(pair for pair in COMPARISONS if "garch" not in pair) if args.non_garch_only else COMPARISONS
     )
 
     panel = _load_json(PANEL_PATH)
@@ -129,10 +115,7 @@ def main() -> None:
             garch = None
             garch_diag = {
                 "status": "failed_closed_not_reexecuted",
-                "reference": (
-                    "docs/research/experiments/"
-                    "task-101-canonical-garch-failure-reference.json"
-                ),
+                "reference": ("docs/research/experiments/" "task-101-canonical-garch-failure-reference.json"),
             }
         else:
             garch, garch_diag = _garch_forecast(
@@ -163,16 +146,10 @@ def main() -> None:
             common &= np.isfinite(forecast) & (forecast > 0.0)
 
         if int(common.sum()) < BOOTSTRAP_BLOCK:
-            raise RuntimeError(
-                f"task101_baseline_insufficient_common_rows:{symbol}:"
-                f"{int(common.sum())}"
-            )
+            raise RuntimeError(f"task101_baseline_insufficient_common_rows:{symbol}:" f"{int(common.sum())}")
 
         actual = item["y5"][common]
-        losses = {
-            name: _qlike(actual, forecast[common])
-            for name, forecast in forecasts.items()
-        }
+        losses = {name: _qlike(actual, forecast[common]) for name, forecast in forecasts.items()}
         scored_by_symbol[symbol] = {
             "dates": item["dates"][common],
             **losses,
@@ -183,10 +160,7 @@ def main() -> None:
                 "symbol": symbol,
                 "market": item["market"],
                 "n_eval": int(common.sum()),
-                **{
-                    f"{name}_qlike": float(loss.mean())
-                    for name, loss in losses.items()
-                },
+                **{f"{name}_qlike": float(loss.mean()) for name, loss in losses.items()},
             }
         )
         forecast_diag[symbol] = {
@@ -196,17 +170,13 @@ def main() -> None:
             "common_eval_count": int(common.sum()),
             "garch": garch_diag,
             "forecast_available_count": {
-                name: int(np.isfinite(values).sum())
-                for name, values in forecasts.items()
+                name: int(np.isfinite(values).sum()) for name, values in forecasts.items()
             },
         }
 
     bootstrap_rows = _bootstrap_rows(
         scored_by_symbol,
-        {
-            symbol: data[symbol]["market"]
-            for symbol in SYMBOLS
-        },
+        {symbol: data[symbol]["market"] for symbol in SYMBOLS},
         active_model_names,
         active_comparisons,
     )
@@ -229,16 +199,8 @@ def main() -> None:
         "artifact_version": "task-101-canonical-baselines-v1",
         "task": 101,
         "slice": "S2-mandatory-baselines",
-        "status": (
-            "accepted_non_garch_subset"
-            if args.non_garch_only
-            else "accepted"
-        ),
-        "garch_status": (
-            "failed_closed_not_reexecuted"
-            if args.non_garch_only
-            else "included"
-        ),
+        "status": ("accepted_non_garch_subset" if args.non_garch_only else "accepted"),
+        "garch_status": ("failed_closed_not_reexecuted" if args.non_garch_only else "included"),
         "input_sha256": {
             "canonical_panel": _sha256(PANEL_PATH),
         },
@@ -258,8 +220,7 @@ def main() -> None:
         "provenance_exception": {
             "legacy_pine_fixed_grid_reproduced": False,
             "reason": (
-                "legacy Phase 4A Pine source bytes and exact fixed "
-                "alpha-persistence grid are unavailable"
+                "legacy Phase 4A Pine source bytes and exact fixed " "alpha-persistence grid are unavailable"
             ),
             "replacement": (
                 "same zero-mean GARCH(1,1) class, trailing 504 returns, "
@@ -286,11 +247,9 @@ def main() -> None:
 
 def _validate_panel(panel: dict[str, Any]) -> None:
     if (
-        panel.get("artifact_version")
-        != "task-101-canonical-daily-panel-v1"
+        panel.get("artifact_version") != "task-101-canonical-daily-panel-v1"
         or panel.get("measurement_frozen") is not True
-        or panel.get("measurement_manifest_version")
-        != "cross-market-rv-measurement-target-manifest-v2"
+        or panel.get("measurement_manifest_version") != "cross-market-rv-measurement-target-manifest-v2"
     ):
         raise RuntimeError("task101_baseline_invalid_panel_identity")
     daily = panel.get("daily_values")
@@ -301,26 +260,17 @@ def _validate_panel(panel: dict[str, Any]) -> None:
 def _load_us_closes() -> dict[str, dict[date, float]]:
     result = {symbol: {} for symbol in US_SYMBOLS}
 
-    for receipt_path in US_ROOT.glob(
-        "evidence/alpaca/*/*/*/*/acceptance-receipt.json"
-    ):
+    for receipt_path in US_ROOT.glob("evidence/alpaca/*/*/*/*/acceptance-receipt.json"):
         receipt = _load_json(receipt_path)
         symbol = receipt.get("source_symbol")
         if symbol not in US_SYMBOLS:
             continue
-        session_date = date.fromisoformat(
-            _require_str(receipt.get("session_date"))
-        )
+        session_date = date.fromisoformat(_require_str(receipt.get("session_date")))
         raw_path = receipt_path.parent / "raw-response.bin"
         raw = raw_path.read_bytes()
-        expected_sha = _require_str(
-            receipt.get("raw_artifact_sha256")
-        )
+        expected_sha = _require_str(receipt.get("raw_artifact_sha256"))
         if hashlib.sha256(raw).hexdigest() != expected_sha:
-            raise RuntimeError(
-                f"task101_baseline_us_raw_hash_mismatch:{symbol}:"
-                f"{session_date}"
-            )
+            raise RuntimeError(f"task101_baseline_us_raw_hash_mismatch:{symbol}:" f"{session_date}")
         payload = json.loads(raw)
         close = _alpaca_last_close(payload, symbol)
         _insert_close(result[symbol], session_date, close)
@@ -331,25 +281,18 @@ def _load_us_closes() -> dict[str, dict[date, float]]:
             symbol = raw_path.parents[2].name
             if symbol not in US_SYMBOLS:
                 continue
-            session_date = date.fromisoformat(
-                raw_path.parents[1].name
-            )
+            session_date = date.fromisoformat(raw_path.parents[1].name)
             raw = raw_path.read_bytes()
             expected_sha = raw_path.stem
             if hashlib.sha256(raw).hexdigest() != expected_sha:
-                raise RuntimeError(
-                    "task101_baseline_us_diagnostic_hash_mismatch:"
-                    f"{symbol}:{session_date}"
-                )
+                raise RuntimeError("task101_baseline_us_diagnostic_hash_mismatch:" f"{symbol}:{session_date}")
             payload = json.loads(raw)
             close = _alpaca_last_close(payload, symbol)
             _insert_close(result[symbol], session_date, close)
 
     for symbol in US_SYMBOLS:
         if date(2022, 7, 15) not in result[symbol]:
-            raise RuntimeError(
-                f"task101_baseline_us_prior_close_missing:{symbol}"
-            )
+            raise RuntimeError(f"task101_baseline_us_prior_close_missing:{symbol}")
     return result
 
 
@@ -380,13 +323,8 @@ def _load_taiwan_closes() -> dict[str, dict[date, float]]:
         if symbol not in TAIWAN_SYMBOLS:
             continue
         chunk = _load_json(chunk_path)
-        if (
-            chunk.get("provider") != "shioaji"
-            or chunk.get("symbol") != symbol
-        ):
-            raise RuntimeError(
-                f"task101_baseline_tw_chunk_identity:{symbol}"
-            )
+        if chunk.get("provider") != "shioaji" or chunk.get("symbol") != symbol:
+            raise RuntimeError(f"task101_baseline_tw_chunk_identity:{symbol}")
         payload = chunk.get("payload")
         if not isinstance(payload, dict):
             raise RuntimeError("task101_baseline_tw_payload_missing")
@@ -399,17 +337,13 @@ def _load_taiwan_closes() -> dict[str, dict[date, float]]:
 
         for raw_ts, raw_close in zip(ts, closes, strict=True):
             if type(raw_ts) is not int:
-                raise RuntimeError(
-                    "task101_baseline_tw_invalid_timestamp"
-                )
+                raise RuntimeError("task101_baseline_tw_invalid_timestamp")
             seconds, nanoseconds = divmod(
                 raw_ts,
                 1_000_000_000,
             )
             if nanoseconds != 0:
-                raise RuntimeError(
-                    "task101_baseline_tw_timestamp_precision"
-                )
+                raise RuntimeError("task101_baseline_tw_timestamp_precision")
             wall = datetime.fromtimestamp(
                 seconds,
                 tz=timezone.utc,
@@ -423,9 +357,7 @@ def _load_taiwan_closes() -> dict[str, dict[date, float]]:
 
     for symbol in TAIWAN_SYMBOLS:
         if date(2022, 7, 15) not in result[symbol]:
-            raise RuntimeError(
-                f"task101_baseline_tw_prior_close_missing:{symbol}"
-            )
+            raise RuntimeError(f"task101_baseline_tw_prior_close_missing:{symbol}")
     return result
 
 
@@ -441,9 +373,7 @@ def _insert_close(
         rel_tol=1e-12,
         abs_tol=1e-15,
     ):
-        raise RuntimeError(
-            f"task101_baseline_conflicting_close:{session_date}"
-        )
+        raise RuntimeError(f"task101_baseline_conflicting_close:{session_date}")
     target[session_date] = close
 
 
@@ -465,13 +395,9 @@ def _build_symbol_data(
     for raw in rows:
         if not isinstance(raw, dict):
             raise RuntimeError("task101_baseline_invalid_row")
-        session_date = date.fromisoformat(
-            _require_str(raw.get("session_date"))
-        )
+        session_date = date.fromisoformat(_require_str(raw.get("session_date")))
         if previous is not None and session_date <= previous:
-            raise RuntimeError(
-                f"task101_baseline_non_increasing_dates:{symbol}"
-            )
+            raise RuntimeError(f"task101_baseline_non_increasing_dates:{symbol}")
         previous = session_date
         dates.append(session_date)
         value = raw.get("whole_day_variance")
@@ -492,23 +418,15 @@ def _build_symbol_data(
     y5 = _future_mean(rv, HORIZON)
 
     returns = np.full(rv.size, np.nan)
-    observed_close_dates = sorted(
-        value
-        for value in closes
-        if value <= dates[-1]
-    )
+    observed_close_dates = sorted(value for value in closes if value <= dates[-1])
     if not observed_close_dates:
-        raise RuntimeError(
-            f"task101_baseline_no_close_history:{symbol}"
-        )
+        raise RuntimeError(f"task101_baseline_no_close_history:{symbol}")
     previous_close: float | None = None
     return_by_date: dict[date, float] = {}
     for current_date in observed_close_dates:
         current_close = closes[current_date]
         if previous_close is not None:
-            return_by_date[current_date] = math.log(
-                current_close / previous_close
-            )
+            return_by_date[current_date] = math.log(current_close / previous_close)
         previous_close = current_close
 
     for index, current_date in enumerate(dates):
@@ -575,12 +493,7 @@ def _har_forecast(
         target = y5.copy()
 
     forecast = np.full(rv.size, np.nan)
-    eligible_origin = (
-        np.isfinite(d)
-        & np.isfinite(w)
-        & np.isfinite(m)
-        & np.isfinite(target)
-    )
+    eligible_origin = np.isfinite(d) & np.isfinite(w) & np.isfinite(m) & np.isfinite(target)
 
     for index in range(rv.size):
         current = np.array(
@@ -593,9 +506,7 @@ def _har_forecast(
         matured_end = index - HORIZON
         if matured_end < 0:
             continue
-        candidates = np.flatnonzero(
-            eligible_origin[: matured_end + 1]
-        )
+        candidates = np.flatnonzero(eligible_origin[: matured_end + 1])
         if candidates.size < HAR_TRAIN_ROWS:
             continue
         train_idx = candidates[-HAR_TRAIN_ROWS:]
@@ -613,9 +524,7 @@ def _har_forecast(
         centered = x - means
         centered_y = y - mean_y
         covariance = centered.T @ centered / HAR_TRAIN_ROWS
-        covariance_y = (
-            centered.T @ centered_y / HAR_TRAIN_ROWS
-        )
+        covariance_y = centered.T @ centered_y / HAR_TRAIN_ROWS
         beta = np.linalg.pinv(covariance) @ covariance_y
         intercept = mean_y - float(beta @ means)
         prediction = intercept + float(beta @ current)
@@ -638,10 +547,7 @@ def _ewma_forecast(
         if state is None:
             state = squared
         else:
-            state = (
-                EWMA_LAMBDA * state
-                + (1.0 - EWMA_LAMBDA) * squared
-            )
+            state = EWMA_LAMBDA * state + (1.0 - EWMA_LAMBDA) * squared
         result[index] = max(state, EPS)
     return result
 
@@ -670,8 +576,7 @@ def _garch_forecast(
         need_refit = (
             params is None
             or last_refit_observed_index is None
-            or observed_index - last_refit_observed_index
-            >= GARCH_REFIT_EVERY
+            or observed_index - last_refit_observed_index >= GARCH_REFIT_EVERY
         )
         if need_refit:
             sample = np.asarray(
@@ -702,10 +607,7 @@ def _garch_forecast(
             alpha = float(fit.params["alpha[1]"])
             beta = float(fit.params["beta[1]"])
             if (
-                not all(
-                    math.isfinite(value)
-                    for value in (omega, alpha, beta)
-                )
+                not all(math.isfinite(value) for value in (omega, alpha, beta))
                 or omega <= 0.0
                 or alpha < 0.0
                 or beta < 0.0
@@ -719,9 +621,7 @@ def _garch_forecast(
                     f"persistence={alpha + beta:.17g}"
                 )
             params = (omega, alpha, beta)
-            h_current = float(
-                fit.conditional_volatility[-1] ** 2
-            )
+            h_current = float(fit.conditional_volatility[-1] ** 2)
             if not math.isfinite(h_current) or h_current <= 0.0:
                 raise RuntimeError(
                     "task101_baseline_garch_invalid_state:"
@@ -743,11 +643,7 @@ def _garch_forecast(
         if params is None or h_current is None:
             continue
         omega, alpha, beta = params
-        h1 = (
-            omega
-            + alpha * scaled_return * scaled_return
-            + beta * h_current
-        )
+        h1 = omega + alpha * scaled_return * scaled_return + beta * h_current
         if not math.isfinite(h1) or h1 <= 0.0:
             raise RuntimeError(
                 "task101_baseline_garch_invalid_one_step:"
@@ -761,13 +657,9 @@ def _garch_forecast(
         for _ in range(1, HORIZON):
             next_h = omega + persistence * next_h
             horizon_values.append(next_h)
-        average_variance = (
-            float(np.mean(horizon_values)) / 10000.0
-        )
+        average_variance = float(np.mean(horizon_values)) / 10000.0
         if not math.isfinite(average_variance) or average_variance <= 0.0:
-            raise RuntimeError(
-                "task101_baseline_garch_invalid_forecast"
-            )
+            raise RuntimeError("task101_baseline_garch_invalid_forecast")
         result[index] = max(average_variance, EPS)
         h_current = h1
 
@@ -797,15 +689,8 @@ def _global_ridge_forecasts(
                 [value <= TRAIN_END for value in item["dates"]],
                 dtype=bool,
             )
-            mask = (
-                before
-                & np.isfinite(x_d)
-                & np.isfinite(x_w)
-                & np.isfinite(z)
-            )
-            x_parts.append(
-                np.column_stack((x_d[mask], x_w[mask]))
-            )
+            mask = before & np.isfinite(x_d) & np.isfinite(x_w) & np.isfinite(z)
+            x_parts.append(np.column_stack((x_d[mask], x_w[mask])))
             y_parts.append(z[mask])
 
         train_x = np.vstack(x_parts)
@@ -821,17 +706,9 @@ def _global_ridge_forecasts(
             held_x_d = np.log(held["rv"] / held["rv22"])
             held_x_w = np.log(held["rv5"] / held["rv22"])
         forecast = np.full(held["rv"].size, np.nan)
-        eligible = (
-            np.isfinite(held_x_d)
-            & np.isfinite(held_x_w)
-            & np.isfinite(held["rv22"])
-        )
-        test_x = np.column_stack(
-            (held_x_d[eligible], held_x_w[eligible])
-        )
-        normalized = model.predict(
-            scaler.transform(test_x)
-        )
+        eligible = np.isfinite(held_x_d) & np.isfinite(held_x_w) & np.isfinite(held["rv22"])
+        test_x = np.column_stack((held_x_d[eligible], held_x_w[eligible]))
+        normalized = model.predict(scaler.transform(test_x))
         predicted = held["rv22"][eligible] * np.exp(normalized)
         forecast[eligible] = predicted
         result[held_out] = forecast
@@ -857,27 +734,15 @@ def _bootstrap_rows(
             for row_index, session_date in enumerate(item["dates"]):
                 target = date_values.setdefault(
                     session_date,
-                    {
-                        name: []
-                        for name in model_names
-                    },
+                    {name: [] for name in model_names},
                 )
                 for name in model_names:
-                    target[name].append(
-                        float(item[name][row_index])
-                    )
+                    target[name].append(float(item[name][row_index]))
 
         ordered_dates = sorted(date_values)
         mean_losses = {
             name: np.array(
-                [
-                    float(
-                        np.mean(
-                            date_values[current_date][name]
-                        )
-                    )
-                    for current_date in ordered_dates
-                ],
+                [float(np.mean(date_values[current_date][name])) for current_date in ordered_dates],
                 dtype=float,
             )
             for name in model_names
@@ -891,12 +756,8 @@ def _bootstrap_rows(
                     "scope": scope,
                     "comparison": f"{first}_minus_{second}",
                     "n_dates": len(ordered_dates),
-                    "first_qlike": float(
-                        mean_losses[first].mean()
-                    ),
-                    "second_qlike": float(
-                        mean_losses[second].mean()
-                    ),
+                    "first_qlike": float(mean_losses[first].mean()),
+                    "second_qlike": float(mean_losses[second].mean()),
                     "mean_delta": mean,
                     "ci_025": lower,
                     "ci_975": upper,
@@ -910,16 +771,10 @@ def _moving_block_ci(
 ) -> tuple[float, float, float]:
     values = values[np.isfinite(values)]
     if values.size < BOOTSTRAP_BLOCK:
-        raise RuntimeError(
-            "task101_baseline_not_enough_bootstrap_rows"
-        )
+        raise RuntimeError("task101_baseline_not_enough_bootstrap_rows")
     rng = np.random.default_rng(BOOTSTRAP_SEED)
-    starts = np.arange(
-        values.size - BOOTSTRAP_BLOCK + 1
-    )
-    blocks_needed = math.ceil(
-        values.size / BOOTSTRAP_BLOCK
-    )
+    starts = np.arange(values.size - BOOTSTRAP_BLOCK + 1)
+    blocks_needed = math.ceil(values.size / BOOTSTRAP_BLOCK)
     means = np.empty(BOOTSTRAP_REPS)
     for index in range(BOOTSTRAP_REPS):
         chosen = rng.choice(
@@ -927,14 +782,7 @@ def _moving_block_ci(
             size=blocks_needed,
             replace=True,
         )
-        sample = np.concatenate(
-            [
-                values[
-                    start : start + BOOTSTRAP_BLOCK
-                ]
-                for start in chosen
-            ]
-        )[: values.size]
+        sample = np.concatenate([values[start : start + BOOTSTRAP_BLOCK] for start in chosen])[: values.size]
         means[index] = sample.mean()
     lower, upper = np.quantile(
         means,
@@ -953,9 +801,7 @@ def _qlike(
         or np.any(actual <= 0.0)
         or np.any(predicted <= 0.0)
     ):
-        raise RuntimeError(
-            "task101_baseline_invalid_qlike_input"
-        )
+        raise RuntimeError("task101_baseline_invalid_qlike_input")
     ratio = actual / predicted
     return ratio - np.log(ratio) - 1.0
 
@@ -991,9 +837,7 @@ def _require_str(value: object) -> str:
 def _load_json(path: Path) -> dict[str, Any]:
     value = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(value, dict):
-        raise RuntimeError(
-            f"task101_baseline_json_not_object:{path}"
-        )
+        raise RuntimeError(f"task101_baseline_json_not_object:{path}")
     return value
 
 

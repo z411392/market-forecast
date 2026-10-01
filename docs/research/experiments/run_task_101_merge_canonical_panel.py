@@ -6,20 +6,11 @@ from pathlib import Path
 from typing import Any
 
 MANIFEST_PATH = Path(
-    "docs/research/provider-acceptance/"
-    "cross-market-rv-measurement-target-manifest-v2.json"
+    "docs/research/provider-acceptance/" "cross-market-rv-measurement-target-manifest-v2.json"
 )
-US_PATH = Path(
-    "artifacts/private/provider-captures/"
-    "task-101-us-canonical-panel/daily-values.json"
-)
-TAIWAN_PATH = Path(
-    "artifacts/private/provider-captures/"
-    "task-101-taiwan-canonical-panel/daily-values.json"
-)
-OUTPUT_ROOT = Path(
-    "artifacts/private/provider-captures/task-101-canonical-panel"
-)
+US_PATH = Path("artifacts/private/provider-captures/" "task-101-us-canonical-panel/daily-values.json")
+TAIWAN_PATH = Path("artifacts/private/provider-captures/" "task-101-taiwan-canonical-panel/daily-values.json")
+OUTPUT_ROOT = Path("artifacts/private/provider-captures/task-101-canonical-panel")
 PANEL_PATH = OUTPUT_ROOT / "canonical-daily-panel.json"
 SUMMARY_PATH = OUTPUT_ROOT / "summary.json"
 
@@ -101,9 +92,7 @@ def main() -> None:
         source = us if identity["market"] == "us" else tw
         raw_rows = source["daily_values"].get(symbol)
         if not isinstance(raw_rows, list):
-            raise RuntimeError(
-                f"task101_missing_symbol_rows:{symbol}"
-            )
+            raise RuntimeError(f"task101_missing_symbol_rows:{symbol}")
         rows = _validate_rows(symbol, raw_rows)
         daily_values[symbol] = {
             "market": identity["market"],
@@ -115,23 +104,17 @@ def main() -> None:
             "rows": rows,
         }
         measured_variances = [
-            row["whole_day_variance"]
-            for row in rows
-            if row["whole_day_variance"] is not None
+            row["whole_day_variance"] for row in rows if row["whole_day_variance"] is not None
         ]
         if not measured_variances:
-            raise RuntimeError(
-                f"task101_no_measured_variance:{symbol}"
-            )
+            raise RuntimeError(f"task101_no_measured_variance:{symbol}")
         symbols_summary.append(
             {
                 "symbol": symbol,
                 "market": identity["market"],
                 "session_count": len(rows),
                 "measured_session_count": len(measured_variances),
-                "missing_measurement_count": (
-                    len(rows) - len(measured_variances)
-                ),
+                "missing_measurement_count": (len(rows) - len(measured_variances)),
                 "first_session": rows[0]["session_date"],
                 "last_session": rows[-1]["session_date"],
                 "min_whole_day_variance": min(measured_variances),
@@ -142,17 +125,11 @@ def main() -> None:
     panel = {
         "artifact_version": "task-101-canonical-daily-panel-v1",
         "task": 101,
-        "measurement_manifest_version": manifest[
-            "artifact_version"
-        ],
+        "measurement_manifest_version": manifest["artifact_version"],
         "measurement_frozen": manifest["measurement_frozen"],
         "target_version": manifest["target"]["target_version"],
-        "primary_horizon_sessions": manifest["target"][
-            "primary_horizon_sessions"
-        ],
-        "confirmatory_horizon_sessions": manifest["target"][
-            "confirmatory_horizon_sessions"
-        ],
+        "primary_horizon_sessions": manifest["target"]["primary_horizon_sessions"],
+        "confirmatory_horizon_sessions": manifest["target"]["confirmatory_horizon_sessions"],
         "study_start": START_DATE.isoformat(),
         "study_end": END_DATE.isoformat(),
         "input_sha256": {
@@ -172,37 +149,22 @@ def main() -> None:
         "input_sha256": panel["input_sha256"],
         "symbols": symbols_summary,
         "market_session_counts": {
-            "us": sorted(
-                {
-                    item["session_count"]
-                    for item in symbols_summary
-                    if item["market"] == "us"
-                }
-            ),
+            "us": sorted({item["session_count"] for item in symbols_summary if item["market"] == "us"}),
             "taiwan": sorted(
-                {
-                    item["session_count"]
-                    for item in symbols_summary
-                    if item["market"] == "taiwan"
-                }
+                {item["session_count"] for item in symbols_summary if item["market"] == "taiwan"}
             ),
         },
     }
     if len(summary["market_session_counts"]["us"]) != 1:
-        raise RuntimeError(
-            "task101_us_symbol_session_count_mismatch"
-        )
+        raise RuntimeError("task101_us_symbol_session_count_mismatch")
     if len(summary["market_session_counts"]["taiwan"]) != 1:
-        raise RuntimeError(
-            "task101_tw_symbol_session_count_mismatch"
-        )
+        raise RuntimeError("task101_tw_symbol_session_count_mismatch")
     _write_json(SUMMARY_PATH, summary)
 
 
 def _validate_manifest(manifest: dict[str, Any]) -> None:
     if (
-        manifest.get("artifact_version")
-        != "cross-market-rv-measurement-target-manifest-v2"
+        manifest.get("artifact_version") != "cross-market-rv-measurement-target-manifest-v2"
         or manifest.get("measurement_frozen") is not True
     ):
         raise RuntimeError("task101_invalid_measurement_manifest")
@@ -225,9 +187,7 @@ def _validate_manifest(manifest: dict[str, Any]) -> None:
             {
                 "canonical_sampling_minutes": 15,
                 "price_basis": "as_printed",
-                "algorithm_version": (
-                    "rv-core-v1+xtai-closing-auction-v4"
-                ),
+                "algorithm_version": ("rv-core-v1+xtai-closing-auction-v4"),
                 "provider": "shioaji",
                 "calendar": "XTAI",
             },
@@ -236,9 +196,7 @@ def _validate_manifest(manifest: dict[str, Any]) -> None:
     for actual, expected in expected_pairs:
         for key, value in expected.items():
             if actual.get(key) != value:
-                raise RuntimeError(
-                    f"task101_manifest_identity_mismatch:{key}"
-                )
+                raise RuntimeError(f"task101_manifest_identity_mismatch:{key}")
 
 
 def _validate_source_metadata(
@@ -248,17 +206,11 @@ def _validate_source_metadata(
     if source.get("task") != 101:
         raise RuntimeError("task101_source_task_mismatch")
     if source.get("first_panel_session") != START_DATE.isoformat():
-        raise RuntimeError(
-            f"task101_{market}_start_mismatch"
-        )
+        raise RuntimeError(f"task101_{market}_start_mismatch")
     if source.get("last_panel_session") != END_DATE.isoformat():
-        raise RuntimeError(
-            f"task101_{market}_end_mismatch"
-        )
+        raise RuntimeError(f"task101_{market}_end_mismatch")
 
-    sample_symbol = (
-        "GOOGL" if market == "us" else "2330"
-    )
+    sample_symbol = "GOOGL" if market == "us" else "2330"
     expected = EXPECTED[sample_symbol]
     for key in (
         "provider",
@@ -268,9 +220,7 @@ def _validate_source_metadata(
         "algorithm_version",
     ):
         if source.get(key) != expected[key]:
-            raise RuntimeError(
-                f"task101_{market}_metadata_mismatch:{key}"
-            )
+            raise RuntimeError(f"task101_{market}_metadata_mismatch:{key}")
 
 
 def _validate_rows(
@@ -284,34 +234,19 @@ def _validate_rows(
     previous_date: date | None = None
     for raw in raw_rows:
         if not isinstance(raw, dict):
-            raise RuntimeError(
-                f"task101_invalid_symbol_row:{symbol}"
-            )
-        session_date = date.fromisoformat(
-            _require_str(raw.get("session_date"))
-        )
+            raise RuntimeError(f"task101_invalid_symbol_row:{symbol}")
+        session_date = date.fromisoformat(_require_str(raw.get("session_date")))
         if session_date < START_DATE or session_date > END_DATE:
-            raise RuntimeError(
-                f"task101_session_outside_window:{symbol}"
-            )
+            raise RuntimeError(f"task101_session_outside_window:{symbol}")
         if previous_date is not None and session_date <= previous_date:
-            raise RuntimeError(
-                f"task101_non_increasing_session:{symbol}"
-            )
+            raise RuntimeError(f"task101_non_increasing_session:{symbol}")
         previous_date = session_date
 
         raw_variance = raw.get("whole_day_variance")
         if raw_variance is None:
-            missing_reason = _require_str(
-                raw.get("missing_reason")
-            )
-            if (
-                raw.get("regular_session_variance") is not None
-                or raw.get("observation_count") != 0
-            ):
-                raise RuntimeError(
-                    f"task101_invalid_missing_measurement:{symbol}"
-                )
+            missing_reason = _require_str(raw.get("missing_reason"))
+            if raw.get("regular_session_variance") is not None or raw.get("observation_count") != 0:
+                raise RuntimeError(f"task101_invalid_missing_measurement:{symbol}")
             raw_overnight = raw.get("overnight_variance")
             overnight = (
                 None
@@ -351,9 +286,7 @@ def _validate_rows(
             rel_tol=1e-11,
             abs_tol=1e-15,
         ):
-            raise RuntimeError(
-                f"task101_variance_identity_mismatch:{symbol}"
-            )
+            raise RuntimeError(f"task101_variance_identity_mismatch:{symbol}")
 
         rows.append(
             {
@@ -370,13 +303,9 @@ def _validate_rows(
         )
 
     if rows[0]["session_date"] != START_DATE.isoformat():
-        raise RuntimeError(
-            f"task101_symbol_first_session_mismatch:{symbol}"
-        )
+        raise RuntimeError(f"task101_symbol_first_session_mismatch:{symbol}")
     if rows[-1]["session_date"] != END_DATE.isoformat():
-        raise RuntimeError(
-            f"task101_symbol_last_session_mismatch:{symbol}"
-        )
+        raise RuntimeError(f"task101_symbol_last_session_mismatch:{symbol}")
     return rows
 
 

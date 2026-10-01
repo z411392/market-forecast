@@ -37,22 +37,15 @@ AUDIT_SESSION_COUNT = 252
 CANDIDATE_INTERVALS = (5, 10, 15)
 REQUEST_SLEEP_SECONDS = 0.5
 
-OUTPUT_ROOT = Path(
-    "artifacts/private/provider-captures/"
-    "task-106-us-bandi-russell-optimal-sampling"
-)
+OUTPUT_ROOT = Path("artifacts/private/provider-captures/" "task-106-us-bandi-russell-optimal-sampling")
 EVIDENCE_ROOT = OUTPUT_ROOT / "evidence"
 SUMMARY_PATH = OUTPUT_ROOT / "summary.json"
 DAILY_PATH = OUTPUT_ROOT / "daily-values.json"
 
 
 def main() -> None:
-    api_key_id = _required_secret(
-        "MARKET_FORECAST_ALPACA_API_KEY_ID"
-    )
-    secret_key = _required_secret(
-        "MARKET_FORECAST_ALPACA_SECRET_KEY"
-    )
+    api_key_id = _required_secret("MARKET_FORECAST_ALPACA_API_KEY_ID")
+    secret_key = _required_secret("MARKET_FORECAST_ALPACA_SECRET_KEY")
     retrieval_date = datetime.now(timezone.utc).date()
 
     calendar = xcals.get_calendar("XNAS")
@@ -64,21 +57,13 @@ def main() -> None:
         )
     )
     if len(sessions) != AUDIT_SESSION_COUNT + 1:
-        raise RuntimeError(
-            f"task106_unexpected_session_count:{len(sessions)}"
-        )
+        raise RuntimeError(f"task106_unexpected_session_count:{len(sessions)}")
     if sessions[0] != date(2024, 9, 18):
-        raise RuntimeError(
-            f"task106_unexpected_prior_session:{sessions[0]}"
-        )
+        raise RuntimeError(f"task106_unexpected_prior_session:{sessions[0]}")
     if sessions[1] != date(2024, 9, 19):
-        raise RuntimeError(
-            f"task106_unexpected_first_audit_session:{sessions[1]}"
-        )
+        raise RuntimeError(f"task106_unexpected_first_audit_session:{sessions[1]}")
     if sessions[-1] != END_SESSION:
-        raise RuntimeError(
-            f"task106_unexpected_last_session:{sessions[-1]}"
-        )
+        raise RuntimeError(f"task106_unexpected_last_session:{sessions[-1]}")
 
     if OUTPUT_ROOT.exists():
         import shutil
@@ -86,21 +71,12 @@ def main() -> None:
         shutil.rmtree(OUTPUT_ROOT)
     OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
 
-    persist = FilesystemProviderCaptureEvidenceAdapter(
-        EVIDENCE_ROOT
-    )
-    securities = {
-        symbol: _security(symbol)
-        for symbol in SYMBOLS
-    }
-    daily: dict[str, list[dict[str, Any]]] = {
-        symbol: [] for symbol in SYMBOLS
-    }
+    persist = FilesystemProviderCaptureEvidenceAdapter(EVIDENCE_ROOT)
+    securities = {symbol: _security(symbol) for symbol in SYMBOLS}
+    daily: dict[str, list[dict[str, Any]]] = {symbol: [] for symbol in SYMBOLS}
 
     summary: dict[str, Any] = {
-        "artifact_version": (
-            "task-106-us-bandi-russell-optimal-sampling-v1"
-        ),
+        "artifact_version": ("task-106-us-bandi-russell-optimal-sampling-v1"),
         "task": 106,
         "parent_task": 12,
         "status": "running",
@@ -117,18 +93,10 @@ def main() -> None:
         "retrieval_date": retrieval_date.isoformat(),
         "request_sleep_seconds": REQUEST_SLEEP_SECONDS,
         "formula": {
-            "noise_variance": (
-                "sum(nonzero_1m_return^2)/(2*n_nonzero_1m)"
-            ),
-            "quarticity": (
-                "(n_nonzero_10m/3)*sum(nonzero_10m_return^4)"
-            ),
-            "n_opt": (
-                "[Q10_hat/(2*omega2_hat)^2]^(1/3)"
-            ),
-            "candidate_mse": (
-                "2*Q10_hat/n_c + 4*n_c^2*omega2_hat^2"
-            ),
+            "noise_variance": ("sum(nonzero_1m_return^2)/(2*n_nonzero_1m)"),
+            "quarticity": ("(n_nonzero_10m/3)*sum(nonzero_10m_return^4)"),
+            "n_opt": ("[Q10_hat/(2*omega2_hat)^2]^(1/3)"),
+            "candidate_mse": ("2*Q10_hat/n_c + 4*n_c^2*omega2_hat^2"),
         },
         "symbol_results": [],
     }
@@ -156,23 +124,11 @@ def main() -> None:
 
         for session_index, session_date in enumerate(sessions):
             label = session_date.isoformat()
-            session_open = calendar.session_open(
-                label
-            ).to_pydatetime()
-            session_close = calendar.session_close(
-                label
-            ).to_pydatetime()
-            expected_count = int(
-                (
-                    session_close - session_open
-                ).total_seconds()
-                // 60
-            )
+            session_open = calendar.session_open(label).to_pydatetime()
+            session_close = calendar.session_close(label).to_pydatetime()
+            expected_count = int((session_close - session_open).total_seconds() // 60)
             if expected_count not in (210, 390):
-                raise RuntimeError(
-                    "task106_unexpected_session_minutes:"
-                    f"{label}:{expected_count}"
-                )
+                raise RuntimeError("task106_unexpected_session_minutes:" f"{label}:{expected_count}")
 
             for symbol in SYMBOLS:
                 request = build_alpaca_historical_bars_request(
@@ -210,9 +166,7 @@ def main() -> None:
                 source = source_counts[symbol]
                 source["accepted_source_sessions"] += 1
                 source["gap_count"] += receipt["gap_count"]
-                source["missing_grid_minutes"] += receipt[
-                    "missing_grid_minutes"
-                ]
+                source["missing_grid_minutes"] += receipt["missing_grid_minutes"]
                 if expected_count == 390:
                     source["full_sessions"] += 1
                 else:
@@ -252,9 +206,7 @@ def main() -> None:
     _write_json(
         DAILY_PATH,
         {
-            "artifact_version": (
-                "task-106-us-bandi-russell-daily-v1"
-            ),
+            "artifact_version": ("task-106-us-bandi-russell-daily-v1"),
             "daily_values": daily,
         },
     )
@@ -272,24 +224,13 @@ def _calculate_session(
         *tuple(float(bar["close"]) for bar in bars),
     )
     returns_1m = _log_returns(prices_1m)
-    nonzero_1m = tuple(
-        value
-        for value in returns_1m
-        if value != 0.0
-    )
+    nonzero_1m = tuple(value for value in returns_1m if value != 0.0)
     if not nonzero_1m:
-        raise RuntimeError(
-            f"task106_no_nonzero_1m_returns:{symbol}:{session_date}"
-        )
+        raise RuntimeError(f"task106_no_nonzero_1m_returns:{symbol}:{session_date}")
 
-    omega2_hat = (
-        math.fsum(value * value for value in nonzero_1m)
-        / (2.0 * len(nonzero_1m))
-    )
+    omega2_hat = math.fsum(value * value for value in nonzero_1m) / (2.0 * len(nonzero_1m))
     if not math.isfinite(omega2_hat) or omega2_hat <= 0.0:
-        raise RuntimeError(
-            f"task106_invalid_noise_variance:{symbol}:{session_date}"
-        )
+        raise RuntimeError(f"task106_invalid_noise_variance:{symbol}:{session_date}")
 
     bars_10m = aggregate_minute_bars(
         bars,
@@ -301,37 +242,17 @@ def _calculate_session(
         *tuple(float(bar["close"]) for bar in bars_10m),
     )
     returns_10m = _log_returns(prices_10m)
-    nonzero_10m = tuple(
-        value
-        for value in returns_10m
-        if value != 0.0
-    )
+    nonzero_10m = tuple(value for value in returns_10m if value != 0.0)
     if not nonzero_10m:
-        raise RuntimeError(
-            f"task106_no_nonzero_10m_returns:{symbol}:{session_date}"
-        )
+        raise RuntimeError(f"task106_no_nonzero_10m_returns:{symbol}:{session_date}")
 
-    q10_hat = (
-        len(nonzero_10m)
-        / 3.0
-        * math.fsum(
-            value**4
-            for value in nonzero_10m
-        )
-    )
+    q10_hat = len(nonzero_10m) / 3.0 * math.fsum(value**4 for value in nonzero_10m)
     if not math.isfinite(q10_hat) or q10_hat <= 0.0:
-        raise RuntimeError(
-            f"task106_invalid_quarticity:{symbol}:{session_date}"
-        )
+        raise RuntimeError(f"task106_invalid_quarticity:{symbol}:{session_date}")
 
-    n_opt = (
-        q10_hat
-        / ((2.0 * omega2_hat) ** 2)
-    ) ** (1.0 / 3.0)
+    n_opt = (q10_hat / ((2.0 * omega2_hat) ** 2)) ** (1.0 / 3.0)
     if not math.isfinite(n_opt) or n_opt <= 0.0:
-        raise RuntimeError(
-            f"task106_invalid_n_opt:{symbol}:{session_date}"
-        )
+        raise RuntimeError(f"task106_invalid_n_opt:{symbol}:{session_date}")
 
     session_minutes = len(bars)
     delta_opt_minutes = session_minutes / n_opt
@@ -340,31 +261,21 @@ def _calculate_session(
         f"{interval}m": _candidate_mse(
             q10_hat=q10_hat,
             omega2_hat=omega2_hat,
-            observation_count=(
-                session_minutes / interval
-            ),
+            observation_count=(session_minutes / interval),
         )
         for interval in CANDIDATE_INTERVALS
     }
     minimum_mse = min(candidate_mse.values())
-    winners = [
-        grid
-        for grid, value in candidate_mse.items()
-        if value == minimum_mse
-    ]
+    winners = [grid for grid, value in candidate_mse.items() if value == minimum_mse]
     if len(winners) != 1:
-        raise RuntimeError(
-            f"task106_candidate_mse_tie:{symbol}:{session_date}"
-        )
+        raise RuntimeError(f"task106_candidate_mse_tie:{symbol}:{session_date}")
     winner = winners[0]
 
     return {
         "session_date": session_date.isoformat(),
         "session_minutes": session_minutes,
         "nonzero_1m_return_count": len(nonzero_1m),
-        "zero_1m_return_count": (
-            len(returns_1m) - len(nonzero_1m)
-        ),
+        "zero_1m_return_count": (len(returns_1m) - len(nonzero_1m)),
         "nonzero_10m_return_count": len(nonzero_10m),
         "omega2_hat": omega2_hat,
         "q10_hat": q10_hat,
@@ -372,8 +283,7 @@ def _calculate_session(
         "delta_opt_minutes": delta_opt_minutes,
         "candidate_mse": candidate_mse,
         "candidate_mse_ratio_to_daily_min": {
-            grid: value / minimum_mse
-            for grid, value in candidate_mse.items()
+            grid: value / minimum_mse for grid, value in candidate_mse.items()
         },
         "daily_mse_winner": winner,
     }
@@ -386,69 +296,28 @@ def _summarize_symbol(
     source: dict[str, Any],
 ) -> dict[str, Any]:
     if len(rows) != AUDIT_SESSION_COUNT:
-        raise RuntimeError(
-            f"task106_wrong_audit_count:{symbol}:{len(rows)}"
-        )
+        raise RuntimeError(f"task106_wrong_audit_count:{symbol}:{len(rows)}")
 
-    delta = [
-        float(row["delta_opt_minutes"])
-        for row in rows
-    ]
+    delta = [float(row["delta_opt_minutes"]) for row in rows]
     sorted_delta = sorted(delta)
 
-    grids = tuple(
-        f"{interval}m"
-        for interval in CANDIDATE_INTERVALS
-    )
+    grids = tuple(f"{interval}m" for interval in CANDIDATE_INTERVALS)
     median_mse_ratio = {
-        grid: statistics.median(
-            float(
-                row[
-                    "candidate_mse_ratio_to_daily_min"
-                ][grid]
-            )
-            for row in rows
-        )
+        grid: statistics.median(float(row["candidate_mse_ratio_to_daily_min"][grid]) for row in rows)
         for grid in grids
     }
-    mean_mse = {
-        grid: statistics.fmean(
-            float(row["candidate_mse"][grid])
-            for row in rows
-        )
-        for grid in grids
-    }
-    win_counts = {
-        grid: sum(
-            row["daily_mse_winner"] == grid
-            for row in rows
-        )
-        for grid in grids
-    }
+    mean_mse = {grid: statistics.fmean(float(row["candidate_mse"][grid]) for row in rows) for grid in grids}
+    win_counts = {grid: sum(row["daily_mse_winner"] == grid for row in rows) for grid in grids}
 
     minimum_ratio = min(median_mse_ratio.values())
-    ratio_winners = [
-        grid
-        for grid, value in median_mse_ratio.items()
-        if value == minimum_ratio
-    ]
+    ratio_winners = [grid for grid, value in median_mse_ratio.items() if value == minimum_ratio]
     if len(ratio_winners) != 1:
-        raise RuntimeError(
-            f"task106_symbol_median_mse_tie:{symbol}"
-        )
+        raise RuntimeError(f"task106_symbol_median_mse_tie:{symbol}")
     symbol_candidate = ratio_winners[0]
 
     max_wins = max(win_counts.values())
-    support_winners = [
-        grid
-        for grid, count in win_counts.items()
-        if count == max_wins
-    ]
-    supporting_candidate = (
-        support_winners[0]
-        if len(support_winners) == 1
-        else "TIE"
-    )
+    support_winners = [grid for grid, count in win_counts.items() if count == max_wins]
+    supporting_candidate = support_winners[0] if len(support_winners) == 1 else "TIE"
 
     return {
         **source,
@@ -462,9 +331,7 @@ def _summarize_symbol(
                 sorted_delta,
                 0.25,
             ),
-            "median": statistics.median(
-                sorted_delta
-            ),
+            "median": statistics.median(sorted_delta),
             "p75": _quantile(
                 sorted_delta,
                 0.75,
@@ -473,31 +340,17 @@ def _summarize_symbol(
                 sorted_delta,
                 0.90,
             ),
-            "mean": statistics.fmean(
-                sorted_delta
-            ),
+            "mean": statistics.fmean(sorted_delta),
         },
         "median_candidate_mse_ratio": median_mse_ratio,
         "mean_candidate_mse": mean_mse,
         "candidate_win_counts": win_counts,
-        "symbol_candidate_by_median_mse_ratio": (
-            symbol_candidate
-        ),
-        "supporting_candidate_by_win_count": (
-            supporting_candidate
-        ),
-        "support_consistent": (
-            supporting_candidate == symbol_candidate
-        ),
+        "symbol_candidate_by_median_mse_ratio": (symbol_candidate),
+        "supporting_candidate_by_win_count": (supporting_candidate),
+        "support_consistent": (supporting_candidate == symbol_candidate),
         "zero_1m_return_count": {
-            "total": sum(
-                int(row["zero_1m_return_count"])
-                for row in rows
-            ),
-            "median_per_session": statistics.median(
-                int(row["zero_1m_return_count"])
-                for row in rows
-            ),
+            "total": sum(int(row["zero_1m_return_count"]) for row in rows),
+            "median_per_session": statistics.median(int(row["zero_1m_return_count"]) for row in rows),
         },
     }
 
@@ -505,29 +358,15 @@ def _summarize_symbol(
 def _decision(
     results: list[dict[str, Any]],
 ) -> dict[str, Any]:
-    candidates = {
-        result["symbol_candidate_by_median_mse_ratio"]
-        for result in results
-    }
-    support_ok = all(
-        bool(result["support_consistent"])
-        for result in results
-    )
+    candidates = {result["symbol_candidate_by_median_mse_ratio"] for result in results}
+    support_ok = all(bool(result["support_consistent"]) for result in results)
     unanimous = len(candidates) == 1
-    candidate = (
-        next(iter(candidates))
-        if unanimous
-        else "INCONCLUSIVE"
-    )
+    candidate = next(iter(candidates)) if unanimous else "INCONCLUSIVE"
     freeze = unanimous and support_ok
 
     return {
         "freeze_allowed": freeze,
-        "us_canonical_sampling": (
-            candidate
-            if freeze
-            else "INCONCLUSIVE"
-        ),
+        "us_canonical_sampling": (candidate if freeze else "INCONCLUSIVE"),
         "unanimous_symbol_candidate": unanimous,
         "supporting_win_count_consistent": support_ok,
         "forecast_score_used": False,
@@ -542,12 +381,7 @@ def _candidate_mse(
     omega2_hat: float,
     observation_count: float,
 ) -> float:
-    value = (
-        2.0 * q10_hat / observation_count
-        + 4.0
-        * observation_count**2
-        * omega2_hat**2
-    )
+    value = 2.0 * q10_hat / observation_count + 4.0 * observation_count**2 * omega2_hat**2
     if not math.isfinite(value) or value <= 0.0:
         raise RuntimeError("task106_invalid_candidate_mse")
     return value
@@ -563,18 +397,9 @@ def _log_returns(
         prices,
         prices[1:],
     ):
-        if (
-            not math.isfinite(previous)
-            or not math.isfinite(current)
-            or previous <= 0.0
-            or current <= 0.0
-        ):
-            raise RuntimeError(
-                "task106_invalid_price"
-            )
-        result.append(
-            math.log(current / previous)
-        )
+        if not math.isfinite(previous) or not math.isfinite(current) or previous <= 0.0 or current <= 0.0:
+            raise RuntimeError("task106_invalid_price")
+        result.append(math.log(current / previous))
     return tuple(result)
 
 
@@ -585,27 +410,17 @@ def _quantile(
     if not sorted_values:
         raise RuntimeError("task106_empty_quantile")
     if not 0.0 <= probability <= 1.0:
-        raise RuntimeError(
-            "task106_invalid_quantile_probability"
-        )
+        raise RuntimeError("task106_invalid_quantile_probability")
     if len(sorted_values) == 1:
         return sorted_values[0]
 
-    position = (
-        (len(sorted_values) - 1)
-        * probability
-    )
+    position = (len(sorted_values) - 1) * probability
     lower = math.floor(position)
     upper = math.ceil(position)
     if lower == upper:
         return sorted_values[lower]
     fraction = position - lower
-    return (
-        sorted_values[lower]
-        * (1.0 - fraction)
-        + sorted_values[upper]
-        * fraction
-    )
+    return sorted_values[lower] * (1.0 - fraction) + sorted_values[upper] * fraction
 
 
 def _security(
@@ -627,9 +442,7 @@ def _write_progress(
     summary["progress"] = {
         symbol: {
             **source_counts[symbol],
-            "computed_audit_sessions": len(
-                daily[symbol]
-            ),
+            "computed_audit_sessions": len(daily[symbol]),
         }
         for symbol in SYMBOLS
     }
