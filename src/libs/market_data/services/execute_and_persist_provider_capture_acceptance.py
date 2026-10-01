@@ -19,7 +19,7 @@ def execute_and_persist_provider_capture_acceptance(
     fetch_raw_response: FetchProviderRawResponsePort,
     persist_evidence: PersistProviderCaptureEvidencePort,
     request: ProviderRequestSpec,
-    provider: Literal["massive", "finmind"],
+    provider: Literal["massive", "finmind", "alpaca"],
     source_symbol: str,
     retrieval_date: date,
     security: SecurityIdentity,

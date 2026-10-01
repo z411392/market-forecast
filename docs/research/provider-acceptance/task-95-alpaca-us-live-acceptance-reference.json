@@ -1,0 +1,90 @@
+{
+  "artifact_version": "task-95-alpaca-us-live-acceptance-reference-v1",
+  "task": 95,
+  "parent_spike": 4,
+  "parent_task": 12,
+  "status": "accepted",
+  "provider": "alpaca",
+  "market_data_endpoint": "https://data.alpaca.markets/v2/stocks/{symbol}/bars",
+  "feed": "sip",
+  "timeframe": "1Min",
+  "credentials": {
+    "type": "API key ID + secret key",
+    "trading_or_account_api_used": false
+  },
+  "smoke": {
+    "run_id": 36821242353,
+    "artifact_id": 11143671902,
+    "artifact_sha256": "e369e7ac73e228ee267a7ccbc6f3b17ad4e3c301a1bd5b106b2efb1fc12a94d8",
+    "case": "AAPL 2024-07-02 raw SIP",
+    "bar_count": 390,
+    "status": "pass"
+  },
+  "final_live": {
+    "run_id": 36822474696,
+    "artifact_id": 11143183229,
+    "artifact_sha256": "09c5ed5f35d4001b80d8bfdcad4a8548418a3d6fb2a780088bd9e4c0fc87fd32",
+    "status": "pass"
+  },
+  "cases": [
+    {
+      "role": "aapl_ordinary_raw",
+      "date": "2024-07-02",
+      "count": 390,
+      "gaps": 0,
+      "sha256": "db8297964b957dbf519950ec88e65f18a0955a2a582ddecf6a7712bc284df81e"
+    },
+    {
+      "role": "aapl_early_close_raw",
+      "date": "2024-07-03",
+      "count": 210,
+      "gaps": 0,
+      "sha256": "5ce4da7f27d764b85f48ed7644ecb4c7c90610040e0b57a4dd911767b08428d6"
+    },
+    {
+      "role": "nvda_pre_split_raw",
+      "date": "2024-06-07",
+      "count": 390,
+      "gaps": 0,
+      "sha256": "f91d537fd9c67eaa7638441e65c4a11be805027fb27ae4eb520d6c5d399ac794"
+    },
+    {
+      "role": "nvda_post_split_raw",
+      "date": "2024-06-10",
+      "count": 390,
+      "gaps": 0,
+      "sha256": "8fcd5c71a5608a0f31313e76698bfc29c3eb61adae8a311f136a81fd486051d4"
+    },
+    {
+      "role": "nvda_pre_split_adjusted",
+      "date": "2024-06-07",
+      "count": 390,
+      "gaps": 0,
+      "sha256": "e0a265c6bee8b8561c57d5ba1f42ad547db819af9dc2e55b51bc0e7fb861e640"
+    },
+    {
+      "role": "nvda_post_split_adjusted",
+      "date": "2024-06-10",
+      "count": 390,
+      "gaps": 0,
+      "sha256": "8fcd5c71a5608a0f31313e76698bfc29c3eb61adae8a311f136a81fd486051d4"
+    }
+  ],
+  "split_semantics": {
+    "pre_split_raw_to_adjusted_close_ratio": 9.999586332423265,
+    "post_split_raw_to_adjusted_open_ratio": 1,
+    "expected_pre_split_ratio": 10,
+    "expected_post_split_ratio": 1,
+    "status": "accepted"
+  },
+  "evidence_identity": {
+    "method": "provider/retrieval_date/session_date/request_sha256/raw_sha256",
+    "reason": "distinct raw/split requests may legitimately return identical post-split bytes"
+  },
+  "ruling": {
+    "source_status": "ALPACA_HISTORICAL_SIP_ACCEPTED_FOR_US_MEASUREMENT_PILOT",
+    "canonical_measurement_price_basis_candidate": "split_adjusted",
+    "bulk_backfill_executed": false,
+    "us_sampling_frozen": false
+  }
+}

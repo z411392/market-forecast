@@ -31,7 +31,7 @@ class HttpxProviderRawResponseAdapter(FetchProviderRawResponsePort):
 
     def __call__(
         self,
-        provider: Literal["massive", "finmind"],
+        provider: Literal["massive", "finmind", "alpaca"],
         request: ProviderRequestSpec,
     ) -> bytes:
         if not self._allow_live:
@@ -59,7 +59,7 @@ class HttpxProviderRawResponseAdapter(FetchProviderRawResponsePort):
 
     def _provider_config(
         self,
-        provider: Literal["massive", "finmind"],
+        provider: Literal["massive", "finmind", "alpaca"],
     ) -> tuple[str, str | None]:
         if provider == "massive":
             return self._massive_base_url, self._massive_api_key

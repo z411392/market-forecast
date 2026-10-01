@@ -9,6 +9,9 @@ from libs.market_data.dtos.provider_request_spec import ProviderRequestSpec
 from libs.market_data.exceptions.invalid_provider_capture_input_error import (
     InvalidProviderCaptureInputError,
 )
+from libs.market_data.services.build_alpaca_historical_bars_request import (
+    build_alpaca_historical_bars_request,
+)
 from libs.market_data.services.build_finmind_stock_kbar_request import (
     build_finmind_stock_kbar_request,
 )
@@ -73,5 +76,12 @@ def _build_expected_request(
         return build_finmind_stock_kbar_request(
             manifest["source_symbol"],
             manifest["session_date"],
+        )
+    if manifest["provider"] == "alpaca":
+        return build_alpaca_historical_bars_request(
+            source_symbol=manifest["source_symbol"],
+            session_start_utc=manifest["expected_session_start_utc"],
+            session_end_utc_exclusive=manifest["expected_session_end_utc_exclusive"],
+            price_basis=manifest["price_basis"],
         )
     raise InvalidProviderCaptureInputError("unsupported_provider")

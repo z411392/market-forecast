@@ -16,7 +16,7 @@ from libs.market_data.services.build_provider_capture_acceptance_receipt import 
 
 def build_provider_capture_acceptance(
     request: ProviderRequestSpec,
-    provider: Literal["massive", "finmind"],
+    provider: Literal["massive", "finmind", "alpaca"],
     raw_response: bytes,
     source_symbol: str,
     retrieval_date: date,
