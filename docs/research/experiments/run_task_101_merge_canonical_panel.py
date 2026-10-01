@@ -307,18 +307,26 @@ def _validate_rows(
             )
             if (
                 raw.get("regular_session_variance") is not None
-                or raw.get("overnight_variance") is not None
                 or raw.get("observation_count") != 0
             ):
                 raise RuntimeError(
                     f"task101_invalid_missing_measurement:{symbol}"
                 )
+            raw_overnight = raw.get("overnight_variance")
+            overnight = (
+                None
+                if raw_overnight is None
+                else _nonnegative_finite(
+                    raw_overnight,
+                    f"task101_invalid_missing_overnight:{symbol}",
+                )
+            )
             rows.append(
                 {
                     "session_date": session_date.isoformat(),
                     "whole_day_variance": None,
                     "regular_session_variance": None,
-                    "overnight_variance": None,
+                    "overnight_variance": overnight,
                     "observation_count": 0,
                     "missing_reason": missing_reason,
                 }
