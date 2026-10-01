@@ -7,7 +7,9 @@ from pytest import mark, raises
 from libs.market_data.dtos.provider_request_spec import ProviderRequestSpec
 from libs.market_data.dtos.security_identity import SecurityIdentity
 from libs.market_data.ports.fetch_provider_raw_response_port import FetchProviderRawResponsePort
-from libs.market_data.services.build_massive_minute_request import build_massive_minute_request
+from libs.market_data.services.build_massive_regular_session_minute_request import (
+    build_massive_regular_session_minute_request,
+)
 from libs.market_data.services.execute_provider_capture_acceptance import (
     execute_provider_capture_acceptance,
 )
@@ -65,7 +67,12 @@ def test_execute_provider_capture_acceptance() -> None:
     session_date = date(2025, 11, 26)
     retrieval_date = date(2026, 9, 28)
     start = datetime(2025, 11, 26, 14, 30, tzinfo=timezone.utc)
-    request = build_massive_minute_request("AAPL", session_date)
+    request = build_massive_regular_session_minute_request(
+        source_symbol="AAPL",
+        session_start_utc=start,
+        session_end_utc_exclusive=start + timedelta(minutes=2),
+        price_basis="as_printed",
+    )
     raw_response = _raw_response()
     fetch = _FakeFetchProviderRawResponse(raw_response=raw_response)
 
