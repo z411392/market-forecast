@@ -1,0 +1,83 @@
+{
+  "artifact_version": "task-98-us-canonical-measurement-decision-v1",
+  "task": 98,
+  "parent_task": 12,
+  "parent_story": 5,
+  "status": "accepted_final",
+  "decision": {
+    "us_canonical_sampling": "5m",
+    "canonical_estimator_role": "fixed_grid_whole_day_realized_variance",
+    "algorithm_version": "rv-core-v1",
+    "price_basis": "split_adjusted",
+    "provider": "alpaca",
+    "provider_feed": "sip",
+    "forecast_score_used": false
+  },
+  "empirical_window": {
+    "symbols": [
+      "AAPL",
+      "NVDA"
+    ],
+    "prior_session_for_first_overnight": "2025-09-23",
+    "first_audit_session": "2025-09-24",
+    "last_audit_session": "2026-09-24",
+    "audit_sessions_per_symbol": 252
+  },
+  "workflow": {
+    "run_id": 36823619958,
+    "artifact_id": 11145015407,
+    "artifact_sha256": "89c7c72af09998ea175e3bdd4241207618ea811e311c884b2dcc44fdb732797e",
+    "summary_sha256": "a6234bd7cbca77aff7a13d0f7fd25ce94445b73f376fc9e00e73fa3b7880d560",
+    "status": "pass"
+  },
+  "metrics": {
+    "AAPL": {
+      "geometric_bias_5m_vs_10m_pct": 3.715202858340372,
+      "geometric_bias_5m_vs_15m_pct": 5.359492308726899,
+      "mean_abs_log_gap_5m_10m": 0.17434203665211565,
+      "mean_abs_log_gap_5m_15m": 0.23718811570861817,
+      "pearson_log_rv_5m_10m": 0.9498018673777439,
+      "pearson_log_rv_5m_15m": 0.9177323755798507,
+      "spearman_rv_5m_10m": 0.9390804933850144,
+      "spearman_rv_5m_15m": 0.9011280306967125
+    },
+    "NVDA": {
+      "geometric_bias_5m_vs_10m_pct": 2.5306030702210602,
+      "geometric_bias_5m_vs_15m_pct": 5.41561529819774,
+      "mean_abs_log_gap_5m_10m": 0.14123158585915882,
+      "mean_abs_log_gap_5m_15m": 0.21026397876325545,
+      "pearson_log_rv_5m_10m": 0.9664837511280615,
+      "pearson_log_rv_5m_15m": 0.9255471681335643,
+      "spearman_rv_5m_10m": 0.9604773077837343,
+      "spearman_rv_5m_15m": 0.9325963602769423
+    }
+  },
+  "panel_medians": {
+    "geometric_bias_5m_vs_10m_pct": 3.122902964280716,
+    "geometric_bias_5m_vs_15m_pct": 5.387553803462319,
+    "mean_abs_log_gap_5m_10m": 0.15778681125563723,
+    "mean_abs_log_gap_5m_15m": 0.2237260472359368,
+    "pearson_log_rv_5m_10m": 0.9581428092529027,
+    "pearson_log_rv_5m_15m": 0.9216397718567075,
+    "spearman_rv_5m_10m": 0.9497789005843744,
+    "spearman_rv_5m_15m": 0.9168621954868275
+  },
+  "preregistered_gate": {
+    "rule": "freeze 5m only if both absolute geometric biases are <10% for every pilot symbol",
+    "AAPL_pass": true,
+    "NVDA_pass": true,
+    "overall_pass": true
+  },
+  "rationale": [
+    "5m was the preregistered U.S. practical reference before the provider-backed panel was observed.",
+    "The ex-ante double-digit level-sensitivity gate was frozen before the 252-session audit.",
+    "Both AAPL and NVDA remain below 10% absolute geometric level bias for 5m-vs-10m and 5m-vs-15m.",
+    "No provider/session/price-basis pathology occurred: each symbol has 253/253 accepted source sessions and 252/252 audit rows.",
+    "No forecast QLIKE or model score entered the sampling decision."
+  ],
+  "boundaries": {
+    "taiwan_sampling": "15m",
+    "broad_30_plus_30_confirmation_performed": false,
+    "forecast_model_changed": false
+  }
+}
