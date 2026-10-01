@@ -18,5 +18,5 @@
   "provider_calls_allowed": false,
   "measurement_reselection_allowed": false,
   "hyperparameter_tuning_allowed": false,
-  "execution_sequence": 1
+  "execution_sequence": 2
 }
