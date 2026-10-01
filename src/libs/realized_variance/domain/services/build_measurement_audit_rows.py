@@ -1,4 +1,5 @@
 from collections.abc import Iterable
+from datetime import date
 from math import isfinite, log
 
 from libs.realized_variance.dtos.daily_realized_measures import DailyRealizedMeasures
@@ -18,7 +19,7 @@ def build_measurement_audit_rows(
     expected_security = items[0]["security"]
     expected_price_basis = items[0]["price_basis"]
     expected_algorithm_version = items[0]["algorithm_version"]
-    by_session: dict[object, dict[int, DailyRealizedMeasures]] = {}
+    by_session: dict[date, dict[int, DailyRealizedMeasures]] = {}
 
     for measurement in items:
         if measurement["security"] != expected_security:
