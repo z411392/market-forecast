@@ -8,6 +8,6 @@ class FetchProviderRawResponsePort(ABC):
     @abstractmethod
     def __call__(
         self,
-        provider: Literal["massive", "finmind"],
+        provider: Literal["massive", "finmind", "alpaca"],
         request: ProviderRequestSpec,
     ) -> bytes: ...
