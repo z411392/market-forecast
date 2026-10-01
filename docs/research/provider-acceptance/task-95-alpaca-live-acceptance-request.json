@@ -1,0 +1,18 @@
+{
+  "task": 95,
+  "provider": "alpaca",
+  "scope": "narrow_us_historical_sip_acceptance",
+  "provider_request_allowed": true,
+  "max_requests": 6,
+  "trading_or_account_api_allowed": false,
+  "feed": "sip",
+  "timeframe": "1Min",
+  "cases": [
+    "AAPL 2024-07-02 raw ordinary",
+    "AAPL 2024-07-03 raw early-close",
+    "NVDA 2024-06-07 raw pre-split",
+    "NVDA 2024-06-10 raw post-split",
+    "NVDA 2024-06-07 split-adjusted",
+    "NVDA 2024-06-10 split-adjusted"
+  ]
+}
