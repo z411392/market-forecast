@@ -1,0 +1,27 @@
+name: task-80-corporate-action-contract
+
+on:
+  push:
+    branches:
+      - codex/80-corporate-action-contract-recovery
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Run focused corporate-action contract
+        run: uv run pytest -q src/libs/market_data/tests/contract/test_corporate_action_contract.py
