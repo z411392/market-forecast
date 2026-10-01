@@ -2,8 +2,8 @@
   "task": 90,
   "slice": "S4g",
   "authorized": true,
-  "batch_number": 7,
-  "expected_batch_sha256": "e0bc6d780cf10de4f056e3419c72287aada55e5af3057c729734fc86bcaa7efc",
-  "execution_sequence": 14,
+  "batch_number": 8,
+  "expected_batch_sha256": "5c4844e508ab69e7ea60c2507503647c6d2ced0dbb10dccacbb9beac57e3d349",
+  "execution_sequence": 15,
   "reserve_mib": 100
 }
