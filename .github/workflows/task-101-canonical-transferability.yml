@@ -28,11 +28,166 @@ jobs:
 
       - name: Run XTAI v4 recovered regressions
         run: |
-          uv run pytest -q             src/libs/market_data/tests/contract/test_closing_auction_observation_contract.py             src/libs/market_data/tests/contract/test_session_open_price_observation_contract.py             src/libs/market_data/tests/unit/test_decode_shioaji_stock_kbars.py             src/libs/realized_variance/tests/contract/test_sampled_intraday_price_contract.py             src/libs/realized_variance/tests/unit/test_build_xtai_sampling_prices.py             src/libs/realized_variance/tests/unit/test_calculate_intraday_realized_measures_from_sampled_prices.py             src/libs/realized_variance/tests/unit/test_calculate_daily_realized_measures_xtai.py
+          uv run pytest -q \
+            src/libs/market_data/tests/contract/test_closing_auction_observation_contract.py \
+            src/libs/market_data/tests/contract/test_session_open_price_observation_contract.py \
+            src/libs/market_data/tests/unit/test_decode_shioaji_stock_kbars.py \
+            src/libs/realized_variance/tests/contract/test_sampled_intraday_price_contract.py \
+            src/libs/realized_variance/tests/unit/test_build_xtai_sampling_prices.py \
+            src/libs/realized_variance/tests/unit/test_calculate_intraday_realized_measures_from_sampled_prices.py \
+            src/libs/realized_variance/tests/unit/test_calculate_daily_realized_measures_xtai.py
 
       - name: Run realized-variance regressions
         run: uv run pytest -q src/libs/realized_variance/tests
 
-      - name: Ruff recovered XTAI production files
+      - name: Compile Task 101 S1 runners
         run: |
-          uv run ruff check             src/libs/market_data/services/decode_shioaji_stock_kbars.py             src/libs/realized_variance/domain/services/build_xtai_sampling_prices.py             src/libs/realized_variance/domain/services/calculate_intraday_realized_measures_from_sampled_prices.py             src/libs/realized_variance/domain/services/calculate_daily_realized_measures.py
+          uv run python -m py_compile \
+            docs/research/experiments/run_task_101_us_canonical_panel.py \
+            docs/research/experiments/run_task_101_taiwan_canonical_panel.py \
+            docs/research/experiments/run_task_101_merge_canonical_panel.py
+
+      - name: Ruff Task 101 S1 runners and recovered XTAI files
+        run: |
+          uv run ruff check \
+            docs/research/experiments/run_task_101_us_canonical_panel.py \
+            docs/research/experiments/run_task_101_taiwan_canonical_panel.py \
+            docs/research/experiments/run_task_101_merge_canonical_panel.py \
+            src/libs/market_data/services/decode_shioaji_stock_kbars.py \
+            src/libs/realized_variance/domain/services/build_xtai_sampling_prices.py \
+            src/libs/realized_variance/domain/services/calculate_intraday_realized_measures_from_sampled_prices.py \
+            src/libs/realized_variance/domain/services/calculate_daily_realized_measures.py
+
+  us-panel-live:
+    if: contains(github.event.head_commit.message, '[canonical-panel-live]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      MARKET_FORECAST_ALPACA_API_KEY_ID: ${{ secrets.MARKET_FORECAST_ALPACA_API_KEY_ID }}
+      MARKET_FORECAST_ALPACA_SECRET_KEY: ${{ secrets.MARKET_FORECAST_ALPACA_SECRET_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Verify Alpaca credentials
+        shell: bash
+        run: |
+          test -n "${MARKET_FORECAST_ALPACA_API_KEY_ID:-}"
+          test -n "${MARKET_FORECAST_ALPACA_SECRET_KEY:-}"
+
+      - name: Execute U.S. frozen canonical panel
+        run: |
+          uv run python \
+            docs/research/experiments/run_task_101_us_canonical_panel.py
+
+      - name: Upload U.S. canonical panel evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: task-101-us-canonical-panel
+          path: artifacts/private/provider-captures/task-101-us-canonical-panel
+          if-no-files-found: ignore
+          retention-days: 30
+
+  taiwan-panel-live:
+    if: contains(github.event.head_commit.message, '[canonical-panel-live]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      MARKET_FORECAST_SHIOAJI_API_KEY: ${{ secrets.MARKET_FORECAST_SHIOAJI_API_KEY }}
+      MARKET_FORECAST_SHIOAJI_SECRET_KEY: ${{ secrets.MARKET_FORECAST_SHIOAJI_SECRET_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Install Shioaji runtime
+        run: uv pip install "shioaji==1.7.7"
+
+      - name: Verify Shioaji credentials
+        shell: bash
+        run: |
+          test -n "${MARKET_FORECAST_SHIOAJI_API_KEY:-}"
+          test -n "${MARKET_FORECAST_SHIOAJI_SECRET_KEY:-}"
+
+      - name: Execute Taiwan frozen canonical panel
+        run: |
+          uv run python \
+            docs/research/experiments/run_task_101_taiwan_canonical_panel.py
+
+      - name: Upload Taiwan canonical panel evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: task-101-taiwan-canonical-panel
+          path: artifacts/private/provider-captures/task-101-taiwan-canonical-panel
+          if-no-files-found: ignore
+          retention-days: 30
+
+  merge-panel:
+    needs:
+      - us-panel-live
+      - taiwan-panel-live
+    if: >-
+      needs.us-panel-live.result == 'success' &&
+      needs.taiwan-panel-live.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Restore current-run provider artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in task-101-us-canonical-panel task-101-taiwan-canonical-panel; do
+            artifact_id="$(gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts" \
+              --jq ".artifacts[] | select(.name==\"$name\") | .id" | head -n1)"
+            test -n "$artifact_id"
+            zip_path="/tmp/${name}.zip"
+            target="artifacts/private/provider-captures/${name}"
+            mkdir -p "$target"
+            gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}/zip" \
+              > "$zip_path"
+            unzip -q "$zip_path" -d "$target"
+          done
+
+      - name: Merge and validate canonical panel
+        run: |
+          uv run python \
+            docs/research/experiments/run_task_101_merge_canonical_panel.py
+
+      - name: Upload merged canonical panel
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: task-101-canonical-panel
+          path: artifacts/private/provider-captures/task-101-canonical-panel
+          retention-days: 30
