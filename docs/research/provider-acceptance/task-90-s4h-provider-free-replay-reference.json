@@ -1,0 +1,76 @@
+{
+  "artifact_version": "task-90-s4h-provider-free-replay-reference-v1",
+  "task": 90,
+  "slice": "S4h",
+  "status": "accepted",
+  "branch": "codex/90-taiwan-rk-feasibility",
+  "candidate_sha": "f46380250d7b33c0b9080068c90f469d61ddc06f",
+  "workflow": {
+    "run_id": 36719846796,
+    "artifact_id": 11097866806,
+    "artifact_sha256": "0010115e8017bc0dacbeeac627e3284c156c61ab0861e37d31d3cfd9a86a07d3",
+    "summary_sha256": "819e38a23f5579007cd6489af91b8d7e943fe1f5b5d6ca60dc7f2c0daa2f7967",
+    "daily_values_sha256": "73e0117e809a1d6f6279945ad33d3148934ff91b97e160c644677446b2c5b07b",
+    "static_result": "pass",
+    "empirical_result": "pass"
+  },
+  "input_manifest": "docs/research/provider-acceptance/task-90-s4h-empirical-input.json",
+  "runner": "docs/research/provider-acceptance/run_task_90_s4h_empirical_rk_comparison.py",
+  "estimator_version": "tw-rk-parzen-trades-v1",
+  "audit_window": {
+    "first": "2025-09-11",
+    "last": "2026-05-21",
+    "audit_sessions_per_symbol": 164,
+    "symbols": [
+      "2330",
+      "2317",
+      "2454"
+    ]
+  },
+  "validation": {
+    "immutable_artifact_sha256": "pass",
+    "durable_interim_metric_replay_tolerance": 1e-10,
+    "durable_interim_metric_replay": "pass",
+    "formula_cross_check_session": "2026-04-20",
+    "max_noise_variance_abs_diff": 8.470329472543003e-22,
+    "max_sparse_rv_abs_diff": 2.710505431213761e-20,
+    "max_rk_abs_diff": 4.914146346790549e-17,
+    "q_identity": "pass",
+    "bandwidth_identity": "pass",
+    "timestamp_tie_regression": "pass",
+    "zero_variance_regression": "pass"
+  },
+  "zero_variance_case": {
+    "symbol": "2454",
+    "session_date": "2026-05-04",
+    "tick_count": 489,
+    "noise_variance": 0,
+    "sparse_realized_variance": 0,
+    "bandwidth": 1,
+    "intraday_realized_kernel": 0,
+    "whole_day_variance": 0.009017745061611744,
+    "fixed_grid_5m": 0.009017745061611744,
+    "fixed_grid_10m": 0.009017745061611744,
+    "fixed_grid_15m": 0.009017745061611744
+  },
+  "panel_medians": {
+    "5m": {
+      "geometric_bias_pct": 52.45345365785168,
+      "mean_abs_log_gap": 0.4599378063526849
+    },
+    "10m": {
+      "geometric_bias_pct": 27.055318866965017,
+      "mean_abs_log_gap": 0.30969208075121446
+    },
+    "15m": {
+      "geometric_bias_pct": 15.088775050961821,
+      "mean_abs_log_gap": 0.28294408568069873
+    }
+  },
+  "ruling": {
+    "provider_free_empirical_pipeline_replayable": true,
+    "canonical_freeze_allowed": false,
+    "final_required_audit_session_count": 252,
+    "remaining_core_work": "acquire frozen batches 6-8, append their immutable artifact IDs/digests to the S4h manifest, rerun the same provider-free workflow, then issue the Taiwan measurement verdict"
+  }
+}

@@ -1,0 +1,1 @@
+TAIWAN_REALIZED_KERNEL_ESTIMATOR_VERSION = "tw-rk-parzen-trades-v1"
