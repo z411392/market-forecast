@@ -14,6 +14,9 @@ from libs.market_data.exceptions.provider_capture_evidence_conflict_error import
 from libs.market_data.exceptions.provider_capture_evidence_integrity_error import (
     ProviderCaptureEvidenceIntegrityError,
 )
+from libs.market_data.services.build_provider_request_sha256 import (
+    build_provider_request_sha256,
+)
 
 
 def _receipt(raw_response: bytes) -> dict[str, object]:
@@ -53,6 +56,9 @@ def test_filesystem_provider_capture_evidence_adapter(tmp_path: Path) -> None:
     raw_response = b'{"status":"OK","results":[]}'
     receipt = _receipt(raw_response)
     digest = sha256(raw_response).hexdigest()
+    request_digest = build_provider_request_sha256(
+        receipt["request"]  # type: ignore[arg-type]
+    )
     adapter = FilesystemProviderCaptureEvidenceAdapter(root=tmp_path)
 
     adapter(raw_response=raw_response, receipt=receipt)
@@ -62,6 +68,7 @@ def test_filesystem_provider_capture_evidence_adapter(tmp_path: Path) -> None:
         / "massive"
         / "2024-07-03"
         / "2024-07-02"
+        / request_digest
         / digest
     )
     raw_path = evidence_dir / "raw-response.bin"
@@ -88,6 +95,34 @@ def test_filesystem_provider_capture_evidence_adapter(tmp_path: Path) -> None:
     assert raw_path.read_bytes() == raw_response
     assert receipt_path.read_bytes() == receipt_bytes
 
+    split_receipt = dict(receipt)
+    split_receipt["request"] = {
+        **receipt["request"],  # type: ignore[dict-item]
+        "query": (
+            ("adjusted", "true"),
+            ("sort", "asc"),
+            ("limit", "50000"),
+        ),
+    }
+    split_receipt["price_basis"] = "split_adjusted"
+    adapter(
+        raw_response=raw_response,
+        receipt=split_receipt,  # type: ignore[arg-type]
+    )
+    split_request_digest = build_provider_request_sha256(
+        split_receipt["request"]  # type: ignore[arg-type]
+    )
+    split_dir = (
+        tmp_path
+        / "massive"
+        / "2024-07-03"
+        / "2024-07-02"
+        / split_request_digest
+        / digest
+    )
+    assert split_dir != evidence_dir
+    assert (split_dir / "raw-response.bin").read_bytes() == raw_response
+
     mismatched = dict(receipt)
     mismatched["raw_artifact_sha256"] = "0" * 64
     with raises(
@@ -100,6 +135,7 @@ def test_filesystem_provider_capture_evidence_adapter(tmp_path: Path) -> None:
         / "massive"
         / "2024-07-03"
         / "2024-07-02"
+        / request_digest
         / ("0" * 64)
     ).exists()
 
@@ -119,6 +155,7 @@ def test_filesystem_provider_capture_evidence_adapter(tmp_path: Path) -> None:
         / "massive"
         / "2024-07-03"
         / "2024-07-02"
+        / request_digest
         / digest
         / "acceptance-receipt.json"
     )
