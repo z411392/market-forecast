@@ -1,6 +1,7 @@
 import json
 import math
 import statistics
+from hashlib import sha256
 from pathlib import Path
 from typing import Any
 
@@ -140,7 +141,14 @@ def _load_evidence(
         if receipt.get("price_basis") != "split_adjusted":
             raise RuntimeError("task106r_wrong_price_basis")
         raw_path = receipt_path.parent / "raw-response.bin"
-        payload = json.loads(raw_path.read_bytes())
+        raw_bytes = raw_path.read_bytes()
+        if sha256(raw_bytes).hexdigest() != receipt.get(
+            "raw_artifact_sha256"
+        ):
+            raise RuntimeError(
+                "task106r_raw_hash_mismatch"
+            )
+        payload = json.loads(raw_bytes)
         bars = decode_alpaca_stock_bars(
             payload=payload,
             expected_source_symbol=receipt["source_symbol"],
