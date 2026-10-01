@@ -223,3 +223,71 @@ jobs:
           name: task-101-canonical-panel
           path: artifacts/private/provider-captures/task-101-canonical-panel
           retention-days: 30
+
+  merge-replay:
+    if: contains(github.event.head_commit.message, '[canonical-panel-merge]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Restore accepted provider artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run python - <<'PY' > /tmp/task101-merge-artifacts.tsv
+          import json
+          from pathlib import Path
+
+          request = json.loads(
+              Path(
+                  "docs/research/experiments/"
+                  "task-101-canonical-panel-merge-request.json"
+              ).read_text(encoding="utf-8")
+          )
+          for key, target in (
+              ("us", "task-101-us-canonical-panel"),
+              ("taiwan", "task-101-taiwan-canonical-panel"),
+          ):
+              item = request[key]
+              artifact_id = item.get("artifact_id")
+              digest = item.get("artifact_sha256")
+              if not isinstance(artifact_id, int):
+                  raise SystemExit(f"missing_{key}_artifact_id")
+              if not isinstance(digest, str) or len(digest) != 64:
+                  raise SystemExit(f"missing_{key}_artifact_sha256")
+              print(key, target, artifact_id, digest, sep="\t")
+          PY
+
+          while IFS=$'\t' read -r key target artifact_id expected_sha; do
+            zip_path="/tmp/task101-${key}.zip"
+            out="artifacts/private/provider-captures/${target}"
+            rm -rf "$out"
+            mkdir -p "$out"
+            gh api               "repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}/zip"               > "$zip_path"
+            actual_sha="$(sha256sum "$zip_path" | cut -d' ' -f1)"
+            test "$actual_sha" = "$expected_sha"
+            unzip -q "$zip_path" -d "$out"
+          done < /tmp/task101-merge-artifacts.tsv
+
+      - name: Merge and validate canonical panel
+        run: |
+          uv run python             docs/research/experiments/run_task_101_merge_canonical_panel.py
+
+      - name: Upload merged canonical panel
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: task-101-canonical-panel
+          path: artifacts/private/provider-captures/task-101-canonical-panel
+          retention-days: 30
