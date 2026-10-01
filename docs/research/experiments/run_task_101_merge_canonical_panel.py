@@ -114,21 +114,28 @@ def main() -> None:
             "algorithm_version": identity["algorithm_version"],
             "rows": rows,
         }
+        measured_variances = [
+            row["whole_day_variance"]
+            for row in rows
+            if row["whole_day_variance"] is not None
+        ]
+        if not measured_variances:
+            raise RuntimeError(
+                f"task101_no_measured_variance:{symbol}"
+            )
         symbols_summary.append(
             {
                 "symbol": symbol,
                 "market": identity["market"],
                 "session_count": len(rows),
+                "measured_session_count": len(measured_variances),
+                "missing_measurement_count": (
+                    len(rows) - len(measured_variances)
+                ),
                 "first_session": rows[0]["session_date"],
                 "last_session": rows[-1]["session_date"],
-                "min_whole_day_variance": min(
-                    row["whole_day_variance"]
-                    for row in rows
-                ),
-                "max_whole_day_variance": max(
-                    row["whole_day_variance"]
-                    for row in rows
-                ),
+                "min_whole_day_variance": min(measured_variances),
+                "max_whole_day_variance": max(measured_variances),
             }
         )
 
@@ -293,8 +300,33 @@ def _validate_rows(
             )
         previous_date = session_date
 
+        raw_variance = raw.get("whole_day_variance")
+        if raw_variance is None:
+            missing_reason = _require_str(
+                raw.get("missing_reason")
+            )
+            if (
+                raw.get("regular_session_variance") is not None
+                or raw.get("overnight_variance") is not None
+                or raw.get("observation_count") != 0
+            ):
+                raise RuntimeError(
+                    f"task101_invalid_missing_measurement:{symbol}"
+                )
+            rows.append(
+                {
+                    "session_date": session_date.isoformat(),
+                    "whole_day_variance": None,
+                    "regular_session_variance": None,
+                    "overnight_variance": None,
+                    "observation_count": 0,
+                    "missing_reason": missing_reason,
+                }
+            )
+            continue
+
         variance = _positive_finite(
-            raw.get("whole_day_variance"),
+            raw_variance,
             f"task101_invalid_variance:{symbol}",
         )
         regular = _nonnegative_finite(
@@ -325,6 +357,7 @@ def _validate_rows(
                     raw.get("observation_count"),
                     f"task101_invalid_observation_count:{symbol}",
                 ),
+                "missing_reason": None,
             }
         )
 
