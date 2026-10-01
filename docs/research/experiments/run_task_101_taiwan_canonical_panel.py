@@ -1,7 +1,6 @@
 import json
 import math
 import os
-import statistics
 import time
 from datetime import date, datetime, timedelta, timezone
 from hashlib import sha256
