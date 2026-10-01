@@ -1,0 +1,200 @@
+{
+  "artifact_version": "cross-market-rv-measurement-target-manifest-v2",
+  "task": 99,
+  "parent_task": 12,
+  "parent_story": 5,
+  "status": "frozen",
+  "measurement_frozen": true,
+  "supersedes": {
+    "artifact_version": "cross-market-rv-measurement-target-manifest-v1",
+    "reason": "Task #100 superseded the prior U.S. 5m freeze; Task #106 subsequently re-identified U.S. 5m on a non-overlapping preregistered measurement-theory panel and replicated it on the Task #97 panel."
+  },
+  "forecast_score_used_for_measurement_selection": false,
+  "target": {
+    "target_name": "future_average_whole_day_variance",
+    "target_version": "whole_day_variance_v1",
+    "unit": "log_return_variance",
+    "primary_horizon_sessions": 5,
+    "confirmatory_horizon_sessions": 20,
+    "origin_session_included": false,
+    "first_target_session_offset": 1,
+    "window_rule": "next H validated local exchange sessions after origin",
+    "missing_session_behavior": "fail_closed_do_not_compress_horizon",
+    "builder": "build_future_variance_targets"
+  },
+  "markets": {
+    "US": {
+      "measurement_id": "us-whole-day-rv-5m-v2",
+      "canonical_sampling_minutes": 5,
+      "price_basis": "split_adjusted",
+      "algorithm_version": "rv-core-v1",
+      "provider": "alpaca",
+      "provider_feed": "sip",
+      "source_timeframe": "1Min",
+      "calendar": "XNAS",
+      "timezone": "America/New_York",
+      "regular_session_rule": "exchange-calendar regular session only",
+      "overnight_rule": "previous validated regular close to current regular open",
+      "corporate_action_rule": "split-adjusted historical bars; never mix with raw series",
+      "source_acceptance": {
+        "task": 95,
+        "status": "ALPACA_HISTORICAL_SIP_ACCEPTED_FOR_US_MEASUREMENT_PILOT",
+        "run_id": 36822474696,
+        "artifact_id": 11143183229,
+        "artifact_sha256": "09c5ed5f35d4001b80d8bfdcad4a8548418a3d6fb2a780088bd9e4c0fc87fd32"
+      },
+      "measurement_decision": {
+        "task": 106,
+        "ruling": "US_CANONICAL_SAMPLING = 5m",
+        "method": "bandi-russell-noise-optimal-sampling-v1",
+        "primary_panel": {
+          "prior_session": "2024-09-18",
+          "first_audit_session": "2024-09-19",
+          "last_audit_session": "2025-09-22",
+          "audit_sessions_per_symbol": 252,
+          "pilot_symbols": [
+            "AAPL",
+            "NVDA"
+          ],
+          "run_id": 36829718016,
+          "artifact_id": 11147241072,
+          "artifact_sha256": "2eded721511b2b2700f154e967d754a5c6f2f44eaa1b81ba196f8b9beb53308a",
+          "summary_sha256": "7e72b60d05917175929e8302c21a99c1de21f38a6d07dcfb15bb9007a218d745",
+          "daily_values_sha256": "739c60e5e6f400702b9fd00234d87bd8ef9fc7aaba2ea6757dbf35cc15e8fc4f",
+          "overlaps_task97_audit": false,
+          "decision_gate_passed": true
+        },
+        "replication_panel": {
+          "prior_session": "2025-09-23",
+          "first_audit_session": "2025-09-24",
+          "last_audit_session": "2026-09-24",
+          "audit_sessions_per_symbol": 252,
+          "run_id": 36830679178,
+          "artifact_id": 11146743908,
+          "artifact_sha256": "605bc84b2901de88983e136544bcb28db5b7061905c8d513b63b688cf0e05df1",
+          "summary_sha256": "5112b41ad37c5bcfcb77ea6f808a223840a366ad556c605f01dd6d4a122435e6",
+          "daily_values_sha256": "8b2f296feae99c09864f98f2a0b193306034bcd59f0158d575fcbdd32c611f6d",
+          "replication_candidate": "5m"
+        },
+        "symbol_results": {
+          "AAPL": {
+            "primary_median_delta_opt_minutes": 6.93805319663835,
+            "primary_median_mse_ratio": {
+              "5m": 1.000823711472517,
+              "10m": 1.0457599188035043,
+              "15m": 1.3489579282860666
+            },
+            "primary_win_counts": {
+              "5m": 125,
+              "10m": 118,
+              "15m": 9
+            },
+            "primary_candidate": "5m",
+            "replication_candidate": "5m"
+          },
+          "NVDA": {
+            "primary_median_delta_opt_minutes": 6.6642455311360855,
+            "primary_median_mse_ratio": {
+              "5m": 1,
+              "10m": 1.0530741281750298,
+              "15m": 1.4339271360341557
+            },
+            "primary_win_counts": {
+              "5m": 141,
+              "10m": 108,
+              "15m": 3
+            },
+            "primary_candidate": "5m",
+            "replication_candidate": "5m"
+          }
+        },
+        "forecast_score_used": false
+      },
+      "superseded_intermediate_findings": [
+        {
+          "task": 97,
+          "ruling": "US_CANONICAL_SAMPLING = INCONCLUSIVE",
+          "role": "fixed-grid diagnostic"
+        },
+        {
+          "task": 100,
+          "ruling": "US_CANONICAL_SAMPLING = INCONCLUSIVE",
+          "role": "1m Parzen-RK diagnostic"
+        },
+        {
+          "task": 104,
+          "ruling": "MATERIAL_SOURCE_GRANULARITY_MISMATCH",
+          "role": "one-session source-granularity diagnostic; not a sampling ruling"
+        }
+      ]
+    },
+    "Taiwan": {
+      "measurement_id": "tw-whole-day-rv-15m-v4",
+      "canonical_sampling_minutes": 15,
+      "price_basis": "as_printed",
+      "algorithm_version": "rv-core-v1+xtai-closing-auction-v4",
+      "provider": "shioaji",
+      "provider_feed": "historical_kbars_plus_validated_tick_benchmark",
+      "source_timeframe": "1Min Kbars for canonical fixed-grid measurement",
+      "calendar": "XTAI",
+      "timezone": "Asia/Taipei",
+      "regular_session_rule": "XTAI v4 exchange-clock sampling with factual previous-tick provenance when required",
+      "opening_rule": "factual first matched/opening observation",
+      "closing_rule": "13:30 closing-auction observation retained",
+      "overnight_rule": "previous validated 13:30 close to current factual session open",
+      "corporate_action_rule": "as-printed basis preserved explicitly; do not silently mix adjusted series",
+      "source_acceptance": {
+        "task": 85,
+        "status": "SHIOAJI_FEASIBILITY_ACCEPTED",
+        "reference": "Task #86 v4 / Task #89 accepted provider-backed panel"
+      },
+      "measurement_decision": {
+        "task": 90,
+        "ruling": "TAIWAN_CANONICAL_SAMPLING = 15m",
+        "benchmark": "tw-rk-parzen-trades-v1",
+        "benchmark_role": "independent measurement identification only",
+        "run_id": 36812956091,
+        "artifact_id": 11140371482,
+        "artifact_sha256": "50d54a24cab251c83b11ea8718333128cfdd5d7d0333c750f965db32cb2e7a6f",
+        "summary_sha256": "101ad519301c989daf8e0c791aab560f60d233ea0e156ed7596e19102b7088d2",
+        "audit_sessions_per_symbol": 252,
+        "pilot_symbols": [
+          "2330",
+          "2317",
+          "2454"
+        ],
+        "forecast_score_used": false
+      }
+    }
+  },
+  "cross_market_invariants": {
+    "whole_day_measurement": true,
+    "overnight_variance_included": true,
+    "future_target_is_average_variance_not_volatility": true,
+    "market_local_session_calendar_required": true,
+    "current_day_never_in_future_target": true,
+    "no_forecast_qlike_in_measurement_selection": true,
+    "broad_30_plus_30_confirmation_pending": true,
+    "market_specific_forecast_parameters_not_selected_here": true
+  },
+  "durable_decisions": [
+    {
+      "task": 106,
+      "path": "docs/research/provider-acceptance/task-106-us-bandi-russell-final-reference.json",
+      "branch": "codex/106-us-bandi-russell-optimal-sampling",
+      "commit": "72e7f7670240ad0cc1310eae0c1c32d76680a8be"
+    },
+    {
+      "task": 90,
+      "path": "docs/research/provider-acceptance/task-90-taiwan-canonical-measurement-decision.json",
+      "branch": "codex/90-taiwan-rk-feasibility",
+      "commit": "52147035503bb6c351de2c95315b611ba4197fc3"
+    }
+  ],
+  "next_research_boundary": {
+    "story_5_measurement_harmonization_complete": true,
+    "task_12_measurement_audit_complete": true,
+    "next_story": "Task #6 / Task #13 cross-market parameter transferability study",
+    "model_selection_allowed_only_against_this_frozen_measurement_target": true
+  }
+}
