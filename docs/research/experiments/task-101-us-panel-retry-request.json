@@ -2,8 +2,11 @@
   "task": 101,
   "slice": "S1-us-canonical-panel-retry",
   "prior_anchor_rule": "final_regular_minute_only",
-  "panel_session_rule": "strict_full_exchange_calendar_minute_coverage",
-  "failure_diagnostic": "persist exact missing minute starts before fail-closed",
+  "panel_session_rule": "require regular-session open and close anchors; incomplete minute coverage is preserved as missing canonical RV with exact missing-minute diagnostics; no synthetic bars",
+  "failure_diagnostic": "persist exact missing minute starts and raw-response identity; fail closed only for empty session or missing open/close anchor",
   "cache_first": true,
-  "model_execution_allowed": false
+  "model_execution_allowed": false,
+  "resume_artifact_id": 11150665585,
+  "resume_artifact_sha256": "0c5c01c64dacee1865512b1a78040374a31460c3fc1dd982b9bba16704bb0cfc",
+  "execution_sequence": 1
 }
