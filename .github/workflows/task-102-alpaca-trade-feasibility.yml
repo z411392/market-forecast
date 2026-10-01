@@ -1,0 +1,75 @@
+name: task-102-alpaca-trade-feasibility
+
+on:
+  push:
+    branches:
+      - codex/102-alpaca-sip-trade-feasibility
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Compile runner
+        run: |
+          uv run python -m py_compile \
+            docs/research/provider-acceptance/run_task_102_alpaca_trade_feasibility.py
+
+      - name: Lint runner
+        run: |
+          uv run ruff check \
+            docs/research/provider-acceptance/run_task_102_alpaca_trade_feasibility.py
+
+  live-feasibility:
+    if: contains(github.event.head_commit.message, '[trade-feasibility-live]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      MARKET_FORECAST_ALPACA_API_KEY_ID: ${{ secrets.MARKET_FORECAST_ALPACA_API_KEY_ID }}
+      MARKET_FORECAST_ALPACA_SECRET_KEY: ${{ secrets.MARKET_FORECAST_ALPACA_SECRET_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Verify Alpaca credentials
+        shell: bash
+        run: |
+          test -n "${MARKET_FORECAST_ALPACA_API_KEY_ID:-}"
+          test -n "${MARKET_FORECAST_ALPACA_SECRET_KEY:-}"
+
+      - name: Execute two-session trade feasibility
+        run: |
+          uv run python \
+            docs/research/provider-acceptance/run_task_102_alpaca_trade_feasibility.py
+
+      - name: Upload feasibility evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: task-102-alpaca-trade-feasibility
+          path: artifacts/private/provider-captures/task-102-alpaca-trade-feasibility
+          if-no-files-found: ignore
+          retention-days: 30
