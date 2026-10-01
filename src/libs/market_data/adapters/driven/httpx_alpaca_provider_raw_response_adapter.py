@@ -32,7 +32,7 @@ class HttpxAlpacaProviderRawResponseAdapter(
 
     def __call__(
         self,
-        provider: Literal["alpaca"],
+        provider: Literal["massive", "finmind", "alpaca"],
         request: ProviderRequestSpec,
     ) -> bytes:
         if not self._allow_live:
