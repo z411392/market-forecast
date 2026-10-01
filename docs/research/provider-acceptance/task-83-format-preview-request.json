@@ -2,7 +2,7 @@
   "task": 83,
   "slice": "formatter-preview-regeneration",
   "tool": "ruff 0.8.x pinned by branch pyproject",
-  "action": "read-only format preview artifact",
-  "branch_write_by_workflow": false,
-  "execution_sequence": 1
+  "action": "apply exact Ruff 0.8.x formatter output after manifest equality check",
+  "branch_write_by_workflow": true,
+  "execution_sequence": 2
 }
