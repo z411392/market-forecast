@@ -45,7 +45,8 @@ jobs:
           uv run python -m py_compile \
             docs/research/experiments/run_task_101_us_canonical_panel.py \
             docs/research/experiments/run_task_101_taiwan_canonical_panel.py \
-            docs/research/experiments/run_task_101_merge_canonical_panel.py
+            docs/research/experiments/run_task_101_merge_canonical_panel.py \
+            docs/research/experiments/run_task_101_canonical_transferability.py
 
       - name: Ruff Task 101 S1 runners and recovered XTAI files
         run: |
@@ -53,6 +54,7 @@ jobs:
             docs/research/experiments/run_task_101_us_canonical_panel.py \
             docs/research/experiments/run_task_101_taiwan_canonical_panel.py \
             docs/research/experiments/run_task_101_merge_canonical_panel.py \
+            docs/research/experiments/run_task_101_canonical_transferability.py \
             src/libs/market_data/services/decode_shioaji_stock_kbars.py \
             src/libs/realized_variance/domain/services/build_xtai_sampling_prices.py \
             src/libs/realized_variance/domain/services/calculate_intraday_realized_measures_from_sampled_prices.py \
