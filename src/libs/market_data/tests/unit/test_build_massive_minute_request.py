@@ -24,9 +24,7 @@ def test_build_massive_minute_request() -> None:
         ),
     }
 
-    assert build_massive_minute_request("BRK.B", session_date)["path"].startswith(
-        "/v2/aggs/ticker/BRK.B/"
-    )
+    assert build_massive_minute_request("BRK.B", session_date)["path"].startswith("/v2/aggs/ticker/BRK.B/")
 
     for invalid_symbol in ("", " ", "aapl", "AAPL/QQQ", "AAPL?x=1", "AAPL QQQ"):
         with raises(

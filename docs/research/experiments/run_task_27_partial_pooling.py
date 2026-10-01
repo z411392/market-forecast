@@ -278,9 +278,9 @@ def _moving_block_ci(values: np.ndarray) -> tuple[float, float, float]:
 
     for index in range(BOOTSTRAP_REPLICATES):
         chosen = rng.choice(starts, size=block_count, replace=True)
-        sample = np.concatenate(
-            [values[start : start + BOOTSTRAP_BLOCK_LENGTH] for start in chosen]
-        )[: values.size]
+        sample = np.concatenate([values[start : start + BOOTSTRAP_BLOCK_LENGTH] for start in chosen])[
+            : values.size
+        ]
         means[index] = sample.mean()
 
     lower, upper = np.quantile(means, [0.025, 0.975])
@@ -339,10 +339,7 @@ def _scope_row(
             )
 
     date_rows = np.array(
-        [
-            np.mean(per_date[session_date], axis=0)
-            for session_date in sorted(per_date)
-        ],
+        [np.mean(per_date[session_date], axis=0) for session_date in sorted(per_date)],
         dtype=float,
     )
     return _row(
@@ -379,16 +376,11 @@ def main() -> None:
         actual_hash = _sha256(spec.path)
         expected_hash = EXPECTED_SHA256[spec.symbol]
         if actual_hash != expected_hash:
-            raise ValueError(
-                f"{spec.symbol}: input SHA-256 {actual_hash} != expected {expected_hash}"
-            )
+            raise ValueError(f"{spec.symbol}: input SHA-256 {actual_hash} != expected {expected_hash}")
 
     specs = {spec.symbol: spec for spec in input_specs}
     data = {spec.symbol: _load(spec) for spec in input_specs}
-    evaluations = {
-        symbol: _evaluate(data, specs, symbol)
-        for symbol in data
-    }
+    evaluations = {symbol: _evaluate(data, specs, symbol) for symbol in data}
 
     summaries: list[dict[str, object]] = []
     for symbol, evaluated in evaluations.items():

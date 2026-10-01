@@ -14,6 +14,7 @@ from libs.realized_variance.exceptions.invalid_realized_variance_input_error imp
     InvalidRealizedVarianceInputError,
 )
 
+
 @mark.contract
 def test_realized_variance_contract() -> None:
     assert AggregatedIntradayBar.__required_keys__ == frozenset(

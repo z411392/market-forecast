@@ -103,12 +103,15 @@ def test_repository_architecture() -> None:
     for importer, imported in allowed_examples:
         assert _import_violation(importer, imported) is None
 
-    assert _dependency_cycle(
-        {
-            ("risk_forecast", "realized_variance"),
-            ("realized_variance", "market_data"),
-        }
-    ) is None
+    assert (
+        _dependency_cycle(
+            {
+                ("risk_forecast", "realized_variance"),
+                ("realized_variance", "market_data"),
+            }
+        )
+        is None
+    )
     assert _dependency_cycle(
         {
             ("market_data", "realized_variance"),

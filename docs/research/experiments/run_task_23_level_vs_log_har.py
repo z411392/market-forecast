@@ -169,9 +169,7 @@ def moving_block_ci(values: np.ndarray) -> tuple[float, float, float]:
     means = np.empty(BOOTSTRAP_REPLICATES)
     for iteration in range(BOOTSTRAP_REPLICATES):
         chosen = rng.choice(starts, size=blocks_needed, replace=True)
-        sample = np.concatenate(
-            [values[start : start + BOOTSTRAP_BLOCK] for start in chosen]
-        )[: values.size]
+        sample = np.concatenate([values[start : start + BOOTSTRAP_BLOCK] for start in chosen])[: values.size]
         means[iteration] = sample.mean()
     lower, upper = np.quantile(means, [0.025, 0.975])
     return float(values.mean()), float(lower), float(upper)

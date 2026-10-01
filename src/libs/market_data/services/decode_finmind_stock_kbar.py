@@ -72,10 +72,7 @@ def decode_finmind_stock_kbar(
         if volume is None:
             raise InvalidProviderCaptureInputError("finmind_invalid_volume")
 
-        if not (
-            low_price <= open_price <= high_price
-            and low_price <= close_price <= high_price
-        ):
+        if not (low_price <= open_price <= high_price and low_price <= close_price <= high_price):
             raise InvalidProviderCaptureInputError("finmind_invalid_ohlc_envelope")
 
         bars.append(

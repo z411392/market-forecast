@@ -71,9 +71,8 @@ def test_calculate_intraday_realized_measures() -> None:
     assert result["realized_quarticity"] == approx(expected_rq)
     assert result["positive_semivariance"] == approx(expected_positive)
     assert result["negative_semivariance"] == approx(expected_negative)
-    assert (
-        result["positive_semivariance"] + result["negative_semivariance"]
-        == approx(result["realized_variance"])
+    assert result["positive_semivariance"] + result["negative_semivariance"] == approx(
+        result["realized_variance"]
     )
 
     mixed_sampling = list(bars)

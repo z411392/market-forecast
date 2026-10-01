@@ -265,8 +265,7 @@ def _evaluate_symbol(
     panel = data[held_out]
     in_window = np.array(
         [
-            session_date >= fold_start
-            and (fold_end is None or session_date <= fold_end)
+            session_date >= fold_start and (fold_end is None or session_date <= fold_end)
             for session_date in panel.dates
         ],
         dtype=bool,
@@ -319,12 +318,9 @@ def _moving_block_ci(values: np.ndarray) -> tuple[float, float, float]:
 
     for index in range(BOOTSTRAP_REPLICATES):
         chosen = rng.choice(starts, size=blocks_needed, replace=True)
-        sample = np.concatenate(
-            [
-                values[start : start + BOOTSTRAP_BLOCK_LENGTH]
-                for start in chosen
-            ]
-        )[: values.size]
+        sample = np.concatenate([values[start : start + BOOTSTRAP_BLOCK_LENGTH] for start in chosen])[
+            : values.size
+        ]
         means[index] = sample.mean()
 
     lower, upper = np.quantile(means, [0.025, 0.975])
@@ -417,9 +413,7 @@ def main() -> None:
         actual_hash = _sha256(spec.path)
         expected_hash = EXPECTED_SHA256[spec.symbol]
         if actual_hash != expected_hash:
-            raise ValueError(
-                f"{spec.symbol}: input SHA-256 {actual_hash} != expected {expected_hash}"
-            )
+            raise ValueError(f"{spec.symbol}: input SHA-256 {actual_hash} != expected {expected_hash}")
 
     specs = {spec.symbol: spec for spec in input_specs}
     data = {spec.symbol: _load(spec) for spec in input_specs}
