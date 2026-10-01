@@ -1,0 +1,26 @@
+{
+  "artifact_version": "task-105-trade-batch-artifacts-v1",
+  "task": 105,
+  "batches": [
+    {
+      "batch": 1,
+      "run_id": 36828522471,
+      "artifact_id": 11147171584,
+      "artifact_sha256": "09b58496d435521604e6b6e691344ccdb8960d7b50a82e767af3c3d417f541dd",
+      "artifact_size_bytes": 187646433,
+      "status": "accepted",
+      "dates": [
+        "2025-10-01",
+        "2025-10-15",
+        "2025-10-30",
+        "2025-11-13"
+      ],
+      "symbol_days": 8,
+      "page_count": 1385,
+      "raw_trade_count": 13827706,
+      "eligible_trade_count": 2572297,
+      "raw_response_bytes": 1358404989,
+      "eligible_sequence_bytes_gzip": 18209959
+    }
+  ]
+}
