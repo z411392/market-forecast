@@ -1,0 +1,80 @@
+name: task-103-trade-price-eligibility
+
+on:
+  push:
+    branches:
+      - codex/103-alpaca-trade-price-eligibility
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Compile replay runner
+        run: |
+          uv run python -m py_compile             docs/research/provider-acceptance/run_task_103_trade_price_eligibility.py
+
+      - name: Lint replay runner
+        run: |
+          uv run ruff check             docs/research/provider-acceptance/run_task_103_trade_price_eligibility.py
+
+  replay:
+    if: contains(github.event.head_commit.message, '[trade-price-eligibility]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Restore and verify Task 97 and Task 102 artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="artifacts/private/provider-captures/task-103-input"
+          rm -rf "$root"
+          mkdir -p "$root/task97" "$root/task102"
+
+          gh api             "repos/${GITHUB_REPOSITORY}/actions/artifacts/11144780888/zip"             > /tmp/task97.zip
+          test "$(sha256sum /tmp/task97.zip | cut -d' ' -f1)" =             "39a419d8aa070c2f3b641c5f93dde638189164bb933a7780615a24c6b7e6c812"
+          unzip -q /tmp/task97.zip -d "$root/task97"
+
+          gh api             "repos/${GITHUB_REPOSITORY}/actions/artifacts/11145730777/zip"             > /tmp/task102.zip
+          test "$(sha256sum /tmp/task102.zip | cut -d' ' -f1)" =             "a34d32b443d82df4de548a2eca834b438cff4aa2dba03c0107a63c8a76981d3f"
+          unzip -q /tmp/task102.zip -d "$root/task102"
+
+      - name: Replay trade price eligibility against accepted 1m bars
+        run: |
+          uv run python             docs/research/provider-acceptance/run_task_103_trade_price_eligibility.py
+
+      - name: Upload replay evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: task-103-trade-price-eligibility
+          path: artifacts/private/provider-captures/task-103-trade-price-eligibility
+          retention-days: 30
