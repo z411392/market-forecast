@@ -1,7 +1,7 @@
 import json
 import os
 import time
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -26,6 +26,9 @@ from libs.market_data.services.build_provider_capture_acceptance_receipt import 
 )
 from libs.market_data.services.build_provider_request_sha256 import (
     build_provider_request_sha256,
+)
+from libs.market_data.services.decode_alpaca_stock_bars import (
+    decode_alpaca_stock_bars,
 )
 from libs.realized_variance.domain.services.aggregate_minute_bars import (
     aggregate_minute_bars,
@@ -103,6 +106,7 @@ def main() -> None:
         "algorithm_version": "rv-core-v1",
         "symbols": list(SYMBOLS),
         "prior_session_for_first_overnight": prior_session.isoformat(),
+        "prior_anchor_rule": "final_regular_minute_only",
         "first_panel_session": audit_sessions[0].isoformat(),
         "last_panel_session": audit_sessions[-1].isoformat(),
         "panel_session_count": len(audit_sessions),
@@ -115,6 +119,8 @@ def main() -> None:
                 "accepted_panel_sessions": 0,
                 "missing_grid_minutes": 0,
                 "gap_count": 0,
+                "cache_hits": 0,
+                "provider_fetches": 0,
             }
             for symbol in SYMBOLS
         },
@@ -135,23 +141,95 @@ def main() -> None:
             label = session_date.isoformat()
             session_open = calendar.session_open(label).to_pydatetime()
             session_close = calendar.session_close(label).to_pydatetime()
-            expected_minute_count = int(
+            full_session_minute_count = int(
                 (session_close - session_open).total_seconds() // 60
             )
-            if expected_minute_count not in (210, 390):
+            if full_session_minute_count not in (210, 390):
                 raise RuntimeError(
                     "task101_us_unexpected_session_minutes:"
-                    f"{label}:{expected_minute_count}"
+                    f"{label}:{full_session_minute_count}"
                 )
+
+            is_prior_anchor = session_index == 0
+            request_start = (
+                session_close - timedelta(minutes=1)
+                if is_prior_anchor
+                else session_open
+            )
+            expected_minute_count = (
+                1 if is_prior_anchor else full_session_minute_count
+            )
 
             for symbol in SYMBOLS:
                 request = build_alpaca_historical_bars_request(
                     source_symbol=symbol,
-                    session_start_utc=session_open,
+                    session_start_utc=request_start,
                     session_end_utc_exclusive=session_close,
                     price_basis="split_adjusted",
                 )
-                raw = fetch(provider="alpaca", request=request)
+                raw = _load_cached_raw(
+                    session_date=session_date,
+                    request=request,
+                )
+                progress = summary["symbol_progress"][symbol]
+                if raw is None:
+                    raw = fetch(provider="alpaca", request=request)
+                    progress["provider_fetches"] += 1
+                    time.sleep(REQUEST_SLEEP_SECONDS)
+                else:
+                    progress["cache_hits"] += 1
+
+                payload = json.loads(raw)
+                if not isinstance(payload, dict):
+                    raise RuntimeError("task101_us_response_not_object")
+                preview = decode_alpaca_stock_bars(
+                    payload=payload,
+                    expected_source_symbol=symbol,
+                    security=securities[symbol],
+                    price_basis="split_adjusted",
+                )
+                if len(preview) != expected_minute_count:
+                    expected_starts = {
+                        request_start + timedelta(minutes=index)
+                        for index in range(expected_minute_count)
+                    }
+                    observed_starts = {
+                        bar["bar_start_utc"] for bar in preview
+                    }
+                    summary["last_failed_attempt"] = {
+                        "symbol": symbol,
+                        "session_date": session_date.isoformat(),
+                        "role": (
+                            "prior_anchor"
+                            if is_prior_anchor
+                            else "panel_session"
+                        ),
+                        "expected_minute_count": expected_minute_count,
+                        "observed_minute_count": len(preview),
+                        "first_observed_utc": (
+                            preview[0]["bar_start_utc"].isoformat()
+                            if preview
+                            else None
+                        ),
+                        "last_observed_utc": (
+                            preview[-1]["bar_start_utc"].isoformat()
+                            if preview
+                            else None
+                        ),
+                        "missing_minute_starts_utc": [
+                            value.isoformat()
+                            for value in sorted(
+                                expected_starts - observed_starts
+                            )
+                        ],
+                    }
+                    _write_json(SUMMARY_PATH, summary)
+                    raise RuntimeError(
+                        "task101_us_unexpected_minute_count:"
+                        f"{symbol}:{label}:"
+                        f"{len(preview)}/{expected_minute_count}"
+                    )
+
                 manifest, bars = assemble_provider_capture_sample(
                     provider="alpaca",
                     raw_response=raw,
@@ -159,7 +237,7 @@ def main() -> None:
                     retrieval_date=retrieval_date,
                     security=securities[symbol],
                     session_date=session_date,
-                    expected_session_start_utc=session_open,
+                    expected_session_start_utc=request_start,
                     expected_session_end_utc_exclusive=session_close,
                     expected_minute_count=expected_minute_count,
                     price_basis="split_adjusted",
@@ -171,7 +249,6 @@ def main() -> None:
                 )
                 persist(raw_response=raw, receipt=receipt)
 
-                progress = summary["symbol_progress"][symbol]
                 progress["accepted_source_sessions"] += 1
                 progress["missing_grid_minutes"] += receipt[
                     "missing_grid_minutes"
@@ -227,7 +304,6 @@ def main() -> None:
                     previous_close[symbol] = bars[-1]["close"]
 
                 _write_json(SUMMARY_PATH, summary)
-                time.sleep(REQUEST_SLEEP_SECONDS)
 
     for symbol in SYMBOLS:
         rows = daily_rows[symbol]
@@ -267,6 +343,33 @@ def main() -> None:
         },
     )
 
+
+
+def _load_cached_raw(
+    *,
+    session_date: date,
+    request: dict[str, Any],
+) -> bytes | None:
+    request_sha = build_provider_request_sha256(request)
+    pattern = (
+        EVIDENCE_ROOT
+        / "alpaca"
+        / "*"
+        / session_date.isoformat()
+        / request_sha
+        / "*"
+        / "raw-response.bin"
+    )
+    paths = sorted(Path().glob(str(pattern)))
+    if not paths:
+        return None
+
+    payloads = {path.read_bytes() for path in paths}
+    if len(payloads) != 1:
+        raise RuntimeError(
+            "task101_us_conflicting_cached_raw_response"
+        )
+    return next(iter(payloads))
 
 def _security(symbol: str) -> SecurityIdentity:
     exchange = "XNYS" if symbol == "TSM" else "XNAS"
