@@ -1,0 +1,8 @@
+{
+  "task": 83,
+  "slice": "formatter-preview-regeneration",
+  "tool": "ruff 0.8.x pinned by branch pyproject",
+  "action": "read-only format preview artifact",
+  "branch_write_by_workflow": false,
+  "execution_sequence": 1
+}
