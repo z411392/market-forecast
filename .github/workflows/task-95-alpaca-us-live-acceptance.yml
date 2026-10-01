@@ -79,3 +79,69 @@ jobs:
             src/libs/market_data/tests/unit/test_decode_alpaca_stock_bars.py \
             src/libs/market_data/tests/unit/test_httpx_alpaca_provider_raw_response_adapter.py \
             src/libs/market_data/tests/unit/test_build_alpaca_provider_capture_acceptance.py
+
+      - name: Run full market_data regressions
+        run: uv run pytest -q src/libs/market_data/tests
+
+      - name: Compile and lint Alpaca path
+        run: |
+          uv run python -m py_compile \
+            docs/research/provider-acceptance/run_task_95_alpaca_us_live_acceptance.py
+          uv run ruff check \
+            src/libs/market_data/services/build_alpaca_historical_bars_request.py \
+            src/libs/market_data/services/decode_alpaca_stock_bars.py \
+            src/libs/market_data/adapters/driven/httpx_alpaca_provider_raw_response_adapter.py \
+            docs/research/provider-acceptance/run_task_95_alpaca_us_live_acceptance.py
+
+  live-acceptance:
+    if: contains(github.event.head_commit.message, '[alpaca-live-acceptance]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      MARKET_FORECAST_ALPACA_API_KEY_ID: ${{ secrets.MARKET_FORECAST_ALPACA_API_KEY_ID }}
+      MARKET_FORECAST_ALPACA_SECRET_KEY: ${{ secrets.MARKET_FORECAST_ALPACA_SECRET_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Verify narrow historical authorization
+        run: |
+          uv run python - <<'PY'
+          import json
+          from pathlib import Path
+
+          request = json.loads(
+              Path(
+                  "docs/research/provider-acceptance/"
+                  "task-95-alpaca-live-acceptance-request.json"
+              ).read_text(encoding="utf-8")
+          )
+          if request.get("provider_request_allowed") is not True:
+              raise SystemExit("alpaca_provider_request_not_authorized")
+          if request.get("max_requests") != 6:
+              raise SystemExit("alpaca_request_cap_mismatch")
+          if request.get("trading_or_account_api_allowed") is not False:
+              raise SystemExit("alpaca_scope_mismatch")
+          PY
+
+      - name: Execute six historical SIP acceptance requests
+        run: |
+          uv run python \
+            docs/research/provider-acceptance/run_task_95_alpaca_us_live_acceptance.py
+
+      - name: Upload Alpaca acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: task-95-alpaca-us-live-acceptance
+          path: artifacts/private/provider-captures/task-95-alpaca-us-live-acceptance
+          if-no-files-found: ignore
+          retention-days: 30
