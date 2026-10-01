@@ -1,9 +1,10 @@
 from datetime import date
 from typing import get_args, get_type_hints
 
+from pytest import mark
+
 from libs.market_data.dtos.security_identity import SecurityIdentity
 from libs.realized_variance.dtos.future_variance_target import FutureVarianceTarget
-from pytest import mark
 
 
 @mark.contract

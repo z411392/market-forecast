@@ -13,7 +13,6 @@ import numpy as np
 from sklearn.linear_model import Ridge
 from sklearn.preprocessing import StandardScaler
 
-
 Market = Literal["us", "taiwan"]
 Mode = Literal["global", "market", "partial"]
 

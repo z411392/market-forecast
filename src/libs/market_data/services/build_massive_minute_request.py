@@ -6,7 +6,6 @@ from libs.market_data.exceptions.invalid_provider_request_input_error import (
     InvalidProviderRequestInputError,
 )
 
-
 _MASSIVE_SOURCE_SYMBOL = re.compile(r"[A-Z0-9.-]+\Z")
 
 

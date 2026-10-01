@@ -13,7 +13,6 @@ import numpy as np
 from sklearn.linear_model import Ridge
 from sklearn.preprocessing import StandardScaler
 
-
 Market = Literal["us", "taiwan"]
 
 START_DATE = date(2022, 7, 18)

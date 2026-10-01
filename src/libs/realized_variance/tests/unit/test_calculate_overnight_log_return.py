@@ -1,12 +1,13 @@
 from math import inf, log, nan
 
+from pytest import approx, mark, raises
+
 from libs.realized_variance.domain.services.calculate_overnight_log_return import (
     calculate_overnight_log_return,
 )
 from libs.realized_variance.exceptions.invalid_realized_variance_input_error import (
     InvalidRealizedVarianceInputError,
 )
-from pytest import approx, mark, raises
 
 
 @mark.unit

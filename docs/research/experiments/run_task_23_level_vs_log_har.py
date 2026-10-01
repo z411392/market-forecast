@@ -11,7 +11,6 @@ from typing import Literal
 
 import numpy as np
 
-
 Market = Literal["us", "taiwan"]
 
 HORIZON = 5

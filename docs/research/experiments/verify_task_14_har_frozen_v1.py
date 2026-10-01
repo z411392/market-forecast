@@ -7,7 +7,6 @@ import math
 import re
 from pathlib import Path
 
-
 VAR_TOLERANCE = 1e-15
 DISPLAY_TOLERANCE = 1e-10
 
