@@ -29,12 +29,60 @@ EVIDENCE_ROOT = OUTPUT_ROOT / "evidence"
 SUMMARY_PATH = OUTPUT_ROOT / "summary.json"
 
 CASES = (
-    ("AAPL", date(2024, 7, 2), "2024-07-02T13:30:00+00:00", "2024-07-02T20:00:00+00:00", 390, "as_printed", "aapl_ordinary_raw"),
-    ("AAPL", date(2024, 7, 3), "2024-07-03T13:30:00+00:00", "2024-07-03T17:00:00+00:00", 210, "as_printed", "aapl_early_close_raw"),
-    ("NVDA", date(2024, 6, 7), "2024-06-07T13:30:00+00:00", "2024-06-07T20:00:00+00:00", 390, "as_printed", "nvda_pre_split_raw"),
-    ("NVDA", date(2024, 6, 10), "2024-06-10T13:30:00+00:00", "2024-06-10T20:00:00+00:00", 390, "as_printed", "nvda_post_split_raw"),
-    ("NVDA", date(2024, 6, 7), "2024-06-07T13:30:00+00:00", "2024-06-07T20:00:00+00:00", 390, "split_adjusted", "nvda_pre_split_adjusted"),
-    ("NVDA", date(2024, 6, 10), "2024-06-10T13:30:00+00:00", "2024-06-10T20:00:00+00:00", 390, "split_adjusted", "nvda_post_split_adjusted"),
+    (
+        "AAPL",
+        date(2024, 7, 2),
+        "2024-07-02T13:30:00+00:00",
+        "2024-07-02T20:00:00+00:00",
+        390,
+        "as_printed",
+        "aapl_ordinary_raw",
+    ),
+    (
+        "AAPL",
+        date(2024, 7, 3),
+        "2024-07-03T13:30:00+00:00",
+        "2024-07-03T17:00:00+00:00",
+        210,
+        "as_printed",
+        "aapl_early_close_raw",
+    ),
+    (
+        "NVDA",
+        date(2024, 6, 7),
+        "2024-06-07T13:30:00+00:00",
+        "2024-06-07T20:00:00+00:00",
+        390,
+        "as_printed",
+        "nvda_pre_split_raw",
+    ),
+    (
+        "NVDA",
+        date(2024, 6, 10),
+        "2024-06-10T13:30:00+00:00",
+        "2024-06-10T20:00:00+00:00",
+        390,
+        "as_printed",
+        "nvda_post_split_raw",
+    ),
+    (
+        "NVDA",
+        date(2024, 6, 7),
+        "2024-06-07T13:30:00+00:00",
+        "2024-06-07T20:00:00+00:00",
+        390,
+        "split_adjusted",
+        "nvda_pre_split_adjusted",
+    ),
+    (
+        "NVDA",
+        date(2024, 6, 10),
+        "2024-06-10T13:30:00+00:00",
+        "2024-06-10T20:00:00+00:00",
+        390,
+        "split_adjusted",
+        "nvda_post_split_adjusted",
+    ),
 )
 
 
