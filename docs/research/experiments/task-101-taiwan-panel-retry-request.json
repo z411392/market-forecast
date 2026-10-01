@@ -12,5 +12,5 @@
   ],
   "model_execution_allowed": false,
   "missing_measurement_rule": "known symbol-specific full-day halt remains an explicit missing canonical RV; no synthetic measurement and no target-horizon compression",
-  "execution_sequence": 1
+  "execution_sequence": 2
 }
