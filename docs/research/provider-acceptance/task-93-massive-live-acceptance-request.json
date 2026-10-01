@@ -1,0 +1,15 @@
+{
+  "task": 93,
+  "provider": "massive",
+  "scope": "narrow_us_live_acceptance",
+  "provider_request_allowed": false,
+  "quota_or_spend_allowed": false,
+  "cases": [
+    "AAPL 2024-07-02 as_printed",
+    "AAPL 2024-07-03 as_printed early_close",
+    "NVDA 2024-06-07 as_printed pre_split",
+    "NVDA 2024-06-10 as_printed post_split",
+    "NVDA 2024-06-07 split_adjusted pre_split",
+    "NVDA 2024-06-10 split_adjusted post_split"
+  ]
+}
