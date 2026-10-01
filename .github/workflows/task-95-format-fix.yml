@@ -1,0 +1,64 @@
+name: task-95-format-fix
+
+on:
+  push:
+    branches:
+      - codex/95-alpaca-us-live-acceptance-v2
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: contains(github.event.head_commit.message, '[apply-task95-format]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync project
+        run: uv sync
+
+      - name: Apply deterministic Ruff formatting and import fixes
+        run: |
+          uv run ruff format             docs/research/provider-acceptance/run_task_95_alpaca_historical_sip_smoke.py             docs/research/provider-acceptance/run_task_95_alpaca_us_live_acceptance.py             src/libs/market_data/adapters/driven/filesystem_provider_capture_evidence_adapter.py             src/libs/market_data/adapters/driven/httpx_alpaca_provider_raw_response_adapter.py             src/libs/market_data/services/build_alpaca_historical_bars_request.py             src/libs/market_data/services/build_provider_capture_acceptance_receipt.py             src/libs/market_data/services/decode_alpaca_stock_bars.py             src/libs/market_data/tests/unit/test_build_provider_request_sha256.py             src/libs/market_data/tests/unit/test_decode_alpaca_stock_bars.py             src/libs/market_data/tests/unit/test_filesystem_provider_capture_evidence_adapter.py             src/libs/market_data/tests/unit/test_httpx_alpaca_provider_raw_response_adapter.py
+          uv run ruff check --fix             docs/research/provider-acceptance/run_task_95_alpaca_historical_sip_smoke.py             docs/research/provider-acceptance/run_task_95_alpaca_us_live_acceptance.py             src/libs/market_data/adapters/driven/filesystem_provider_capture_evidence_adapter.py             src/libs/market_data/adapters/driven/httpx_alpaca_provider_raw_response_adapter.py             src/libs/market_data/services/build_alpaca_historical_bars_request.py             src/libs/market_data/services/build_provider_capture_acceptance_receipt.py             src/libs/market_data/services/decode_alpaca_stock_bars.py             src/libs/market_data/tests/unit/test_build_provider_request_sha256.py             src/libs/market_data/tests/unit/test_decode_alpaca_stock_bars.py             src/libs/market_data/tests/unit/test_filesystem_provider_capture_evidence_adapter.py             src/libs/market_data/tests/unit/test_httpx_alpaca_provider_raw_response_adapter.py
+
+      - name: Verify changed file allowlist
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/allowed.txt <<'EOF'
+          docs/research/provider-acceptance/run_task_95_alpaca_historical_sip_smoke.py
+          docs/research/provider-acceptance/run_task_95_alpaca_us_live_acceptance.py
+          src/libs/market_data/adapters/driven/filesystem_provider_capture_evidence_adapter.py
+          src/libs/market_data/adapters/driven/httpx_alpaca_provider_raw_response_adapter.py
+          src/libs/market_data/services/build_alpaca_historical_bars_request.py
+          src/libs/market_data/services/build_provider_capture_acceptance_receipt.py
+          src/libs/market_data/services/decode_alpaca_stock_bars.py
+          src/libs/market_data/tests/unit/test_build_provider_request_sha256.py
+          src/libs/market_data/tests/unit/test_decode_alpaca_stock_bars.py
+          src/libs/market_data/tests/unit/test_filesystem_provider_capture_evidence_adapter.py
+          src/libs/market_data/tests/unit/test_httpx_alpaca_provider_raw_response_adapter.py
+          EOF
+          sed -i 's/^          //' /tmp/allowed.txt
+          git diff --name-only -- '*.py' | sort > /tmp/actual.txt
+          test -s /tmp/actual.txt
+          comm -23 /tmp/actual.txt <(sort /tmp/allowed.txt) | (! grep .)
+
+      - name: Commit exact mechanical output
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "ChatGPT Commander"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- '*.py'
+          git diff --cached --check
+          git commit -m "task-95: apply deterministic Ruff 0.8.6 formatting"
+          git push origin HEAD:codex/95-alpaca-us-live-acceptance-v2
