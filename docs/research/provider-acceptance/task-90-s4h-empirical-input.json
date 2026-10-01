@@ -7,10 +7,10 @@
     "2317",
     "2454"
   ],
-  "expected_session_count": 165,
-  "expected_audit_session_count": 164,
+  "expected_session_count": 253,
+  "expected_audit_session_count": 252,
   "first_session_date": "2025-09-10",
-  "last_session_date": "2026-05-21",
+  "last_session_date": "2026-09-24",
   "final_required_audit_session_count": 252,
   "artifacts": [
     {
@@ -37,10 +37,25 @@
       "batch": 5,
       "artifact_id": 11096306965,
       "digest": "sha256:5ab210d5a56b50e50bf38bcd415fe965a5646d9c92f8503204c94c9e7da1a75b"
+    },
+    {
+      "batch": 6,
+      "artifact_id": 11140021792,
+      "digest": "sha256:249926da745df0c9624b8fddd0809c768be791849b1624a2b46d865a487aee16"
+    },
+    {
+      "batch": 7,
+      "artifact_id": 11139932346,
+      "digest": "sha256:bb25dfa0b003415a69ef85deaf7176788ed98ae4e17b2d5e1861ff1cdae63749"
+    },
+    {
+      "batch": 8,
+      "artifact_id": 11140321291,
+      "digest": "sha256:3cad89220bf9c20b7a17d93fa8fdfcbd92044d5c899d530744a78873117a35cb"
     }
   ],
-  "reference_summary": "docs/research/provider-acceptance/task-90-s4g-interim-164-rk-comparison.json",
+  "reference_summary": null,
   "formula_cross_check_session": "2026-04-20",
-  "output_version": "task-90-s4h-empirical-rk-comparison-v1",
-  "execution_sequence": 1
+  "output_version": "task-90-s4h-final-rk-comparison-v1",
+  "execution_sequence": 2
 }
