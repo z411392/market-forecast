@@ -1,0 +1,85 @@
+name: task-104-us-trade-rk-granularity
+
+on:
+  push:
+    branches:
+      - codex/104-us-trade-rk-granularity
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Compile diagnostic runner
+        run: |
+          uv run python -m py_compile             docs/research/provider-acceptance/run_task_104_us_trade_rk_granularity.py
+
+      - name: Lint diagnostic runner
+        run: |
+          uv run ruff check             docs/research/provider-acceptance/run_task_104_us_trade_rk_granularity.py
+
+  diagnostic:
+    if: contains(github.event.head_commit.message, '[trade-rk-granularity]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Restore and verify frozen input artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="artifacts/private/provider-captures/task-104-input"
+          rm -rf "$root"
+          mkdir -p "$root/task100" "$root/task102" "$root/task103"
+
+          gh api             "repos/${GITHUB_REPOSITORY}/actions/artifacts/11144968136/zip"             > /tmp/task100.zip
+          test "$(sha256sum /tmp/task100.zip | cut -d' ' -f1)" =             "1211d8bb42b453b1d96705a0831e5e2e0a0d7aedc0a6c85d658335889fd053e1"
+          unzip -q /tmp/task100.zip -d "$root/task100"
+
+          gh api             "repos/${GITHUB_REPOSITORY}/actions/artifacts/11145730777/zip"             > /tmp/task102.zip
+          test "$(sha256sum /tmp/task102.zip | cut -d' ' -f1)" =             "a34d32b443d82df4de548a2eca834b438cff4aa2dba03c0107a63c8a76981d3f"
+          unzip -q /tmp/task102.zip -d "$root/task102"
+
+          gh api             "repos/${GITHUB_REPOSITORY}/actions/artifacts/11145463492/zip"             > /tmp/task103.zip
+          test "$(sha256sum /tmp/task103.zip | cut -d' ' -f1)" =             "78ea597e5c364db51c9d9f8293ebbff5d60317803dc9f0a08777251249be54df"
+          unzip -q /tmp/task103.zip -d "$root/task103"
+
+      - name: Run one-session trade-RK granularity diagnostic
+        run: |
+          uv run python             docs/research/provider-acceptance/run_task_104_us_trade_rk_granularity.py
+
+      - name: Upload diagnostic evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: task-104-us-trade-rk-granularity
+          path: artifacts/private/provider-captures/task-104-us-trade-rk-granularity
+          retention-days: 30
