@@ -562,7 +562,6 @@ def _log_returns(
     for previous, current in zip(
         prices,
         prices[1:],
-        strict=True,
     ):
         if (
             not math.isfinite(previous)
