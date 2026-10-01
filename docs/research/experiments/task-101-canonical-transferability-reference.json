@@ -1,0 +1,113 @@
+{
+  "artifact_version": "task-101-canonical-transferability-reference-v1",
+  "task": 101,
+  "slice": "S2-S3-transferability",
+  "status": "accepted",
+  "branch": "codex/101-canonical-transferability-v2",
+  "workflow_run_id": 36849301344,
+  "artifact_id": 11154299669,
+  "artifact_sha256": "7d97355a56f73dbbbbce2cf5c21be34a34cddc613d1f95a0e5f5ce2d0d77633a",
+  "summary_sha256": "8fedceafa369b5b5b6c0ab3aae66cfa5dcd53183b277233b5a984af6038c304c",
+  "outputs_sha256": {
+    "h5_final": "74cf7f42074121b16cea24ab96e79310c623b2b48e98f9493f24f894802b3acf",
+    "h5_expanding_oos": "d130ccf6f6b96af812c4c740b6635a4eb33426f0cf42cf56cbc45178cfedae0d",
+    "h20_confirmatory": "b9b61102ab9f6c6f1989c4f6e768b913d39479034134cf8d41cd74d9d3dd4df0"
+  },
+  "input_panel": {
+    "artifact_id": 11154198322,
+    "artifact_sha256": "4bd4cf2c5056205e80c321d963b083b67f14ff4cfa6e0e1554c7e1c61789a1ea",
+    "panel_sha256": "439968db10da894d3024ca5cbe38e74259328c28307f65477d3ddfa482183a4e"
+  },
+  "frozen_protocol": {
+    "ridge_alpha": 1,
+    "bootstrap_block_length": 20,
+    "bootstrap_replicates": 5000,
+    "bootstrap_seed": 20260926,
+    "train_end": "2025-11-25",
+    "evaluation_start": "2025-12-04",
+    "unseen_symbol_holdout": true,
+    "local_session_maturity_purge": true,
+    "missing_measurements_break_features_and_targets": true
+  },
+  "h5_final_scope": {
+    "overall": {
+      "global_qlike": 0.18989113724233714,
+      "market_qlike": 0.19140033843653095,
+      "partial_qlike": 0.1913998259730917,
+      "market_minus_global": 0.001509201194193814,
+      "ci_025": 0.00006281469284329115,
+      "ci_975": 0.0030610069344573876
+    },
+    "us": {
+      "global_qlike": 0.17290680181340337,
+      "market_qlike": 0.1750211785960563,
+      "partial_qlike": 0.17502322225358474,
+      "market_minus_global": 0.002114376782652905,
+      "ci_025": 0.0002845001963227502,
+      "ci_975": 0.004517150581270698
+    },
+    "taiwan": {
+      "global_qlike": 0.21366936299734082,
+      "market_qlike": 0.2139587270532589,
+      "partial_qlike": 0.21395485360198518,
+      "market_minus_global": 0.0002893640559180883,
+      "ci_025": -0.0033866082304236348,
+      "ci_975": 0.0037663539065791412
+    }
+  },
+  "h20_final_scope": {
+    "overall": {
+      "global_qlike": 0.12985213289625228,
+      "market_qlike": 0.13172155481341868,
+      "partial_qlike": 0.13172135779072064,
+      "market_minus_global": 0.001869421917166392,
+      "ci_025": 0.00016470458953679102,
+      "ci_975": 0.0028344492769633352
+    },
+    "us": {
+      "global_qlike": 0.11009252355391654,
+      "market_qlike": 0.11277754991329828,
+      "partial_qlike": 0.11277991134277394,
+      "market_minus_global": 0.002685026359381739,
+      "ci_025": 0.0013039853567787807,
+      "ci_975": 0.005900296111824431
+    },
+    "taiwan": {
+      "global_qlike": 0.1623991564709328,
+      "market_qlike": 0.16291129817779024,
+      "partial_qlike": 0.16290765758061268,
+      "market_minus_global": 0.0005121417068574643,
+      "ci_025": -0.004892786909019694,
+      "ci_975": 0.0021588036902896322
+    }
+  },
+  "expanding_oos_overall_market_minus_global": {
+    "F1": {
+      "mean": 0.005797854454753255,
+      "ci_025": -0.005414188563244325,
+      "ci_975": 0.01998562423472114
+    },
+    "F2": {
+      "mean": -0.004345918402563687,
+      "ci_025": -0.0090137561224768,
+      "ci_975": 0.004995210083563738
+    },
+    "F3": {
+      "mean": 0.0028329900911677653,
+      "ci_025": 0.001755634020763112,
+      "ci_975": 0.005086084250595662
+    },
+    "F4": {
+      "mean": 0.0015489792812398684,
+      "ci_025": 0.0001142973466002965,
+      "ci_975": 0.0031167343592345196
+    }
+  },
+  "ruling": {
+    "market_specific_ridge_har_promoted": false,
+    "fixed_alpha_partial_pooling_promoted": false,
+    "canonical_measurement_changes_historical_transferability_ruling": false,
+    "interpretation": "global shared dynamics remain preferred overall and in U.S.; Taiwan market-specific evidence remains unstable/inconclusive"
+  },
+  "mandatory_baseline_comparator_status": "pending_exact_historical_garch_provenance"
+}
