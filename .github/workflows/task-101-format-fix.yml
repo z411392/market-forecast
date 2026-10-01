@@ -1,0 +1,64 @@
+name: task-101-format-fix
+
+on:
+  push:
+    branches:
+      - codex/101-canonical-transferability-integration
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: contains(github.event.head_commit.message, '[apply-task101-format]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync project
+        run: uv sync
+
+      - name: Apply deterministic Ruff formatting and import fixes
+        run: |
+          uv run ruff format             docs/research/experiments/run_task_101_canonical_baselines.py             docs/research/experiments/run_task_101_canonical_transferability.py             docs/research/experiments/run_task_101_merge_canonical_panel.py             docs/research/experiments/run_task_101_taiwan_canonical_panel.py             docs/research/experiments/run_task_101_us_canonical_panel.py             docs/research/provider-acceptance/run_task_106_bandi_russell_replication.py             docs/research/provider-acceptance/run_task_106_us_bandi_russell_optimal_sampling.py             docs/research/provider-acceptance/run_task_97_us_rv_measurement_audit.py             docs/research/provider-acceptance/verify_task_99_cross_market_manifest_v2.py             src/libs/market_data/adapters/driven/shioaji_provider_traffic_usage_adapter.py             src/libs/market_data/tests/unit/test_shioaji_provider_traffic_usage_adapter.py
+          uv run ruff check --fix             docs/research/experiments/run_task_101_canonical_baselines.py             docs/research/experiments/run_task_101_canonical_transferability.py             docs/research/experiments/run_task_101_merge_canonical_panel.py             docs/research/experiments/run_task_101_taiwan_canonical_panel.py             docs/research/experiments/run_task_101_us_canonical_panel.py             docs/research/provider-acceptance/run_task_106_bandi_russell_replication.py             docs/research/provider-acceptance/run_task_106_us_bandi_russell_optimal_sampling.py             docs/research/provider-acceptance/run_task_97_us_rv_measurement_audit.py             docs/research/provider-acceptance/verify_task_99_cross_market_manifest_v2.py             src/libs/market_data/adapters/driven/shioaji_provider_traffic_usage_adapter.py             src/libs/market_data/tests/unit/test_shioaji_provider_traffic_usage_adapter.py
+
+      - name: Verify changed file allowlist
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/allowed.txt <<'EOF'
+          docs/research/experiments/run_task_101_canonical_baselines.py
+          docs/research/experiments/run_task_101_canonical_transferability.py
+          docs/research/experiments/run_task_101_merge_canonical_panel.py
+          docs/research/experiments/run_task_101_taiwan_canonical_panel.py
+          docs/research/experiments/run_task_101_us_canonical_panel.py
+          docs/research/provider-acceptance/run_task_106_bandi_russell_replication.py
+          docs/research/provider-acceptance/run_task_106_us_bandi_russell_optimal_sampling.py
+          docs/research/provider-acceptance/run_task_97_us_rv_measurement_audit.py
+          docs/research/provider-acceptance/verify_task_99_cross_market_manifest_v2.py
+          src/libs/market_data/adapters/driven/shioaji_provider_traffic_usage_adapter.py
+          src/libs/market_data/tests/unit/test_shioaji_provider_traffic_usage_adapter.py
+          EOF
+          sed -i 's/^          //' /tmp/allowed.txt
+          git diff --name-only -- '*.py' | sort > /tmp/actual.txt
+          test -s /tmp/actual.txt
+          comm -23 /tmp/actual.txt <(sort /tmp/allowed.txt) | (! grep .)
+
+      - name: Commit exact mechanical output
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "ChatGPT Commander"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- '*.py'
+          git diff --cached --check
+          git commit -m "task-101: apply deterministic Ruff 0.8.6 formatting"
+          git push origin HEAD:codex/101-canonical-transferability-integration
