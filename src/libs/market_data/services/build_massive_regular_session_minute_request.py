@@ -1,12 +1,11 @@
-from datetime import datetime, timedelta
 import re
+from datetime import datetime, timedelta
 from typing import Literal
 
 from libs.market_data.dtos.provider_request_spec import ProviderRequestSpec
 from libs.market_data.exceptions.invalid_provider_request_input_error import (
     InvalidProviderRequestInputError,
 )
-
 
 _MASSIVE_SOURCE_SYMBOL = re.compile(r"[A-Z0-9.-]+\Z")
 
