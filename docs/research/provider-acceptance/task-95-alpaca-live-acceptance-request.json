@@ -14,5 +14,7 @@
     "NVDA 2024-06-10 raw post-split",
     "NVDA 2024-06-07 split-adjusted",
     "NVDA 2024-06-10 split-adjusted"
-  ]
+  ],
+  "execution_sequence": 2,
+  "evidence_identity": "provider/retrieval_date/session_date/request_sha256/raw_sha256"
 }
