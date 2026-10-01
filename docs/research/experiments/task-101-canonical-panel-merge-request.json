@@ -1,0 +1,13 @@
+{
+  "task": 101,
+  "slice": "S1-canonical-panel-merge-replay",
+  "us": {
+    "artifact_id": null,
+    "artifact_sha256": null
+  },
+  "taiwan": {
+    "artifact_id": 11152655928,
+    "artifact_sha256": "9b348d4878b781642a9daff9d376e147b0beabea88950d3c92401be6cfa8f3c3"
+  },
+  "model_execution_allowed": false
+}
