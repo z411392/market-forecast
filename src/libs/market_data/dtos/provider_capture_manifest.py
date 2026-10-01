@@ -5,7 +5,7 @@ from libs.market_data.dtos.security_identity import SecurityIdentity
 
 
 class ProviderCaptureManifest(TypedDict):
-    provider: Literal["massive", "finmind"]
+    provider: Literal["massive", "finmind", "alpaca"]
     source_symbol: str
     retrieval_date: date
     security: SecurityIdentity
