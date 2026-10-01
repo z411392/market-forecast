@@ -18,5 +18,8 @@
   "provider_calls_allowed": false,
   "measurement_reselection_allowed": false,
   "hyperparameter_tuning_allowed": false,
-  "execution_sequence": 2
+  "execution_sequence": 3,
+  "non_garch_only": true,
+  "garch_failure_reference": "docs/research/experiments/task-101-canonical-garch-failure-reference.json",
+  "garch_status": "FAILED_CLOSED_DO_NOT_REEXECUTE"
 }
