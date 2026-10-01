@@ -1,0 +1,21 @@
+{
+  "task": 101,
+  "slice": "S2-mandatory-baselines",
+  "preregistration": "docs/research/experiments/task-101-canonical-baseline-preregistration.json",
+  "canonical_panel": {
+    "artifact_id": 11154198322,
+    "artifact_sha256": "4bd4cf2c5056205e80c321d963b083b67f14ff4cfa6e0e1554c7e1c61789a1ea"
+  },
+  "us_source": {
+    "artifact_id": 11153700052,
+    "artifact_sha256": "97d7dc85ee779bbe89896cd2113831091201e2b7caee84537087ebc2dbde031d"
+  },
+  "taiwan_source": {
+    "artifact_id": 11152655928,
+    "artifact_sha256": "9b348d4878b781642a9daff9d376e147b0beabea88950d3c92401be6cfa8f3c3"
+  },
+  "baseline_execution_allowed": false,
+  "provider_calls_allowed": false,
+  "measurement_reselection_allowed": false,
+  "hyperparameter_tuning_allowed": false
+}
