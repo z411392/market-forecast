@@ -1,0 +1,12 @@
+{
+  "task": 101,
+  "slice": "S1-taiwan-canonical-panel-retry",
+  "resume_artifact_id": 11149119172,
+  "resume_artifact_sha256": "25c2fff0691a5c91e60670cf1a173fd3aedb5cc4f39ce99c71d320327dc4832c",
+  "corrections": [
+    "exclude TWSE full-day closure 2023-01-18",
+    "exclude TWSE typhoon closure 2024-10-31",
+    "record and ignore out-of-calendar provider session 2024-12-01"
+  ],
+  "model_execution_allowed": false
+}
