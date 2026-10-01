@@ -3,6 +3,9 @@ from math import isclose, isfinite
 from libs.realized_variance.constants.realized_variance_algorithm_version import (
     REALIZED_VARIANCE_ALGORITHM_VERSION,
 )
+from libs.realized_variance.constants.xtai_realized_variance_algorithm_version import (
+    XTAI_REALIZED_VARIANCE_ALGORITHM_VERSION,
+)
 from libs.realized_variance.dtos.daily_realized_measures import DailyRealizedMeasures
 from libs.realized_variance.dtos.intraday_realized_measures import IntradayRealizedMeasures
 from libs.realized_variance.exceptions.invalid_realized_variance_input_error import (
@@ -16,7 +19,10 @@ def calculate_daily_realized_measures(
 ) -> DailyRealizedMeasures:
     if not isfinite(overnight_log_return):
         raise InvalidRealizedVarianceInputError("invalid_overnight_log_return")
-    if intraday["algorithm_version"] != REALIZED_VARIANCE_ALGORITHM_VERSION:
+    if intraday["algorithm_version"] not in (
+        REALIZED_VARIANCE_ALGORITHM_VERSION,
+        XTAI_REALIZED_VARIANCE_ALGORITHM_VERSION,
+    ):
         raise InvalidRealizedVarianceInputError("unsupported_algorithm_version")
     if intraday["observation_count"] <= 0:
         raise InvalidRealizedVarianceInputError("invalid_observation_count")
@@ -26,7 +32,9 @@ def calculate_daily_realized_measures(
     _require_nonnegative_finite(intraday["positive_semivariance"])
     _require_nonnegative_finite(intraday["negative_semivariance"])
 
-    semivariance_total = intraday["positive_semivariance"] + intraday["negative_semivariance"]
+    semivariance_total = (
+        intraday["positive_semivariance"] + intraday["negative_semivariance"]
+    )
     if not isclose(
         semivariance_total,
         intraday["realized_variance"],

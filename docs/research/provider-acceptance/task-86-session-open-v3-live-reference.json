@@ -1,0 +1,158 @@
+{
+  "artifact_version": "task-86-session-open-v3-live-reference-v1",
+  "task": 86,
+  "algorithm_version": "rv-core-v1+xtai-closing-auction-v3",
+  "provider": "shioaji",
+  "provider_version": "1.7.6",
+  "environment": "production",
+  "simulation": false,
+  "subscribe_trade": false,
+  "ca_activated": false,
+  "workflow": {
+    "candidate_sha": "785f31ccac310354f61c653517535c7ef86c2f48",
+    "live_run_id": 36473017386,
+    "static_run_id": 36473017350,
+    "artifact_id": 10992662077,
+    "artifact_sha256": "32b9f7eba9fa6b7e2188d1b35051b364bef18cd9be15005e1d0167d16c672aa2",
+    "summary_sha256": "88cc2e142edf6690c8db19b7feab4494bc93708bec234da8e2016c44c99ec589"
+  },
+  "contract": {
+    "session_open_observation": "official opening price from first trade-bearing Kbar Open",
+    "exact_first_trade_second_is_not_fabricated": true,
+    "pre_first_trade_minute_bars_are_not_synthesized": true,
+    "sampled_prices_are_exchange_clock_closes": true,
+    "first_return": "first sampling-boundary close divided by official opening price",
+    "closing_auction_is_distinct": true,
+    "empty_required_sampling_bucket_fails_closed": true,
+    "expected_return_counts": {
+      "5": 54,
+      "10": 27,
+      "15": 18
+    }
+  },
+  "cases": {
+    "2317_delayed_open_blocker": {
+      "session_date": "2025-11-17",
+      "provider_bar_count": 264,
+      "observed_trade_bearing_minute_count": 263,
+      "sdk_payload_sha256": "e2dc6308701a3fd378b65df42e9ba1b2b3cf2c347cb739f309c254931cddf756",
+      "session_open_source_interval_start_utc": "2025-11-17T01:02:00+00:00",
+      "session_open_price": 241.0,
+      "closing_auction_at_utc": "2025-11-17T05:30:00+00:00",
+      "closing_auction_price": 236.0,
+      "measurements": {
+        "5": {
+          "sampled_price_count": 54,
+          "observation_count": 54,
+          "regular_session_variance": 0.0005654172179537024,
+          "realized_quarticity": 9.633268324908851e-07,
+          "positive_semivariance": 0.00018220425830025528,
+          "negative_semivariance": 0.0003832129596534471
+        },
+        "10": {
+          "sampled_price_count": 27,
+          "observation_count": 27,
+          "regular_session_variance": 0.00032639986742110836,
+          "realized_quarticity": 1.8558360214987723e-07,
+          "positive_semivariance": 0.00010244127610335614,
+          "negative_semivariance": 0.00022395859131775224
+        },
+        "15": {
+          "sampled_price_count": 18,
+          "observation_count": 18,
+          "regular_session_variance": 0.0004428205189068247,
+          "realized_quarticity": 2.673170436643228e-07,
+          "positive_semivariance": 0.00011177177789052023,
+          "negative_semivariance": 0.00033104874101630443
+        }
+      }
+    },
+    "2317_normal_reference": {
+      "session_date": "2026-09-24",
+      "provider_bar_count": 266,
+      "observed_trade_bearing_minute_count": 265,
+      "sdk_payload_sha256": "9fbbdc1cf3feca56f8604b2f8df780abf93c43f91a492af159badeee374d8d36",
+      "session_open_source_interval_start_utc": "2026-09-24T01:00:00+00:00",
+      "session_open_price": 253.0,
+      "closing_auction_at_utc": "2026-09-24T05:30:00+00:00",
+      "closing_auction_price": 250.5,
+      "measurements": {
+        "5": {
+          "sampled_price_count": 54,
+          "observation_count": 54,
+          "regular_session_variance": 0.00013091528840799728
+        },
+        "10": {
+          "sampled_price_count": 27,
+          "observation_count": 27,
+          "regular_session_variance": 0.00013074199229837273
+        },
+        "15": {
+          "sampled_price_count": 18,
+          "observation_count": 18,
+          "regular_session_variance": 0.0001147259495782424
+        }
+      }
+    },
+    "2330_frozen_ordinary": {
+      "session_date": "2024-07-02",
+      "provider_bar_count": 266,
+      "observed_trade_bearing_minute_count": 265,
+      "sdk_payload_sha256": "f6aca4ac306cc690d1969cb39eb1ebda96fae43ecc3b9aa7d8ad4f8bf57fab16",
+      "session_open_source_interval_start_utc": "2024-07-02T01:00:00+00:00",
+      "session_open_price": 967.0,
+      "closing_auction_at_utc": "2024-07-02T05:30:00+00:00",
+      "closing_auction_price": 960.0,
+      "measurements": {
+        "5": {
+          "sampled_price_count": 54,
+          "observation_count": 54,
+          "regular_session_variance": 0.00010221288319299749
+        },
+        "10": {
+          "sampled_price_count": 27,
+          "observation_count": 27,
+          "regular_session_variance": 8.706959301028129e-05
+        },
+        "15": {
+          "sampled_price_count": 18,
+          "observation_count": 18,
+          "regular_session_variance": 0.00013856332496125267
+        }
+      }
+    },
+    "2330_frozen_parity": {
+      "session_date": "2026-09-24",
+      "provider_bar_count": 266,
+      "observed_trade_bearing_minute_count": 265,
+      "sdk_payload_sha256": "85444f6f7270a59d72aff7304b5ad65309ac26fd1c240c9ff6804d8e71074e13",
+      "session_open_source_interval_start_utc": "2026-09-24T01:00:00+00:00",
+      "session_open_price": 2480.0,
+      "closing_auction_at_utc": "2026-09-24T05:30:00+00:00",
+      "closing_auction_price": 2475.0,
+      "measurements": {
+        "5": {
+          "sampled_price_count": 54,
+          "observation_count": 54,
+          "regular_session_variance": 0.00010964302898558377
+        },
+        "10": {
+          "sampled_price_count": 27,
+          "observation_count": 27,
+          "regular_session_variance": 5.283407680026145e-05
+        },
+        "15": {
+          "sampled_price_count": 18,
+          "observation_count": 18,
+          "regular_session_variance": 3.659131792395245e-05
+        }
+      }
+    }
+  },
+  "ruling": {
+    "session_open_v3_live_accepted": true,
+    "delayed_open_case_accepted_without_synthetic_bars": true,
+    "normal_open_reference_numeric_drift": false,
+    "task_89_full_panel_rerun_allowed_after_workflow_cleanup": true
+  }
+}
