@@ -165,9 +165,9 @@ def main() -> None:
             "input": "accepted_split_adjusted_alpaca_sip_1m",
         },
         "audit_window": {
-            "prior_session": sessions[0].isoformat(),
-            "first": audit_sessions[0].isoformat(),
-            "last": audit_sessions[-1].isoformat(),
+            "prior_session": sessions[0],
+            "first": audit_sessions[0],
+            "last": audit_sessions[-1],
             "audit_sessions_per_symbol": len(audit_sessions),
             "symbols": list(symbols),
         },
