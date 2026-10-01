@@ -15,8 +15,8 @@ from libs.market_data.services.build_provider_capture_acceptance_receipt import 
 from libs.market_data.services.build_finmind_stock_kbar_request import (
     build_finmind_stock_kbar_request,
 )
-from libs.market_data.services.build_massive_minute_request import (
-    build_massive_minute_request,
+from libs.market_data.services.build_massive_regular_session_minute_request import (
+    build_massive_regular_session_minute_request,
 )
 
 
@@ -67,7 +67,14 @@ def test_build_provider_capture_acceptance_receipt() -> None:
         _bar(start, 1),
         _bar(start, 3),
     )
-    request = build_massive_minute_request("AAPL", date(2025, 11, 26))
+    request = build_massive_regular_session_minute_request(
+        source_symbol="AAPL",
+        session_start_utc=manifest["expected_session_start_utc"],
+        session_end_utc_exclusive=manifest[
+            "expected_session_end_utc_exclusive"
+        ],
+        price_basis=manifest["price_basis"],
+    )
 
     receipt = build_provider_capture_acceptance_receipt(
         request=request,
