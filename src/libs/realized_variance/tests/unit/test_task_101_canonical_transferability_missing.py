@@ -30,7 +30,7 @@ _build_panel = _MODULE._build_panel
 def test_task_101_missing_measurement_breaks_local_session_windows() -> None:
     start = date(2024, 1, 2)
     rows = []
-    for index in range(40):
+    for index in range(50):
         rows.append(
             {
                 "session_date": (start + timedelta(days=index)).isoformat(),
@@ -49,10 +49,19 @@ def test_task_101_missing_measurement_breaks_local_session_windows() -> None:
 
     assert math.isnan(h5.rv[20])
 
-    assert np.all(np.isnan(h5.x_w[20:25]))
-    assert np.isfinite(h5.x_w[25])
+    # xW requires both RV5 and RV22.  RV22 remains unavailable through
+    # index 41 because every 22-session window through that origin still
+    # contains the explicit missing measurement at index 20.
+    assert np.all(np.isnan(h5.x_w[20:42]))
+    assert np.isfinite(h5.x_w[42])
 
-    assert np.all(np.isnan(h5.rv22[20:40]))
+    assert np.all(np.isnan(h5.rv22[20:42]))
+    assert np.isfinite(h5.rv22[42])
 
-    assert np.all(np.isnan(h5.target[15:21]))
-    assert np.all(np.isnan(h20.target[0:21]))
+    # H=5 origins 15..19 have future windows crossing index 20.
+    assert np.all(np.isnan(h5.target[15:20]))
+    assert np.isfinite(h5.target[20])
+
+    # H=20 origins 0..19 cross index 20; origin 20 starts at session 21.
+    assert np.all(np.isnan(h20.target[0:20]))
+    assert np.isfinite(h20.target[20])
