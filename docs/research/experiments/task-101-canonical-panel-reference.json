@@ -1,0 +1,27 @@
+{
+  "artifact_version": "task-101-canonical-panel-reference-v1",
+  "task": 101,
+  "slice": "S1-canonical-panel-merge",
+  "status": "accepted",
+  "branch": "codex/101-canonical-transferability-v2",
+  "workflow_run_id": 36849093141,
+  "artifact_id": 11154198322,
+  "artifact_sha256": "4bd4cf2c5056205e80c321d963b083b67f14ff4cfa6e0e1554c7e1c61789a1ea",
+  "summary_sha256": "d91457954eb8d7f61adc8e62c07202af92d89d03a41438999aca937c433bd049",
+  "panel_sha256": "439968db10da894d3024ca5cbe38e74259328c28307f65477d3ddfa482183a4e",
+  "input_sha256": {
+    "measurement_manifest": "59f2eea6208469076436299d0f5bc99922e5a3bc9b04975c64efd2add5a0a242",
+    "us_daily_values": "d8523cb4e0c007ed6b6281d1b1ff5cefc12782e29b02a839700a71d7fa21e49e",
+    "taiwan_daily_values": "4cb582429eb3b9f122927a7f6be9a2802490a3ada2eda319c202ac1e4394ae8f"
+  },
+  "session_counts": {
+    "us": 1052,
+    "taiwan": 1019
+  },
+  "explicit_missing_measurements": {
+    "2317": 1,
+    "TSM": 2
+  },
+  "target_horizon_compression": false,
+  "model_execution_allowed": false
+}
