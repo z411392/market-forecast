@@ -31,6 +31,10 @@ jobs:
             src/libs/market_data/tests/unit/test_build_massive_regular_session_minute_request.py \
             src/libs/market_data/tests/unit/test_build_provider_capture_acceptance_receipt.py
 
+      - name: Run full market_data regressions
+        run: |
+          uv run pytest -q src/libs/market_data/tests
+
   credential-presence:
     if: contains(github.event.head_commit.message, '[massive-secret-check]')
     runs-on: ubuntu-latest
