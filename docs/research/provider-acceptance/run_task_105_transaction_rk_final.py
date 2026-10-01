@@ -1,4 +1,5 @@
 import gzip
+import hashlib
 import json
 import math
 import re
@@ -36,7 +37,6 @@ def main() -> None:
     plan = _load_json(PLAN_PATH)
     _validate_plan(plan)
     fixed = _load_task97_fixed_grid()
-    evidence = _load_eligible_trade_sequences(plan)
 
     symbols = tuple(plan["symbols"])
     dates = tuple(plan["sample"]["dates"])
@@ -55,7 +55,11 @@ def main() -> None:
         sparse_values: list[float] = []
 
         for session_date in dates:
-            timestamps_ns, prices = evidence[(symbol, session_date)]
+            timestamps_ns, prices = _load_eligible_trade_sequence(
+                plan,
+                symbol,
+                session_date,
+            )
             fixed_row = fixed[(symbol, session_date)]
 
             log_prices = tuple(math.log(value) for value in prices)
@@ -171,98 +175,91 @@ def main() -> None:
     )
 
 
-def _load_eligible_trade_sequences(
+def _load_eligible_trade_sequence(
     plan: dict[str, Any],
-) -> dict[tuple[str, str], tuple[tuple[int, ...], tuple[float, ...]]]:
-    result: dict[
-        tuple[str, str],
-        tuple[tuple[int, ...], tuple[float, ...]],
-    ] = {}
-    for batch in plan["batches"]:
-        batch_number = int(batch["batch"])
-        batch_root = INPUT_ROOT / f"batch-{batch_number}"
-        for session_date in batch["dates"]:
-            for symbol in plan["symbols"]:
-                root = (
-                    batch_root
-                    / "sessions"
-                    / session_date
-                    / symbol
-                )
-                sequence_path = root / "eligible-trades.jsonl.gz"
-                summary_path = root / "session-summary.json"
-                if not sequence_path.is_file() or not summary_path.is_file():
-                    raise RuntimeError(
-                        f"task105_missing_session_evidence:"
-                        f"{batch_number}:{session_date}:{symbol}"
-                    )
-                session_summary = _load_json(summary_path)
-                sequence_bytes = sequence_path.read_bytes()
-                expected_sha = session_summary[
-                    "eligible_sequence_sha256"
-                ]
-                import hashlib
-
-                if hashlib.sha256(sequence_bytes).hexdigest() != expected_sha:
-                    raise RuntimeError(
-                        f"task105_eligible_sequence_hash_mismatch:"
-                        f"{session_date}:{symbol}"
-                    )
-
-                timestamps: list[int] = []
-                prices: list[float] = []
-                previous_ns: int | None = None
-                with gzip.open(
-                    sequence_path,
-                    "rt",
-                    encoding="utf-8",
-                ) as source:
-                    for line in source:
-                        payload = json.loads(line)
-                        if not isinstance(payload, dict):
-                            raise RuntimeError(
-                                "task105_invalid_eligible_record"
-                            )
-                        timestamp_ns = _timestamp_to_ns(
-                            payload.get("t")
-                        )
-                        price = _positive_price(payload.get("p"))
-                        if (
-                            previous_ns is not None
-                            and timestamp_ns < previous_ns
-                        ):
-                            raise RuntimeError(
-                                "task105_decreasing_eligible_timestamp"
-                            )
-                        previous_ns = timestamp_ns
-                        timestamps.append(timestamp_ns)
-                        prices.append(price)
-
-                expected_count = int(
-                    session_summary["eligible_trade_count"]
-                )
-                if len(prices) != expected_count:
-                    raise RuntimeError(
-                        f"task105_eligible_count_mismatch:"
-                        f"{session_date}:{symbol}"
-                    )
-                if len(prices) < 5:
-                    raise RuntimeError(
-                        f"task105_insufficient_eligible_trades:"
-                        f"{session_date}:{symbol}"
-                    )
-                key = (symbol, session_date)
-                if key in result:
-                    raise RuntimeError("task105_duplicate_session_evidence")
-                result[key] = (tuple(timestamps), tuple(prices))
-
-    expected = len(plan["sample"]["dates"]) * len(plan["symbols"])
-    if len(result) != expected:
+    symbol: str,
+    session_date: str,
+) -> tuple[tuple[int, ...], tuple[float, ...]]:
+    batch_number = _batch_number_for_date(plan, session_date)
+    root = (
+        INPUT_ROOT
+        / f"batch-{batch_number}"
+        / "sessions"
+        / session_date
+        / symbol
+    )
+    sequence_path = root / "eligible-trades.jsonl.gz"
+    summary_path = root / "session-summary.json"
+    if not sequence_path.is_file() or not summary_path.is_file():
         raise RuntimeError(
-            f"task105_unexpected_session_evidence_count:{len(result)}"
+            f"task105_missing_session_evidence:"
+            f"{batch_number}:{session_date}:{symbol}"
         )
-    return result
 
+    session_summary = _load_json(summary_path)
+    sequence_bytes = sequence_path.read_bytes()
+    expected_sha = session_summary["eligible_sequence_sha256"]
+    if hashlib.sha256(sequence_bytes).hexdigest() != expected_sha:
+        raise RuntimeError(
+            f"task105_eligible_sequence_hash_mismatch:"
+            f"{session_date}:{symbol}"
+        )
+
+    timestamps: list[int] = []
+    prices: list[float] = []
+    previous_ns: int | None = None
+    with gzip.open(
+        sequence_path,
+        "rt",
+        encoding="utf-8",
+    ) as source:
+        for line in source:
+            payload = json.loads(line)
+            if not isinstance(payload, dict):
+                raise RuntimeError(
+                    "task105_invalid_eligible_record"
+                )
+            timestamp_ns = _timestamp_to_ns(payload.get("t"))
+            price = _positive_price(payload.get("p"))
+            if (
+                previous_ns is not None
+                and timestamp_ns < previous_ns
+            ):
+                raise RuntimeError(
+                    "task105_decreasing_eligible_timestamp"
+                )
+            previous_ns = timestamp_ns
+            timestamps.append(timestamp_ns)
+            prices.append(price)
+
+    expected_count = int(session_summary["eligible_trade_count"])
+    if len(prices) != expected_count:
+        raise RuntimeError(
+            f"task105_eligible_count_mismatch:"
+            f"{session_date}:{symbol}"
+        )
+    if len(prices) < 5:
+        raise RuntimeError(
+            f"task105_insufficient_eligible_trades:"
+            f"{session_date}:{symbol}"
+        )
+    return tuple(timestamps), tuple(prices)
+
+
+def _batch_number_for_date(
+    plan: dict[str, Any],
+    session_date: str,
+) -> int:
+    matches = [
+        int(batch["batch"])
+        for batch in plan["batches"]
+        if session_date in batch["dates"]
+    ]
+    if len(matches) != 1:
+        raise RuntimeError(
+            f"task105_batch_date_identity:{session_date}"
+        )
+    return matches[0]
 
 def _load_task97_fixed_grid() -> dict[tuple[str, str], dict[str, Any]]:
     candidates = list(TASK97_ROOT.rglob("daily-values.json"))
