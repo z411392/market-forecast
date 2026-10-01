@@ -93,7 +93,10 @@ def main() -> None:
         level_har = _har_forecast(item, use_log=False)
         log_har = _har_forecast(item, use_log=True)
         ewma = _ewma_forecast(item["returns"])
-        garch, garch_diag = _garch_forecast(item["returns"])
+        garch, garch_diag = _garch_forecast(
+            symbol,
+            item["returns"],
+        )
         naive = item["rv5"].copy()
         global_forecast = global_forecasts[symbol]
 
@@ -590,6 +593,7 @@ def _ewma_forecast(
 
 
 def _garch_forecast(
+    symbol: str,
     returns: np.ndarray,
 ) -> tuple[np.ndarray, dict[str, Any]]:
     result = np.full(returns.size, np.nan)
@@ -636,7 +640,9 @@ def _garch_forecast(
             )
             if fit.convergence_flag != 0:
                 raise RuntimeError(
-                    "task101_baseline_garch_nonconverged"
+                    "task101_baseline_garch_nonconverged:"
+                    f"{symbol}:observed_index={observed_index}:"
+                    f"flag={fit.convergence_flag}"
                 )
             omega = float(fit.params["omega"])
             alpha = float(fit.params["alpha[1]"])
@@ -652,7 +658,11 @@ def _garch_forecast(
                 or alpha + beta >= 1.0
             ):
                 raise RuntimeError(
-                    "task101_baseline_garch_invalid_parameters"
+                    "task101_baseline_garch_invalid_parameters:"
+                    f"{symbol}:observed_index={observed_index}:"
+                    f"omega={omega:.17g}:alpha={alpha:.17g}:"
+                    f"beta={beta:.17g}:"
+                    f"persistence={alpha + beta:.17g}"
                 )
             params = (omega, alpha, beta)
             h_current = float(
@@ -660,7 +670,9 @@ def _garch_forecast(
             )
             if not math.isfinite(h_current) or h_current <= 0.0:
                 raise RuntimeError(
-                    "task101_baseline_garch_invalid_state"
+                    "task101_baseline_garch_invalid_state:"
+                    f"{symbol}:observed_index={observed_index}:"
+                    f"h={h_current:.17g}"
                 )
             last_refit_observed_index = observed_index
             refits.append(
@@ -684,7 +696,9 @@ def _garch_forecast(
         )
         if not math.isfinite(h1) or h1 <= 0.0:
             raise RuntimeError(
-                "task101_baseline_garch_invalid_one_step"
+                "task101_baseline_garch_invalid_one_step:"
+                f"{symbol}:observed_index={observed_index}:"
+                f"h1={h1:.17g}"
             )
 
         persistence = alpha + beta
