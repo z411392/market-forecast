@@ -1,0 +1,102 @@
+{
+  "artifact_version": "task-101-canonical-baseline-preregistration-v1",
+  "task": 101,
+  "slice": "S2-mandatory-baselines",
+  "status": "frozen_before_canonical_baseline_values",
+  "input_panel": {
+    "artifact_id": 11154198322,
+    "artifact_sha256": "4bd4cf2c5056205e80c321d963b083b67f14ff4cfa6e0e1554c7e1c61789a1ea",
+    "panel_sha256": "439968db10da894d3024ca5cbe38e74259328c28307f65477d3ddfa482183a4e"
+  },
+  "source_artifacts_for_close_to_close_returns": {
+    "us": {
+      "artifact_id": 11153700052,
+      "artifact_sha256": "97d7dc85ee779bbe89896cd2113831091201e2b7caee84537087ebc2dbde031d"
+    },
+    "taiwan": {
+      "artifact_id": 11152655928,
+      "artifact_sha256": "9b348d4878b781642a9daff9d376e147b0beabea88950d3c92401be6cfa8f3c3"
+    }
+  },
+  "evaluation": {
+    "start": "2025-12-04",
+    "horizon_sessions": 5,
+    "qlike_primary": true,
+    "common_scoring_rows": true,
+    "paired_moving_block_bootstrap": {
+      "block_length": 20,
+      "replicates": 5000,
+      "seed": 20260926
+    }
+  },
+  "models": {
+    "naive": {
+      "identity": "recent-rv5-v1",
+      "forecast": "mean of current and previous 4 canonical whole-day RV observations",
+      "missing_behavior": "window invalid if any of the 5 canonical local-session RV observations is missing"
+    },
+    "ewma": {
+      "identity": "close-return-ewma-094-v1",
+      "lambda": 0.94,
+      "input": "observed close-to-close log returns in the frozen market price basis",
+      "recursion": "h_t=lambda*h_(t-1)+(1-lambda)*r_t^2",
+      "h5_forecast": "current EWMA variance repeated for each of next 5 sessions",
+      "missing_behavior": "non-trading session has no return update; target remains uncompressed canonical-session sequence",
+      "initialization": "first finite observed close-to-close return squared"
+    },
+    "level_har": {
+      "identity": "causal-level-har-504-v1",
+      "features": [
+        "RV_t",
+        "mean(RV_t..RV_t-4)",
+        "mean(RV_t..RV_t-21)"
+      ],
+      "target": "mean(RV_t+1..RV_t+5)",
+      "training_rows": 504,
+      "fit": "OLS via covariance pseudo-inverse",
+      "maturation_lag_sessions": 5
+    },
+    "log_har": {
+      "identity": "causal-log-har-504-v1",
+      "features": [
+        "log(RV_t)",
+        "log(RV5_t)",
+        "log(RV22_t)"
+      ],
+      "target": "log(mean(RV_t+1..RV_t+5))",
+      "training_rows": 504,
+      "fit": "OLS via covariance pseudo-inverse",
+      "maturation_lag_sessions": 5
+    },
+    "garch": {
+      "identity": "canonical-python-garch11-qmle-v1",
+      "model": "zero-mean GARCH(1,1)",
+      "input": "observed close-to-close log returns",
+      "trailing_return_count": 504,
+      "refit_every_observed_sessions": 20,
+      "distribution": "Gaussian",
+      "estimator": "arch 8.x continuous QMLE",
+      "fit_scale": "returns multiplied by 100; forecast variances divided by 10000",
+      "horizon_sessions": 5,
+      "output": "average of 5 conditional variance forecasts",
+      "refit_anchor": "first observed-return index with 504 finite observed returns; refit at that index and every 20 subsequent observed-return indices",
+      "state_update": "between refits, keep fitted omega/alpha/beta fixed and update conditional variance causally with each newly observed close-to-close return",
+      "fit_failure_behavior": "fail closed on non-converged QMLE or invalid/nonstationary parameters",
+      "package_runtime": "arch==8.0.0 in current uv lock/runtime"
+    }
+  },
+  "provenance_exception": {
+    "historical_pine_source_available": false,
+    "historical_known_spec": "trailing 504 daily returns; refit every 20 bars; fixed alpha x persistence grid; Gaussian QMLE",
+    "missing_detail": "exact fixed alpha x persistence grid values",
+    "amendment": "replace unavailable legacy fixed-grid optimizer with deterministic arch Gaussian QMLE; preserve model class, input window, refit cadence, distribution and H=5 variance semantics",
+    "historical_pine_parity_claimed": false
+  },
+  "boundaries": {
+    "hyperparameter_tuning": false,
+    "new_model_class": false,
+    "measurement_reselection": false,
+    "ticker_specific_winner_selection": false,
+    "transferability_ruling_reopened": false
+  }
+}

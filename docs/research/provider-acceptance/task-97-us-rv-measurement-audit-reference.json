@@ -1,0 +1,80 @@
+{
+  "artifact_version": "task-97-us-rv-measurement-audit-reference-v1",
+  "task": 97,
+  "parent_task": 12,
+  "status": "accepted_inconclusive",
+  "provider": {
+    "name": "alpaca",
+    "feed": "sip",
+    "timeframe": "1Min",
+    "price_basis": "split_adjusted",
+    "source_acceptance_task": 95
+  },
+  "panel": {
+    "symbols": [
+      "AAPL",
+      "NVDA"
+    ],
+    "calendar": "XNAS",
+    "prior_session_for_first_overnight": "2025-09-23",
+    "first_audit_session": "2025-09-24",
+    "last_audit_session": "2026-09-24",
+    "audit_sessions_per_symbol": 252,
+    "accepted_sessions_including_anchor_per_symbol": 253,
+    "missing_grid_minutes": 0,
+    "early_close_sessions_per_symbol": 2
+  },
+  "workflow": {
+    "run_id": 36823983535,
+    "artifact_id": 11144780888,
+    "artifact_sha256": "39a419d8aa070c2f3b641c5f93dde638189164bb933a7780615a24c6b7e6c812",
+    "summary_sha256": "20ae7ed62515783a9895c7b43f53cab994dac19a3b54b4038df1f6c44285a2e7",
+    "daily_values_sha256": "7e81ed6b61c4be451633371a8042cbd1da9f3c26526d43da5389276738e2ee37",
+    "status": "pass"
+  },
+  "metrics": {
+    "AAPL": {
+      "pearson_log_5m_10m": 0.9498018673777439,
+      "pearson_log_5m_15m": 0.9177323755798507,
+      "spearman_5m_10m": 0.9390804933850144,
+      "spearman_5m_15m": 0.9011280306967125,
+      "geometric_bias_5m_vs_10m_pct": 3.715202858340372,
+      "geometric_bias_5m_vs_15m_pct": 5.359492308726899,
+      "mean_abs_log_gap_5m_10m": 0.17434203665211565,
+      "mean_abs_log_gap_5m_15m": 0.23718811570861817
+    },
+    "NVDA": {
+      "pearson_log_5m_10m": 0.9664837511280615,
+      "pearson_log_5m_15m": 0.9255471681335643,
+      "spearman_5m_10m": 0.9604773077837343,
+      "spearman_5m_15m": 0.9325963602769423,
+      "geometric_bias_5m_vs_10m_pct": 2.5306030702210602,
+      "geometric_bias_5m_vs_15m_pct": 5.41561529819774,
+      "mean_abs_log_gap_5m_10m": 0.14123158585915882,
+      "mean_abs_log_gap_5m_15m": 0.21026397876325545
+    },
+    "panel_median": {
+      "geometric_bias_5m_vs_10m_pct": 3.122902964280716,
+      "geometric_bias_5m_vs_15m_pct": 5.387553803462319,
+      "mean_abs_log_gap_5m_10m": 0.15778681125563723,
+      "mean_abs_log_gap_5m_15m": 0.2237260472359368,
+      "pearson_log_5m_10m": 0.9581428092529027,
+      "pearson_log_5m_15m": 0.9216397718567075,
+      "spearman_5m_10m": 0.9497789005843744,
+      "spearman_5m_15m": 0.9168621954868275
+    }
+  },
+  "decision_rule": {
+    "frozen_before_empirical_values": true,
+    "systematic_monotone_level_inflation": true,
+    "forecast_score_used": false
+  },
+  "ruling": {
+    "us_canonical_sampling": "INCONCLUSIVE",
+    "five_minute_status": "practical_reference_only",
+    "ten_minute_status": "sensitivity_only",
+    "fifteen_minute_status": "sensitivity_only",
+    "next_required_measurement_step": "independent_noise_robust_benchmark",
+    "switch_to_coarser_grid_from_fixed_grid_levels_alone": false
+  }
+}

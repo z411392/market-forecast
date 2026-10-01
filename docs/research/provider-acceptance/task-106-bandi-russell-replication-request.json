@@ -1,0 +1,12 @@
+{
+  "task": 106,
+  "role": "secondary_replication_only",
+  "inputs": {
+    "task97_artifact_id": 11144780888,
+    "task97_sha256": "39a419d8aa070c2f3b641c5f93dde638189164bb933a7780615a24c6b7e6c812",
+    "task106_primary_artifact_id": 11147241072,
+    "task106_primary_sha256": "2eded721511b2b2700f154e967d754a5c6f2f44eaa1b81ba196f8b9beb53308a"
+  },
+  "provider_calls_allowed": false,
+  "primary_decision_override_allowed": false
+}

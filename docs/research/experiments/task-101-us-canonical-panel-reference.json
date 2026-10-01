@@ -1,0 +1,59 @@
+{
+  "artifact_version": "task-101-us-canonical-panel-reference-v1",
+  "task": 101,
+  "slice": "S1-us-canonical-panel",
+  "status": "accepted",
+  "branch": "codex/101-canonical-transferability-v2",
+  "workflow_run_id": 36841905545,
+  "artifact_id": 11153700052,
+  "artifact_sha256": "97d7dc85ee779bbe89896cd2113831091201e2b7caee84537087ebc2dbde031d",
+  "summary_sha256": "c6afa47b6f45116c935792f491d4611db369206a9e913ca36e0720f7eff8dd86",
+  "daily_values_sha256": "d8523cb4e0c007ed6b6281d1b1ff5cefc12782e29b02a839700a71d7fa21e49e",
+  "measurement": {
+    "provider": "alpaca",
+    "feed": "sip",
+    "calendar": "XNAS",
+    "price_basis": "split_adjusted",
+    "sampling_minutes": 5,
+    "algorithm_version": "rv-core-v1",
+    "first_panel_session": "2022-07-18",
+    "last_panel_session": "2026-09-24",
+    "panel_session_count": 1052,
+    "prior_anchor_session": "2022-07-15",
+    "prior_anchor_rule": "final_regular_minute_only"
+  },
+  "symbols": {
+    "GOOGL": {
+      "measured_panel_sessions": 1052,
+      "missing_measurement_sessions": 0
+    },
+    "NVDA": {
+      "measured_panel_sessions": 1052,
+      "missing_measurement_sessions": 0
+    },
+    "QQQ": {
+      "measured_panel_sessions": 1052,
+      "missing_measurement_sessions": 0
+    },
+    "TSM": {
+      "measured_panel_sessions": 1050,
+      "missing_measurement_sessions": 2,
+      "incomplete_sessions": [
+        {
+          "session_date": "2023-01-24",
+          "observed_minute_count": 380,
+          "expected_minute_count": 390,
+          "missing_minute_count": 10
+        },
+        {
+          "session_date": "2023-06-05",
+          "observed_minute_count": 386,
+          "expected_minute_count": 390,
+          "missing_minute_count": 4
+        }
+      ]
+    }
+  },
+  "missing_measurement_rule": "incomplete regular-session SIP coverage remains explicit missing canonical RV; no synthetic bars and no target-horizon compression",
+  "model_execution_allowed": false
+}

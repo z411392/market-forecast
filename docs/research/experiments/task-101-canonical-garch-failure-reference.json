@@ -1,0 +1,34 @@
+{
+  "artifact_version": "task-101-canonical-garch-failure-reference-v1",
+  "task": 101,
+  "slice": "S2-mandatory-baselines-garch",
+  "status": "failed_closed",
+  "preregistration_path": "docs/research/experiments/task-101-canonical-baseline-preregistration.json",
+  "preregistration_commit": "90d7c813976a2ee9054d71d2dc23d83b062c54ef",
+  "diagnostic_runner_commit": "8d55cf43ec46ba5bff328a71dddd7a6d6b420388",
+  "workflow_run_id": 36851169574,
+  "failing_symbol": "TSM",
+  "observed_return_index": 643,
+  "fit": {
+    "estimator": "arch 8.0.0 Gaussian QMLE zero-mean GARCH(1,1)",
+    "trailing_return_count": 504,
+    "refit_every_observed_sessions": 20,
+    "omega": 0.007969200546117465,
+    "alpha": 0.006276747894811883,
+    "beta": 0.9937245731950013,
+    "persistence": 1.000001321089813
+  },
+  "frozen_gate": {
+    "require_omega_positive": true,
+    "require_alpha_nonnegative": true,
+    "require_beta_nonnegative": true,
+    "require_persistence_strictly_below_one": true
+  },
+  "ruling": "GARCH comparator fails the preregistered stationarity gate; no clipping, parameter rescue, optimizer change, or post-hoc refit rule is authorized.",
+  "impact": {
+    "canonical_measurement_changed": false,
+    "completed_global_vs_market_transferability_changed": false,
+    "level_har_log_har_ewma_naive_execution_blocked": false,
+    "exact_legacy_pine_garch_grid_still_unavailable": true
+  }
+}

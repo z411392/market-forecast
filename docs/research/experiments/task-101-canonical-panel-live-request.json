@@ -1,0 +1,35 @@
+{
+  "task": 101,
+  "slice": "S1-canonical-daily-panel",
+  "measurement_manifest": "cross-market-rv-measurement-target-manifest-v2",
+  "study_start": "2022-07-18",
+  "study_end": "2026-09-24",
+  "us": {
+    "symbols": [
+      "GOOGL",
+      "NVDA",
+      "QQQ",
+      "TSM"
+    ],
+    "provider": "alpaca",
+    "feed": "sip",
+    "price_basis": "split_adjusted",
+    "sampling_minutes": 5,
+    "algorithm_version": "rv-core-v1"
+  },
+  "taiwan": {
+    "symbols": [
+      "2330",
+      "2317",
+      "2454"
+    ],
+    "provider": "shioaji",
+    "price_basis": "as_printed",
+    "sampling_minutes": 15,
+    "algorithm_version": "rv-core-v1+xtai-closing-auction-v4",
+    "min_remaining_mib": 100,
+    "max_current_run_delta_mib": 250
+  },
+  "model_execution_allowed": false,
+  "forecast_score_allowed": false
+}

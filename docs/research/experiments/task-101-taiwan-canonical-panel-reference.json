@@ -1,0 +1,57 @@
+{
+  "artifact_version": "task-101-taiwan-canonical-panel-reference-v1",
+  "task": 101,
+  "slice": "S1-taiwan-canonical-panel",
+  "status": "accepted",
+  "branch": "codex/101-canonical-transferability-v2",
+  "workflow_run_id": 36842714290,
+  "artifact_id": 11152655928,
+  "artifact_sha256": "9b348d4878b781642a9daff9d376e147b0beabea88950d3c92401be6cfa8f3c3",
+  "summary_sha256": "ada41bcfa88a00009287f45d6ce2c4db92aaf8536566fe25400d2d4aa7329db3",
+  "daily_values_sha256": "4cb582429eb3b9f122927a7f6be9a2802490a3ada2eda319c202ac1e4394ae8f",
+  "measurement": {
+    "provider": "shioaji",
+    "provider_version": "1.7.7",
+    "calendar": "XTAI",
+    "price_basis": "as_printed",
+    "sampling_minutes": 15,
+    "algorithm_version": "rv-core-v1+xtai-closing-auction-v4",
+    "first_panel_session": "2022-07-18",
+    "last_panel_session": "2026-09-24",
+    "panel_session_count": 1019
+  },
+  "symbols": {
+    "2317": {
+      "measured_panel_sessions": 1018,
+      "missing_measurement_sessions": 1,
+      "missing_session": "2025-07-30",
+      "missing_reason": "twse_material_information_trading_halt",
+      "previous_tick_sample_count": 0
+    },
+    "2330": {
+      "measured_panel_sessions": 1019,
+      "missing_measurement_sessions": 0,
+      "previous_tick_sample_count": 0
+    },
+    "2454": {
+      "measured_panel_sessions": 1019,
+      "missing_measurement_sessions": 0,
+      "previous_tick_sample_count": 1,
+      "previous_tick_session_count": 1,
+      "max_previous_tick_staleness_upper_seconds": 960
+    }
+  },
+  "out_of_calendar_provider_diagnostic": {
+    "session_date": "2024-12-01",
+    "action": "ignored_outside_canonical_xtai_calendar"
+  },
+  "traffic": {
+    "initial_used_bytes": 114382809,
+    "final_used_bytes": 128939588,
+    "current_run_delta_bytes": 14556779,
+    "final_remaining_bytes": 395348412,
+    "min_remaining_bytes": 104857600,
+    "max_current_run_delta_bytes": 262144000
+  },
+  "model_execution_allowed": false
+}

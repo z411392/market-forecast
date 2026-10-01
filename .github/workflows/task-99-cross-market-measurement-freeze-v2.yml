@@ -1,0 +1,55 @@
+name: task-99-cross-market-measurement-freeze-v2
+
+on:
+  push:
+    branches:
+      - codex/99-cross-market-measurement-freeze-v2
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Fetch exact Task 90 Taiwan authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api \
+            "repos/${GITHUB_REPOSITORY}/contents/docs/research/provider-acceptance/task-90-taiwan-canonical-measurement-decision.json?ref=52147035503bb6c351de2c95315b611ba4197fc3" \
+            --jq .content \
+            | base64 --decode \
+            > /tmp/task90-taiwan-decision.json
+
+      - name: Verify manifest v2 evidence chain
+        run: |
+          uv run python \
+            docs/research/provider-acceptance/verify_task_99_cross_market_manifest_v2.py \
+            --taiwan-reference /tmp/task90-taiwan-decision.json
+
+      - name: Regress frozen future-target builder
+        run: |
+          uv run pytest -q \
+            src/libs/realized_variance/tests/unit/test_build_future_variance_targets.py
+
+      - name: Lint verifier
+        run: |
+          uv run ruff check \
+            docs/research/provider-acceptance/verify_task_99_cross_market_manifest_v2.py
