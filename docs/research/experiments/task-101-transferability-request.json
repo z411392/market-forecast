@@ -2,10 +2,10 @@
   "task": 101,
   "slice": "S2-S3-canonical-transferability",
   "canonical_panel": {
-    "artifact_id": null,
-    "artifact_sha256": null
+    "artifact_id": 11154198322,
+    "artifact_sha256": "4bd4cf2c5056205e80c321d963b083b67f14ff4cfa6e0e1554c7e1c61789a1ea"
   },
-  "model_execution_allowed": false,
+  "model_execution_allowed": true,
   "measurement_reselection_allowed": false,
   "new_model_classes_allowed": false,
   "ridge_alpha": 1,
@@ -13,5 +13,6 @@
     "block_length": 20,
     "replicates": 5000,
     "seed": 20260926
-  }
+  },
+  "execution_sequence": 1
 }
