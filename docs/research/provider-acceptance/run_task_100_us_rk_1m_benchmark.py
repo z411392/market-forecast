@@ -2,7 +2,7 @@ import json
 import math
 import statistics
 from bisect import bisect_right
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 from pathlib import Path
 from typing import Any
@@ -524,7 +524,7 @@ def _self_check_math() -> None:
         _noise_variance((0.0, 1.0, 2.0, 4.0, 6.0, 9.0), 2),
         6.75,
     )
-    start = datetime(2026, 1, 1, tzinfo=timedelta(0))
+    start = datetime(2026, 1, 1, tzinfo=timezone.utc)
     timestamps = (
         start,
         start + timedelta(seconds=1),
