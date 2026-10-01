@@ -1,12 +1,16 @@
 {
   "task": 101,
   "slice": "S1-taiwan-canonical-panel-retry",
-  "resume_artifact_id": 11149119172,
-  "resume_artifact_sha256": "25c2fff0691a5c91e60670cf1a173fd3aedb5cc4f39ce99c71d320327dc4832c",
+  "resume_artifact_id": 11150515509,
+  "resume_artifact_sha256": "362ca769d1478ef1497134b9874703ba3bbdfdc05031e05afe71ce6437592688",
   "corrections": [
     "exclude TWSE full-day closure 2023-01-18",
     "exclude TWSE typhoon closure 2024-10-31",
-    "record and ignore out-of-calendar provider session 2024-12-01"
+    "exclude TWSE full-day closure 2026-07-10",
+    "record and ignore out-of-calendar provider session 2024-12-01",
+    "preserve 2317 2025-07-30 verified full-day trading halt as missing canonical measurement"
   ],
-  "model_execution_allowed": false
+  "model_execution_allowed": false,
+  "missing_measurement_rule": "known symbol-specific full-day halt remains an explicit missing canonical RV; no synthetic measurement and no target-horizon compression",
+  "execution_sequence": 1
 }
