@@ -1,0 +1,47 @@
+name: task-90-integration-format
+
+on:
+  push:
+    branches:
+      - codex/90-taiwan-rk-integration
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: contains(github.event.head_commit.message, '[task90-format]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: codex/90-taiwan-rk-integration
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Format only Task 90 integration files
+        run: |
+          uv run ruff format             docs/research/provider-acceptance/run_task_90_s4h_empirical_rk_comparison.py             src/libs/realized_variance/domain/services/calculate_parzen_realized_kernel.py             src/libs/realized_variance/domain/services/calculate_realized_kernel_bandwidth.py             src/libs/realized_variance/domain/services/compose_noise_robust_daily_variance.py             src/libs/realized_variance/domain/services/estimate_noise_variance_from_subgrids.py             src/libs/realized_variance/domain/services/estimate_sparse_realized_variance.py             src/libs/realized_variance/domain/services/realized_autocovariance.py             src/libs/realized_variance/domain/services/select_noise_subgrid_stride.py             src/libs/realized_variance/tests/unit/test_calculate_parzen_realized_kernel.py             src/libs/realized_variance/tests/unit/test_realized_kernel_primitives.py
+
+      - name: Commit deterministic formatter output
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          if git diff --quiet; then
+            echo "No formatter changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add             docs/research/provider-acceptance/run_task_90_s4h_empirical_rk_comparison.py             src/libs/realized_variance/domain/services/calculate_parzen_realized_kernel.py             src/libs/realized_variance/domain/services/calculate_realized_kernel_bandwidth.py             src/libs/realized_variance/domain/services/compose_noise_robust_daily_variance.py             src/libs/realized_variance/domain/services/estimate_noise_variance_from_subgrids.py             src/libs/realized_variance/domain/services/estimate_sparse_realized_variance.py             src/libs/realized_variance/domain/services/realized_autocovariance.py             src/libs/realized_variance/domain/services/select_noise_subgrid_stride.py             src/libs/realized_variance/tests/unit/test_calculate_parzen_realized_kernel.py             src/libs/realized_variance/tests/unit/test_realized_kernel_primitives.py
+          git commit -m "task-90: apply Ruff 0.8.6 formatter"
+          git push origin HEAD:codex/90-taiwan-rk-integration
