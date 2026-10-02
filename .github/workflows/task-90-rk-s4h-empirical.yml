@@ -1,0 +1,102 @@
+name: task-90-rk-s4h-empirical
+
+on:
+  push:
+    branches:
+      - codex/90-taiwan-rk-feasibility
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Compile empirical runner
+        run: |
+          uv run python -m py_compile             docs/research/provider-acceptance/run_task_90_s4h_empirical_rk_comparison.py
+
+      - name: Lint empirical runner
+        run: |
+          uv run ruff check             docs/research/provider-acceptance/run_task_90_s4h_empirical_rk_comparison.py
+
+  empirical:
+    if: contains(github.event.head_commit.message, '[s4h-empirical]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4
+        with:
+          python-version: "3.12"
+
+      - name: Sync environment
+        run: uv sync
+
+      - name: Restore immutable batch artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          input_root="artifacts/private/provider-captures/task-90-s4h-input"
+          rm -rf "$input_root"
+          mkdir -p "$input_root"
+
+          python - <<'PY' > /tmp/task90-artifacts.tsv
+          import json
+          from pathlib import Path
+
+          manifest = json.loads(
+              Path(
+                  "docs/research/provider-acceptance/"
+                  "task-90-s4h-empirical-input.json"
+              ).read_text(encoding="utf-8")
+          )
+          for item in manifest["artifacts"]:
+              print(
+                  item["batch"],
+                  item["artifact_id"],
+                  item["digest"].removeprefix("sha256:"),
+                  sep="\t",
+              )
+          PY
+
+          while IFS=$'\t' read -r batch artifact_id expected_sha; do
+            zip_path="/tmp/task90-batch-${batch}.zip"
+            batch_dir="$input_root/batch-${batch}"
+            gh api               "repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}/zip"               > "$zip_path"
+            actual_sha="$(sha256sum "$zip_path" | cut -d' ' -f1)"
+            test "$actual_sha" = "$expected_sha"
+            mkdir -p "$batch_dir"
+            unzip -q "$zip_path" -d "$batch_dir"
+          done < /tmp/task90-artifacts.tsv
+
+      - name: Run provider-free empirical RK comparison
+        run: |
+          uv run python             docs/research/provider-acceptance/run_task_90_s4h_empirical_rk_comparison.py
+
+      - name: Upload empirical comparison
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: task-90-s4h-empirical-rk-comparison
+          path: artifacts/private/provider-captures/task-90-s4h-empirical-rk-comparison
+          retention-days: 30

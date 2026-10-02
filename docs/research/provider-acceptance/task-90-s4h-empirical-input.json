@@ -1,0 +1,61 @@
+{
+  "artifact_version": "task-90-s4h-empirical-input-v1",
+  "task": 90,
+  "estimator_version": "tw-rk-parzen-trades-v1",
+  "symbols": [
+    "2330",
+    "2317",
+    "2454"
+  ],
+  "expected_session_count": 253,
+  "expected_audit_session_count": 252,
+  "first_session_date": "2025-09-10",
+  "last_session_date": "2026-09-24",
+  "final_required_audit_session_count": 252,
+  "artifacts": [
+    {
+      "batch": 1,
+      "artifact_id": 11089220372,
+      "digest": "sha256:0312e2f2731ff7c718a6053631119d11dc540338ef49bf418edea041dad858bf"
+    },
+    {
+      "batch": 2,
+      "artifact_id": 11088642834,
+      "digest": "sha256:bbcd71baf9a3db4f9e4b2efb17c8c441983a21f87085582f702f794f6d14da07"
+    },
+    {
+      "batch": 3,
+      "artifact_id": 11095812044,
+      "digest": "sha256:26f3ab32b41963e5ac25a2d88859ab065c73e5d7cbe2a57d67eb4b4a717b7e10"
+    },
+    {
+      "batch": 4,
+      "artifact_id": 11096276516,
+      "digest": "sha256:0d49a2edb455457916b6c267de057539f1057840860b36a90ad0262428e4a583"
+    },
+    {
+      "batch": 5,
+      "artifact_id": 11096306965,
+      "digest": "sha256:5ab210d5a56b50e50bf38bcd415fe965a5646d9c92f8503204c94c9e7da1a75b"
+    },
+    {
+      "batch": 6,
+      "artifact_id": 11140021792,
+      "digest": "sha256:249926da745df0c9624b8fddd0809c768be791849b1624a2b46d865a487aee16"
+    },
+    {
+      "batch": 7,
+      "artifact_id": 11139932346,
+      "digest": "sha256:bb25dfa0b003415a69ef85deaf7176788ed98ae4e17b2d5e1861ff1cdae63749"
+    },
+    {
+      "batch": 8,
+      "artifact_id": 11140321291,
+      "digest": "sha256:3cad89220bf9c20b7a17d93fa8fdfcbd92044d5c899d530744a78873117a35cb"
+    }
+  ],
+  "reference_summary": null,
+  "formula_cross_check_session": "2026-04-20",
+  "output_version": "task-90-s4h-final-rk-comparison-v1",
+  "execution_sequence": 2
+}
