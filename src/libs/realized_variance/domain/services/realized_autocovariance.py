@@ -16,7 +16,4 @@ def realized_autocovariance(
     if any(not isfinite(value) for value in returns):
         raise InvalidRealizedVarianceInputError("non_finite_realized_return")
 
-    return sum(
-        returns[index] * returns[index - lag]
-        for index in range(lag, len(returns))
-    )
+    return sum(returns[index] * returns[index - lag] for index in range(lag, len(returns)))

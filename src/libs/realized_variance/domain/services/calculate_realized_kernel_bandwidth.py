@@ -26,11 +26,7 @@ def calculate_realized_kernel_bandwidth(
         raise InvalidRealizedVarianceInputError("zero_sparse_realized_variance_with_noise")
 
     xi_hat = sqrt(noise_variance / sparse_realized_variance)
-    raw_bandwidth = (
-        bandwidth_constant
-        * xi_hat ** (4.0 / 5.0)
-        * return_count ** (3.0 / 5.0)
-    )
+    raw_bandwidth = bandwidth_constant * xi_hat ** (4.0 / 5.0) * return_count ** (3.0 / 5.0)
     if not isfinite(raw_bandwidth):
         return return_count - 1
 

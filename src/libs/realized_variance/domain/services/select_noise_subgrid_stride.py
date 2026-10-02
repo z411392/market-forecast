@@ -20,8 +20,7 @@ def select_noise_subgrid_stride(
             raise InvalidRealizedVarianceInputError("noise_stride_timestamp_not_utc")
 
     gaps = tuple(
-        (current - previous).total_seconds()
-        for previous, current in zip(timestamps, timestamps[1:])
+        (current - previous).total_seconds() for previous, current in zip(timestamps, timestamps[1:])
     )
     if any(not isfinite(gap) or gap < 0.0 for gap in gaps):
         raise InvalidRealizedVarianceInputError("decreasing_noise_stride_timestamps")

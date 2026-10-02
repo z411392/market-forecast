@@ -86,14 +86,11 @@ def test_calculate_parzen_realized_kernel() -> None:
     assert result == approx(110.0 / 3.0)
     assert result >= 0.0
 
-    assert (
-        calculate_parzen_realized_kernel(
-            log_prices=(1.0, 1.0, 1.0, 1.0),
-            bandwidth=1,
-            endpoint_jitter_m=2,
-        )
-        == approx(0.0)
-    )
+    assert calculate_parzen_realized_kernel(
+        log_prices=(1.0, 1.0, 1.0, 1.0),
+        bandwidth=1,
+        endpoint_jitter_m=2,
+    ) == approx(0.0)
 
     with raises(InvalidRealizedVarianceInputError):
         calculate_parzen_realized_kernel(

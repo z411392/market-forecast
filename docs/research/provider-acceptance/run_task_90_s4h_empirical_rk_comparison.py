@@ -32,15 +32,9 @@ from libs.realized_variance.domain.services.select_noise_subgrid_stride import (
     select_noise_subgrid_stride,
 )
 
-MANIFEST = Path(
-    "docs/research/provider-acceptance/task-90-s4h-empirical-input.json"
-)
-INPUT_ROOT = Path(
-    "artifacts/private/provider-captures/task-90-s4h-input"
-)
-OUTPUT_ROOT = Path(
-    "artifacts/private/provider-captures/task-90-s4h-empirical-rk-comparison"
-)
+MANIFEST = Path("docs/research/provider-acceptance/task-90-s4h-empirical-input.json")
+INPUT_ROOT = Path("artifacts/private/provider-captures/task-90-s4h-input")
+OUTPUT_ROOT = Path("artifacts/private/provider-captures/task-90-s4h-empirical-rk-comparison")
 SUMMARY_PATH = OUTPUT_ROOT / "summary.json"
 DAILY_PATH = OUTPUT_ROOT / "daily-values.json"
 LOCAL_TZ = ZoneInfo("Asia/Taipei")
@@ -89,28 +83,18 @@ def main() -> None:
                 )
 
         daily_values[symbol] = rows
-        metrics[symbol] = {
-            f"{interval}m": _summarize_grid(rows, interval)
-            for interval in GRID_MINUTES
-        }
+        metrics[symbol] = {f"{interval}m": _summarize_grid(rows, interval) for interval in GRID_MINUTES}
 
     panel_medians = _panel_medians(metrics, symbols)
-    level_ordering = {
-        symbol: _level_bias_ordering(metrics[symbol])
-        for symbol in symbols
-    }
+    level_ordering = {symbol: _level_bias_ordering(metrics[symbol]) for symbol in symbols}
     expected_audit_count = _require_int(manifest["expected_audit_session_count"])
-    final_required_count = _require_int(
-        manifest["final_required_audit_session_count"]
-    )
+    final_required_count = _require_int(manifest["final_required_audit_session_count"])
 
     summary: dict[str, Any] = {
         "artifact_version": manifest["output_version"],
         "task": 90,
         "status": (
-            "final_gate_ready"
-            if expected_audit_count == final_required_count
-            else "interim_not_final"
+            "final_gate_ready" if expected_audit_count == final_required_count else "interim_not_final"
         ),
         "estimator_version": params["estimator_version"],
         "audit_window": {
@@ -127,9 +111,7 @@ def main() -> None:
         },
         "interpretation": {
             "level_bias_ordering_by_symbol": level_ordering,
-            "canonical_freeze_allowed": (
-                len(audit_sessions) == final_required_count
-            ),
+            "canonical_freeze_allowed": (len(audit_sessions) == final_required_count),
             "final_required_audit_session_count": final_required_count,
         },
     }
@@ -189,9 +171,7 @@ def _load_evidence(root: Path) -> dict[tuple[str, date], dict[str, Any]]:
             raise RuntimeError("s4h_estimator_identity_mismatch")
 
         symbol = _require_str(transaction_payload["source_symbol"])
-        session_date = date.fromisoformat(
-            _require_str(transaction_payload["session_date"])
-        )
+        session_date = date.fromisoformat(_require_str(transaction_payload["session_date"]))
         if receipt["source_symbol"] != symbol:
             raise RuntimeError("s4h_receipt_symbol_mismatch")
         if receipt["session_date"] != session_date.isoformat():
@@ -207,12 +187,8 @@ def _load_evidence(root: Path) -> dict[tuple[str, date], dict[str, Any]]:
         for transaction in transactions_raw:
             if not isinstance(transaction, dict):
                 raise RuntimeError("s4h_invalid_transaction")
-            observed_at = datetime.fromisoformat(
-                _require_str(transaction["observed_at_utc"])
-            )
-            if observed_at.tzinfo is None or observed_at.utcoffset() != timezone.utc.utcoffset(
-                observed_at
-            ):
+            observed_at = datetime.fromisoformat(_require_str(transaction["observed_at_utc"]))
+            if observed_at.tzinfo is None or observed_at.utcoffset() != timezone.utc.utcoffset(observed_at):
                 raise RuntimeError("s4h_transaction_not_utc")
             if previous is not None and observed_at < previous:
                 raise RuntimeError("s4h_decreasing_transaction_time")
@@ -352,10 +328,7 @@ def _calculate_day(
         "noise_variance": noise_variance,
         "sparse_realized_variance": sparse_rv,
         "bandwidth": bandwidth,
-        **{
-            f"whole_day_variance_{interval}m": fixed_grid[f"{interval}m"]
-            for interval in GRID_MINUTES
-        },
+        **{f"whole_day_variance_{interval}m": fixed_grid[f"{interval}m"] for interval in GRID_MINUTES},
     }
 
 
@@ -395,12 +368,8 @@ def _cross_check_frozen_services(
 
     checks = {
         "q_equal": q == result["q"],
-        "noise_variance_abs_diff": abs(
-            noise_variance - result["noise_variance"]
-        ),
-        "sparse_rv_abs_diff": abs(
-            sparse_rv - result["sparse_realized_variance"]
-        ),
+        "noise_variance_abs_diff": abs(noise_variance - result["noise_variance"]),
+        "sparse_rv_abs_diff": abs(sparse_rv - result["sparse_realized_variance"]),
         "bandwidth_equal": bandwidth == result["bandwidth"],
         "rk_abs_diff": abs(intraday_rk - result["intraday_realized_kernel"]),
     }
@@ -421,9 +390,7 @@ def _optimized_noise_subgrid_stride(
     timestamp_us: np.ndarray,
     target_spacing_seconds: int,
 ) -> int:
-    elapsed_seconds = (
-        int(timestamp_us[-1]) - int(timestamp_us[0])
-    ) / 1_000_000.0
+    elapsed_seconds = (int(timestamp_us[-1]) - int(timestamp_us[0])) / 1_000_000.0
     if elapsed_seconds <= 0.0:
         raise RuntimeError("s4h_zero_elapsed_tick_session")
     average_gap = elapsed_seconds / (len(timestamp_us) - 1)
@@ -441,9 +408,7 @@ def _optimized_noise_variance(log_prices: np.ndarray, q: int) -> float:
         if nonzero_count == 0:
             estimates.append(0.0)
         else:
-            estimates.append(
-                float(np.dot(returns, returns)) / (2.0 * nonzero_count)
-            )
+            estimates.append(float(np.dot(returns, returns)) / (2.0 * nonzero_count))
     if not estimates:
         raise RuntimeError("s4h_no_noise_subgrid")
     return float(statistics.fmean(estimates))
@@ -509,9 +474,7 @@ def _optimized_parzen_rk(
             weight = 1.0 - 6.0 * x * x + 6.0 * x * x * x
         else:
             weight = 2.0 * (1.0 - x) ** 3
-        result += 2.0 * weight * float(
-            np.dot(returns[lag:], returns[:-lag])
-        )
+        result += 2.0 * weight * float(np.dot(returns[lag:], returns[:-lag]))
 
     if result < 0.0:
         if math.isclose(result, 0.0, rel_tol=0.0, abs_tol=1e-15):
@@ -540,8 +503,7 @@ def _fixed_grid_whole_day_variance(
     ).astimezone(timezone.utc)
 
     boundary_us = np.arange(
-        _datetime_to_microseconds(session_start)
-        + interval_minutes * 60 * 1_000_000,
+        _datetime_to_microseconds(session_start) + interval_minutes * 60 * 1_000_000,
         _datetime_to_microseconds(closing_at),
         interval_minutes * 60 * 1_000_000,
         dtype=np.int64,
@@ -582,10 +544,7 @@ def _summarize_grid(
 
     return {
         "n": len(rows),
-        "geometric_bias_pct": (
-            math.exp(float(np.mean(log_gap))) - 1.0
-        )
-        * 100.0,
+        "geometric_bias_pct": (math.exp(float(np.mean(log_gap))) - 1.0) * 100.0,
         "mean_abs_log_gap": float(np.mean(np.abs(log_gap))),
         "pearson_log": float(np.corrcoef(log_grid, log_rk)[0, 1]),
         "spearman": float(spearman_value),
@@ -607,8 +566,7 @@ def _panel_medians(
     return {
         f"{interval}m": {
             metric_name: statistics.median(
-                float(metrics[symbol][f"{interval}m"][metric_name])
-                for symbol in symbols
+                float(metrics[symbol][f"{interval}m"][metric_name]) for symbol in symbols
             )
             for metric_name in metric_names
         }
@@ -621,9 +579,7 @@ def _level_bias_ordering(
 ) -> list[str]:
     return sorted(
         symbol_metrics,
-        key=lambda grid: abs(
-            float(symbol_metrics[grid]["geometric_bias_pct"])
-        ),
+        key=lambda grid: abs(float(symbol_metrics[grid]["geometric_bias_pct"])),
     )
 
 
@@ -648,8 +604,7 @@ def _assert_reference_metrics_match(
                 )
                 if difference > METRIC_TOLERANCE:
                     raise RuntimeError(
-                        "s4h_reference_metric_mismatch:"
-                        f"{symbol}:{grid}:{metric}:{difference}"
+                        "s4h_reference_metric_mismatch:" f"{symbol}:{grid}:{metric}:{difference}"
                     )
 
 

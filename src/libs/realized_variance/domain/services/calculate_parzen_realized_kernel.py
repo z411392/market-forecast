@@ -32,21 +32,15 @@ def calculate_parzen_realized_kernel(
     )
 
     if type(bandwidth) is not int or bandwidth < 1:
-        raise InvalidRealizedVarianceInputError(
-            "invalid_realized_kernel_bandwidth"
-        )
+        raise InvalidRealizedVarianceInputError("invalid_realized_kernel_bandwidth")
 
     max_bandwidth = max(1, len(returns) - 1)
     if bandwidth > max_bandwidth:
-        raise InvalidRealizedVarianceInputError(
-            "realized_kernel_bandwidth_exceeds_available_lags"
-        )
+        raise InvalidRealizedVarianceInputError("realized_kernel_bandwidth_exceeds_available_lags")
 
     gamma_zero = realized_autocovariance(returns, 0)
     weighted_terms = (
-        2.0
-        * parzen_kernel_weight(lag / (bandwidth + 1.0))
-        * realized_autocovariance(returns, lag)
+        2.0 * parzen_kernel_weight(lag / (bandwidth + 1.0)) * realized_autocovariance(returns, lag)
         for lag in range(1, min(bandwidth, len(returns) - 1) + 1)
     )
     result = fsum((gamma_zero, *weighted_terms))
@@ -54,8 +48,6 @@ def calculate_parzen_realized_kernel(
     if result < 0.0:
         if isclose(result, 0.0, rel_tol=0.0, abs_tol=1e-15):
             return 0.0
-        raise InvalidRealizedVarianceInputError(
-            "negative_parzen_realized_kernel"
-        )
+        raise InvalidRealizedVarianceInputError("negative_parzen_realized_kernel")
 
     return result

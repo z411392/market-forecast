@@ -73,10 +73,7 @@ def test_realized_kernel_primitives() -> None:
 def test_noise_subgrid_stride_and_variance() -> None:
     start = datetime(2026, 9, 24, 1, 0, tzinfo=timezone.utc)
 
-    ten_second_ticks = tuple(
-        start + timedelta(seconds=10 * index)
-        for index in range(31)
-    )
+    ten_second_ticks = tuple(start + timedelta(seconds=10 * index) for index in range(31))
     assert (
         select_noise_subgrid_stride(
             ten_second_ticks,
@@ -85,10 +82,7 @@ def test_noise_subgrid_stride_and_variance() -> None:
         == 12
     )
 
-    half_up_ticks = tuple(
-        start + timedelta(seconds=48 * index)
-        for index in range(6)
-    )
+    half_up_ticks = tuple(start + timedelta(seconds=48 * index) for index in range(6))
     assert (
         select_noise_subgrid_stride(
             half_up_ticks,
@@ -136,13 +130,10 @@ def test_noise_subgrid_stride_and_variance() -> None:
     log_prices = (0.0, 1.0, 2.0, 4.0, 6.0, 9.0)
     assert estimate_noise_variance_from_subgrids(log_prices, q=2) == approx(6.75)
 
-    assert (
-        estimate_noise_variance_from_subgrids(
-            (1.0, 1.0, 1.0, 1.0),
-            q=2,
-        )
-        == approx(0.0)
-    )
+    assert estimate_noise_variance_from_subgrids(
+        (1.0, 1.0, 1.0, 1.0),
+        q=2,
+    ) == approx(0.0)
 
     with raises(InvalidRealizedVarianceInputError):
         estimate_noise_variance_from_subgrids(log_prices, q=0)

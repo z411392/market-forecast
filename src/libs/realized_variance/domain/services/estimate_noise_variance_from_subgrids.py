@@ -22,10 +22,7 @@ def estimate_noise_variance_from_subgrids(
         if len(subgrid) < 2:
             continue
 
-        returns = tuple(
-            current - previous
-            for previous, current in zip(subgrid, subgrid[1:])
-        )
+        returns = tuple(current - previous for previous, current in zip(subgrid, subgrid[1:]))
         nonzero_returns = tuple(value for value in returns if value != 0.0)
         if not nonzero_returns:
             estimates.append(0.0)
